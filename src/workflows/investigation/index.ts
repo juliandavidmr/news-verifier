@@ -1,6 +1,7 @@
 import { getWorkflowMetadata, sleep } from "workflow";
 import {
   acquireResearchLease,
+  evaluateQueuedReport,
   extractQueuedUrl,
   failQueuedInvestigation,
   identifyQueuedClaims,
@@ -24,7 +25,8 @@ export async function investigationWorkflow(reportId: string) {
       await extractQueuedUrl(reportId, workflowRunId);
       await identifyQueuedClaims(reportId, workflowRunId);
       await researchQueuedEvidence(reportId, workflowRunId);
-      return { outcome: "partial" as const };
+      await evaluateQueuedReport(reportId, workflowRunId);
+      return { outcome: "completed" as const };
     } catch {
       await failQueuedInvestigation(reportId);
       return { outcome: "failed" as const };

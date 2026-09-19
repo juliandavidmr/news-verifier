@@ -103,6 +103,11 @@ export class EvidenceRepository {
     provider: EvidenceProvider,
     candidateCount: number,
     evidence: ValidatedEvidence[],
+    modelCall?: {
+      requestedModel: string;
+      responseModel: string;
+      usage: Record<string, unknown>;
+    },
   ) {
     await getDatabase().query(
       `WITH search AS (
@@ -111,6 +116,19 @@ export class EvidenceRepository {
             error_code = NULL, finished_at = now()
         WHERE id = $1 AND status = 'reserved'
         RETURNING id, report_id, claim_id, query, provider
+      ), ai AS (
+        INSERT INTO ai_calls (
+          report_id, phase, requested_model, response_model, usage
+        )
+        SELECT search.report_id, 'evidence_search',
+               model."requestedModel", model."responseModel", model.usage
+        FROM search
+        CROSS JOIN jsonb_to_record($5::jsonb) AS model(
+          "requestedModel" text,
+          "responseModel" text,
+          usage jsonb
+        )
+        WHERE $5::jsonb IS NOT NULL
       )
       INSERT INTO evidence_records (
         report_id, claim_id, search_id, source_url, canonical_url,
@@ -140,7 +158,13 @@ export class EvidenceRepository {
         "dependencyFingerprint" text
       )
       ON CONFLICT DO NOTHING`,
-      [searchId, provider, candidateCount, JSON.stringify(evidence)],
+      [
+        searchId,
+        provider,
+        candidateCount,
+        JSON.stringify(evidence),
+        modelCall ? JSON.stringify(modelCall) : null,
+      ],
     );
   }
 
@@ -165,18 +189,14 @@ export class EvidenceRepository {
         WHERE evidence_searches.report_id = $1
       ), updated AS (
         UPDATE reports
-        SET status = 'partial', updated_at = now(),
+        SET status = 'evaluating', updated_at = now(),
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'researching'
         RETURNING id, next_event_sequence - 1 AS sequence
-      ), consumed AS (
-        UPDATE quota_reservations
-        SET status = 'consumed', updated_at = now()
-        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
       )
       INSERT INTO report_events (report_id, sequence, stage, public_payload)
-      SELECT updated.id, updated.sequence, 'partial', jsonb_build_object(
-        'status', 'partial',
+      SELECT updated.id, updated.sequence, 'evaluating', jsonb_build_object(
+        'status', 'evaluating',
         'searches', totals.searches,
         'evidenceRecords', totals.evidence
       )

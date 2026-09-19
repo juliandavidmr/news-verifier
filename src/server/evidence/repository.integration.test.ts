@@ -4,6 +4,8 @@ import { ClaimsRepository } from "../claims/repository";
 import { getDatabase } from "../db";
 import { NeonReportsRepository } from "../reports/neon-repository";
 import { ResearchQueueRepository } from "../research/queue-repository";
+import { methodologyVersion, VerdictRepository } from "../verdicts/repository";
+import { applyVerdictRules } from "../verdicts/rules";
 import { EvidenceRepository } from "./repository";
 
 const runDatabaseTests = process.env.RUN_DATABASE_TESTS === "1";
@@ -120,7 +122,75 @@ describe.skipIf(!runDatabaseTests)("evidence persistence", () => {
       },
     ]);
     expect((await reports.findByShortId(created.report.shortId))?.status).toBe(
-      "partial",
+      "evaluating",
     );
+
+    const verdictRepository = new VerdictRepository();
+    const evaluationInput =
+      await verdictRepository.getEvaluationInput(reportId);
+    if (!evaluationInput) throw new Error("Evaluation input was not persisted");
+    const evidenceId = evaluationInput.claims[0].evidence[0].id;
+    const evaluation = applyVerdictRules(evaluationInput.claims, [
+      {
+        claimId: evaluationInput.claims[0].id,
+        verdict: "supported",
+        explanation:
+          "The primary source confirms the same count, scope and period.",
+        relations: [
+          {
+            evidenceId,
+            relation: "supports",
+            temporalCompatible: true,
+            scopeCompatible: true,
+            rationale: "Same city and 2025 period.",
+          },
+        ],
+      },
+    ]);
+    await verdictRepository.persistEvaluation(
+      reportId,
+      evaluationInput,
+      evaluation,
+      {
+        requestedModel: "inclusionai/test-free",
+        responseModel: "inclusionai/test-free",
+        usage: { inputTokens: 20, outputTokens: 10 },
+      },
+    );
+    const completedRows = await getDatabase().query(
+      `SELECT status, evidence_coverage::float8 AS evidence_coverage,
+              support_index::float8 AS support_index, report_outcome,
+              methodology_version, configuration_snapshot, model_snapshot
+       FROM reports WHERE id = $1`,
+      [reportId],
+    );
+    const completed = (completedRows as unknown[])[0] as Record<
+      string,
+      unknown
+    >;
+    expect(completed).toMatchObject({
+      status: "completed",
+      evidence_coverage: 100,
+      support_index: 100,
+      report_outcome: "conclusive",
+      methodology_version: methodologyVersion,
+    });
+    expect(completed.configuration_snapshot).toMatchObject({
+      maxClaims: 15,
+    });
+    expect(completed.model_snapshot).toHaveLength(2);
+    const relationRows = await getDatabase().query(
+      `SELECT relation, temporal_compatible, scope_compatible
+       FROM claim_evidence_relations
+       WHERE evidence_id = $1`,
+      [evidenceId],
+    );
+    expect(relationRows).toEqual([
+      {
+        relation: "supports",
+        temporal_compatible: true,
+        scope_compatible: true,
+      },
+    ]);
   });
 });

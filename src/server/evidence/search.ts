@@ -53,8 +53,9 @@ function toCandidates(value: unknown): EvidenceCandidate[] {
 
 export class GatewayExaSearchAdapter implements EvidenceSearchAdapter {
   async search(request: EvidenceSearchRequest): Promise<EvidenceSearchResult> {
+    const modelId = process.env.AI_SEARCH_MODEL ?? defaultSearchModel;
     const result = await generateText({
-      model: gateway(process.env.AI_SEARCH_MODEL ?? defaultSearchModel),
+      model: gateway(modelId),
       tools: {
         exa_search: gateway.tools.exaSearch({
           type: "fast",
@@ -83,7 +84,15 @@ export class GatewayExaSearchAdapter implements EvidenceSearchAdapter {
     if (typeof output === "object" && output !== null && "error" in output) {
       throw new Error(`Gateway Exa search failed: ${String(output.error)}`);
     }
-    return { provider: "gateway_exa", candidates: toCandidates(output) };
+    return {
+      provider: "gateway_exa",
+      candidates: toCandidates(output),
+      modelCall: {
+        requestedModel: modelId,
+        responseModel: result.response.modelId,
+        usage: { ...result.totalUsage },
+      },
+    };
   }
 }
 

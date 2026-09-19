@@ -135,6 +135,7 @@ export async function researchEvidence(
         result.provider,
         result.candidates.length,
         accepted,
+        result.modelCall,
       );
       completedSearches += 1;
       evidenceRecords += accepted.length;

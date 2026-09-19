@@ -9,6 +9,9 @@ import { SafeRemoteDocumentFetcher } from "../../server/ingestion/public-url";
 import { extractReadableContent } from "../../server/ingestion/readable-content";
 import { NeonReportsRepository } from "../../server/reports/neon-repository";
 import { ResearchQueueRepository } from "../../server/research/queue-repository";
+import { GatewayVerdictEvaluator } from "../../server/verdicts/gateway-evaluator";
+import { VerdictRepository } from "../../server/verdicts/repository";
+import { applyVerdictRules } from "../../server/verdicts/rules";
 
 export async function acquireResearchLease(
   reportId: string,
@@ -114,6 +117,35 @@ export async function researchQueuedEvidence(
       throw new Error("Research lease expired during evidence discovery");
     }
     await repository.finishResearch(reportId);
+  } finally {
+    clearInterval(heartbeat);
+  }
+}
+
+export async function evaluateQueuedReport(
+  reportId: string,
+  workflowRunId: string,
+) {
+  "use step";
+  const queue = new ResearchQueueRepository();
+  const repository = new VerdictRepository();
+  const input = await repository.getEvaluationInput(reportId);
+  if (!input) throw new Error("Verdict evaluation input is unavailable");
+
+  let heartbeatError: unknown;
+  const heartbeat = setInterval(() => {
+    void queue.heartbeat(reportId, workflowRunId).catch((error: unknown) => {
+      heartbeatError = error;
+    });
+  }, 20_000);
+  try {
+    const result = await new GatewayVerdictEvaluator().evaluate(input);
+    if (heartbeatError) throw heartbeatError;
+    if (!(await queue.heartbeat(reportId, workflowRunId))) {
+      throw new Error("Research lease expired during verdict evaluation");
+    }
+    const evaluation = applyVerdictRules(input.claims, result.verdicts);
+    await repository.persistEvaluation(reportId, input, evaluation, result);
   } finally {
     clearInterval(heartbeat);
   }

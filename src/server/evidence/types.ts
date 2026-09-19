@@ -38,6 +38,11 @@ export type EvidenceCandidate = {
 export type EvidenceSearchResult = {
   provider: EvidenceProvider;
   candidates: EvidenceCandidate[];
+  modelCall?: {
+    requestedModel: string;
+    responseModel: string;
+    usage: Record<string, unknown>;
+  };
 };
 
 export interface EvidenceSearchAdapter {
