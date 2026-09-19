@@ -1,5 +1,4 @@
 import { access, mkdir, readlink, symlink, unlink } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createWorker, OEM, type Worker } from "tesseract.js";
@@ -9,16 +8,6 @@ const languages = ["eng", "spa", "fra", "por"] as const;
 const languageSet = languages.join("+");
 const maximumWords = 2_000;
 const deadlineMs = 60_000;
-const localRequire = createRequire(import.meta.url);
-const languagePackages = {
-  eng: () => localRequire("@tesseract.js-data/eng"),
-  spa: () => localRequire("@tesseract.js-data/spa"),
-  fra: () => localRequire("@tesseract.js-data/fra"),
-  por: () => localRequire("@tesseract.js-data/por"),
-} satisfies Record<
-  (typeof languages)[number],
-  () => { langPath: string; gzip: boolean }
->;
 
 export class OcrProcessingError extends Error {
   constructor(
@@ -40,7 +29,11 @@ async function prepareLanguageDirectory() {
   await Promise.all(
     languages.map(async (language) => {
       const source = join(
-        languagePackages[language]().langPath,
+        process.cwd(),
+        "node_modules",
+        "@tesseract.js-data",
+        language,
+        "4.0.0",
         `${language}.traineddata.gz`,
       );
       const destination = join(directory, `${language}.traineddata.gz`);
