@@ -6,7 +6,7 @@ import {
   Sincronizar,
 } from "@mteherandev/colombia-icons-react";
 import { useEffect, useRef, useState } from "react";
-import type { ReportEvent } from "../domain/reports";
+import type { ReportEvent, SupportedLocale } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import type { PublicReportDetails } from "../server/reports/report-reader";
@@ -20,8 +20,8 @@ import {
 } from "./report-live-state";
 import { ReportReader } from "./report-reader";
 
-function statusLabel(report: PublicReport) {
-  const copy = messages[report.reportLocale];
+function statusLabel(report: PublicReport, locale: SupportedLocale) {
+  const copy = messages[locale];
   if (report.status === "failed") return copy.reportFailed;
   if (report.status === "partial") return copy.reportPartial;
   if (report.status === "completed") return copy.reportCompleted;
@@ -44,6 +44,9 @@ export function ReportLiveView({
 }) {
   const [report, setReport] = useState(initialReport);
   const [details, setDetails] = useState(initialDetails);
+  const [interfaceLocale, setInterfaceLocale] = useState(
+    initialReport.reportLocale,
+  );
   const [connectionInterrupted, setConnectionInterrupted] = useState(false);
   const [notificationState, setNotificationState] =
     useState<NotificationState>("idle");
@@ -52,11 +55,17 @@ export function ReportLiveView({
   const notificationArmedRef = useRef(false);
   const notificationSentRef = useRef(false);
   const previousStatusRef = useRef(initialReport.status);
-  const copy = messages[report.reportLocale];
+  const copy = messages[interfaceLocale];
+
+  function changeLocale(nextLocale: SupportedLocale) {
+    setInterfaceLocale(nextLocale);
+    // biome-ignore lint/suspicious/noDocumentCookie: Safari support is required and Cookie Store is not universal.
+    document.cookie = `nv_locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+  }
 
   useEffect(() => {
-    document.documentElement.lang = report.reportLocale;
-  }, [report.reportLocale]);
+    document.documentElement.lang = interfaceLocale;
+  }, [interfaceLocale]);
 
   useEffect(() => {
     reportRef.current = report;
@@ -200,17 +209,17 @@ export function ReportLiveView({
       <header className="topbar report-topbar">
         <BrandLink label={copy.brand} />
         <span className={`status-chip ${report.status}`}>
-          {statusLabel(report)}
+          {statusLabel(report, interfaceLocale)}
         </span>
       </header>
 
       <section className="report-hero">
         <p className="kicker">{copy.reportTitle}</p>
-        <h1>{report.extractedTitle ?? statusLabel(report)}</h1>
+        <h1>{report.extractedTitle ?? statusLabel(report, interfaceLocale)}</h1>
         <p className="report-date">
           {copy.createdAt}:{" "}
           <time dateTime={report.createdAt} suppressHydrationWarning>
-            {new Intl.DateTimeFormat(report.reportLocale, {
+            {new Intl.DateTimeFormat(interfaceLocale, {
               dateStyle: "long",
               timeStyle: "short",
             }).format(new Date(report.createdAt))}
@@ -226,7 +235,7 @@ export function ReportLiveView({
             </span>
           </span>
           <div className="progress-copy">
-            <strong>{statusLabel(report)}</strong>
+            <strong>{statusLabel(report, interfaceLocale)}</strong>
             <p>
               {connectionInterrupted ? copy.reconnecting : copy.automatedLimit}
             </p>
@@ -253,7 +262,7 @@ export function ReportLiveView({
       ) : null}
 
       {ready && details ? (
-        <ReportReader locale={report.reportLocale} details={details} />
+        <ReportReader locale={interfaceLocale} details={details} />
       ) : null}
 
       {report.status === "failed" ? (
@@ -274,6 +283,27 @@ export function ReportLiveView({
       </section>
 
       <p className="report-limit">{copy.automatedLimit}</p>
+
+      <footer className="footer report-footer">
+        <nav>
+          <a href="/privacy">{copy.privacy}</a>
+          <a href="/methodology">{copy.methodology}</a>
+        </nav>
+        <label className="locale-control">
+          <span>{copy.language}</span>
+          <select
+            value={interfaceLocale}
+            onChange={(event) =>
+              changeLocale(event.target.value as SupportedLocale)
+            }
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="pt">Português</option>
+          </select>
+        </label>
+      </footer>
     </main>
   );
 }
