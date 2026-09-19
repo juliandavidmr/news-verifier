@@ -83,6 +83,52 @@ describe("deterministic verdict rules", () => {
     }
   });
 
+  it("degrades thematic DART fragments that do not state the full claim", () => {
+    const dartClaim = claim({
+      statement:
+        "DART was a NASA space mission designed to test a method of planetary defense against near-Earth objects.",
+      evidence: [
+        {
+          ...claim().evidence[0],
+          fragment:
+            "NASA's Planetary Defense Coordination Office is the lead for planetary defense activities and is sponsoring the DART mission.",
+        },
+      ],
+    });
+    const result = applyVerdictRules([dartClaim], [proposal()], false, "es");
+
+    expect(result.verdicts[0]).toMatchObject({
+      finalVerdict: "insufficient_evidence",
+      evidenceStrength: "low",
+      includedInIndex: false,
+      relations: [{ relation: "context" }],
+    });
+    expect(result.verdicts[0].explanation).toContain(
+      "no abordan explícitamente",
+    );
+  });
+
+  it("rejects resource-list fragments even when they repeat claim terms", () => {
+    const navigation = Array.from(
+      { length: 14 },
+      () =>
+        "NASA DART space mission planetary defense near-Earth objects test method resources images press kit links.",
+    ).join(" ");
+    const result = applyVerdictRules(
+      [
+        claim({
+          statement:
+            "DART was a NASA space mission designed to test a method of planetary defense against near-Earth objects.",
+          evidence: [{ ...claim().evidence[0], fragment: navigation }],
+        }),
+      ],
+      [proposal()],
+    );
+
+    expect(result.verdicts[0].finalVerdict).toBe("insufficient_evidence");
+    expect(result.verdicts[0].relations[0].relation).toBe("context");
+  });
+
   it("turns reliable conflicts into disputed", () => {
     const conflicted = claim({
       evidence: [

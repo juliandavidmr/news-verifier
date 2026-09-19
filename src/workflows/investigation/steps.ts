@@ -164,7 +164,12 @@ export async function evaluateQueuedReport(
       result = await new GatewayVerdictEvaluator().evaluate(input);
     } catch (error) {
       if (!(error instanceof PlatformCapacityError)) throw error;
-      const evaluation = applyVerdictRules(input.claims, [], true);
+      const evaluation = applyVerdictRules(
+        input.claims,
+        [],
+        true,
+        input.reportLocale,
+      );
       await repository.persistEvaluation(reportId, input, evaluation, null);
       return;
     }
@@ -172,7 +177,12 @@ export async function evaluateQueuedReport(
     if (!(await queue.heartbeat(reportId, workflowRunId))) {
       throw new Error("Research lease expired during verdict evaluation");
     }
-    const evaluation = applyVerdictRules(input.claims, result.verdicts);
+    const evaluation = applyVerdictRules(
+      input.claims,
+      result.verdicts,
+      false,
+      input.reportLocale,
+    );
     await repository.persistEvaluation(reportId, input, evaluation, result);
   } finally {
     clearInterval(heartbeat);

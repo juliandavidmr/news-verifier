@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "../../domain/reports";
 import type {
   AppliedReportEvaluation,
   AppliedVerdict,
@@ -11,6 +12,84 @@ const conclusiveVerdicts = new Set<Verdict>([
   "contradicted",
   "misleading",
 ]);
+
+const materialStopWords = new Set([
+  "a",
+  "an",
+  "and",
+  "as",
+  "at",
+  "by",
+  "de",
+  "del",
+  "des",
+  "do",
+  "dos",
+  "el",
+  "en",
+  "et",
+  "for",
+  "from",
+  "in",
+  "la",
+  "las",
+  "le",
+  "les",
+  "los",
+  "of",
+  "on",
+  "or",
+  "para",
+  "por",
+  "the",
+  "to",
+  "un",
+  "una",
+  "une",
+  "with",
+  "y",
+]);
+
+const insufficientExplanations: Record<SupportedLocale, string> = {
+  en: "The retrieved fragments do not explicitly address enough of this claim to support a conclusive verdict.",
+  es: "Los fragmentos recuperados no abordan explícitamente suficiente parte de esta afirmación para sostener un veredicto concluyente.",
+  fr: "Les extraits récupérés ne traitent pas explicitement une part suffisante de cette affirmation pour étayer un verdict concluant.",
+  pt: "Os trechos recuperados não abordam explicitamente uma parte suficiente desta afirmação para sustentar um veredito conclusivo.",
+};
+
+function materialTokens(value: string) {
+  return new Set(
+    value
+      .normalize("NFKD")
+      .replaceAll(/\p{M}/gu, "")
+      .toLocaleLowerCase()
+      .replaceAll(/[^\p{L}\p{N}]+/gu, " ")
+      .split(/\s+/u)
+      .filter((word) => word.length > 1 && !materialStopWords.has(word)),
+  );
+}
+
+export function fragmentMateriallyAddressesClaim(
+  statement: string,
+  fragment: string,
+) {
+  const fragmentWords = fragment.trim().split(/\s+/u);
+  if (fragment.length > 650 || fragmentWords.length > 110) return false;
+
+  const claimTokens = materialTokens(statement);
+  const fragmentTokens = materialTokens(fragment);
+  if (claimTokens.size === 0 || fragmentTokens.size === 0) return false;
+
+  let overlap = 0;
+  for (const token of claimTokens) {
+    if (fragmentTokens.has(token)) overlap += 1;
+  }
+  const requiredCoverage = claimTokens.size <= 5 ? 0.8 : 0.65;
+  if (overlap / claimTokens.size < requiredCoverage) return false;
+
+  const numbers = [...claimTokens].filter((token) => /^\d/u.test(token));
+  return numbers.every((number) => fragmentTokens.has(number));
+}
 
 function importance(importanceValue: number) {
   if (importanceValue >= 4) {
@@ -32,18 +111,27 @@ function contribution(verdict: Verdict): 100 | 50 | 0 | null {
 function applyClaim(
   claim: EvaluationClaim,
   proposal: ProposedVerdict,
+  reportLocale: SupportedLocale,
 ): AppliedVerdict {
   const evidenceById = new Map(claim.evidence.map((item) => [item.id, item]));
   const seen = new Set<string>();
-  const relations = proposal.relations.filter((relation) => {
+  const relations = proposal.relations.flatMap((relation) => {
     if (
       !evidenceById.has(relation.evidenceId) ||
       seen.has(relation.evidenceId)
     ) {
-      return false;
+      return [];
     }
     seen.add(relation.evidenceId);
-    return true;
+    const evidence = evidenceById.get(relation.evidenceId);
+    if (
+      evidence &&
+      relation.relation !== "context" &&
+      !fragmentMateriallyAddressesClaim(claim.statement, evidence.fragment)
+    ) {
+      return [{ ...relation, relation: "context" as const }];
+    }
+    return [relation];
   });
   const compatible = relations.filter(
     (relation) =>
@@ -115,7 +203,11 @@ function applyClaim(
     proposedVerdict: proposal.verdict,
     finalVerdict,
     evidenceStrength: finalVerdict === "not_verifiable" ? null : strength,
-    explanation: proposal.explanation,
+    explanation:
+      finalVerdict === "insufficient_evidence" &&
+      conclusiveVerdicts.has(proposal.verdict)
+        ? insufficientExplanations[reportLocale]
+        : proposal.explanation,
     ...importance(claim.importance),
     includedInIndex: finalContribution !== null,
     contribution: finalContribution,
@@ -127,6 +219,7 @@ export function applyVerdictRules(
   claims: EvaluationClaim[],
   proposals: ProposedVerdict[],
   forcePartial = false,
+  reportLocale: SupportedLocale = "en",
 ): AppliedReportEvaluation {
   const proposalByClaim = new Map(
     proposals.map((item) => [item.claimId, item]),
@@ -144,7 +237,7 @@ export function applyVerdictRules(
       explanation: "No structured evaluation was returned for this claim.",
       relations: [],
     };
-    return [applyClaim(claim, proposal)];
+    return [applyClaim(claim, proposal, reportLocale)];
   });
   const verdictByClaim = new Map(verdicts.map((item) => [item.claimId, item]));
   const totalWeight = claims.reduce(

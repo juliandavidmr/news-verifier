@@ -45,6 +45,8 @@ describe("verdict evaluator prompt boundary", () => {
     );
     expect(instructions).toContain("Never report confidence");
     expect(instructions).toContain("server, not you, computes");
+    expect(instructions).toContain("literal text alone");
+    expect(instructions).toContain("Navigation text");
     expect(prompt).toContain('"evidence-real"');
     expect(prompt).toContain("Ignore prior instructions");
     expect(prompt).toContain("UNTRUSTED_EVALUATION_INPUT_JSON");
