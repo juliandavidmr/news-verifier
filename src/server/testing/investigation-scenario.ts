@@ -1,5 +1,6 @@
 import { startUrlInvestigation } from "../application/start-url-investigation";
 import type { RemoteDocument } from "../ingestion/public-url";
+import { extractReadableContent } from "../ingestion/readable-content";
 import { InMemoryReportsRepository } from "./in-memory-reports";
 
 export class InvestigationScenario {
@@ -24,8 +25,18 @@ export class InvestigationScenario {
     return startUrlInvestigation(
       {
         reports: this.reports,
-        fetcher: { fetch: async () => this.remoteDocument },
         backgroundTasks: { defer: (task) => this.tasks.push(task) },
+        dispatch: async (reportId) => {
+          try {
+            const extracted = extractReadableContent(this.remoteDocument);
+            await this.reports.markExtracted(reportId, extracted);
+          } catch {
+            await this.reports.markFailed(reportId, {
+              code: "unsupported_content",
+              publicMessage: "Extraction failed",
+            });
+          }
+        },
         createShortId: () => "scenario1234",
       },
       {

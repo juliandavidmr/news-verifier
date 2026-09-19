@@ -7,7 +7,7 @@ describe("URL investigation scenario", () => {
     const started = await scenario.startUrl();
 
     expect(started.shortId).toBe("scenario1234");
-    expect(started.status).toBe("extracting");
+    expect(started.status).toBe("queued");
 
     await scenario.runBackgroundTasks();
 
@@ -20,10 +20,7 @@ describe("URL investigation scenario", () => {
       analyzedWordCount: 19,
       truncated: false,
     });
-    expect(events.map((event) => event.stage)).toEqual([
-      "extracting",
-      "partial",
-    ]);
+    expect(events.map((event) => event.stage)).toEqual(["queued", "partial"]);
   });
 
   it("persists an extraction failure without throwing from the background task", async () => {
@@ -53,9 +50,6 @@ describe("URL investigation scenario", () => {
 
     await scenario.runBackgroundTasks();
     const events = await scenario.reports.listEvents(first.id, 0);
-    expect(events.map((event) => event.stage)).toEqual([
-      "extracting",
-      "partial",
-    ]);
+    expect(events.map((event) => event.stage)).toEqual(["queued", "partial"]);
   });
 });

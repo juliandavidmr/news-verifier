@@ -33,7 +33,7 @@ export class InMemoryReportsRepository implements ReportsRepository {
       sourceKind: "url",
       sourceUrl: input.sourceUrl,
       reportLocale: input.reportLocale,
-      status: "extracting",
+      status: "queued",
       extractedTitle: null,
       extractedAuthor: null,
       analyzedExcerpt: null,
@@ -50,8 +50,8 @@ export class InMemoryReportsRepository implements ReportsRepository {
     this.events.set(report.id, [
       {
         sequence: 1,
-        stage: "extracting",
-        payload: { status: "extracting" },
+        stage: "queued",
+        payload: { status: "queued" },
         createdAt: timestamp,
       },
     ]);
@@ -64,7 +64,11 @@ export class InMemoryReportsRepository implements ReportsRepository {
 
   async markExtracted(reportId: string, content: ExtractedContent) {
     const report = this.reports.get(reportId);
-    if (!report || report.status !== "extracting") return;
+    if (
+      !report ||
+      (report.status !== "queued" && report.status !== "extracting")
+    )
+      return;
     const timestamp = this.now().toISOString();
     Object.assign(report, {
       status: "partial",
@@ -88,7 +92,11 @@ export class InMemoryReportsRepository implements ReportsRepository {
     error: { code: string; publicMessage: string },
   ) {
     const report = this.reports.get(reportId);
-    if (!report || report.status !== "extracting") return;
+    if (
+      !report ||
+      (report.status !== "queued" && report.status !== "extracting")
+    )
+      return;
     report.status = "failed";
     report.errorCode = error.code;
     report.errorMessage = error.publicMessage;

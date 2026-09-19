@@ -8,11 +8,9 @@ import {
   resolveAnonymousIdentity,
   visitorCookieName,
 } from "../../../server/identity/anonymous-visitor";
-import {
-  RemoteContentError,
-  SafeRemoteDocumentFetcher,
-} from "../../../server/ingestion/public-url";
+import { RemoteContentError } from "../../../server/ingestion/public-url";
 import { NeonReportsRepository } from "../../../server/reports/neon-repository";
+import { dispatchPendingInvestigations } from "../../../server/research/dispatcher";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -64,8 +62,10 @@ export async function POST(request: Request) {
     const report = await startUrlInvestigation(
       {
         reports: new NeonReportsRepository(),
-        fetcher: new SafeRemoteDocumentFetcher(),
         backgroundTasks: { defer: (task) => after(task) },
+        dispatch: async (reportId) => {
+          await dispatchPendingInvestigations(1, reportId);
+        },
       },
       {
         url: body.url,

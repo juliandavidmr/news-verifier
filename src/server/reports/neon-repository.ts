@@ -171,7 +171,7 @@ export class NeonReportsRepository implements ReportsRepository {
             extraction_finished_at = now(),
             updated_at = now(),
             next_event_sequence = next_event_sequence + 1
-        WHERE id = $1 AND status = 'extracting'
+        WHERE id = $1 AND status IN ('queued', 'extracting')
         RETURNING id, next_event_sequence - 1 AS sequence
       ), refunded AS (
         UPDATE quota_reservations

@@ -1,5 +1,7 @@
+import { after } from "next/server";
 import { NeonReportsRepository } from "@/server/reports/neon-repository";
 import { toPublicReport } from "@/server/reports/repository";
+import { dispatchPendingInvestigations } from "../../../../../server/research/dispatcher";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,15 +11,22 @@ export async function GET(
   context: RouteContext<"/api/reports/[shortId]/events">,
 ) {
   const { shortId } = await context.params;
-  const after = Number(new URL(request.url).searchParams.get("after") ?? 0);
+  const afterSequence = Number(
+    new URL(request.url).searchParams.get("after") ?? 0,
+  );
   const repository = new NeonReportsRepository();
   const report = await repository.findByShortId(shortId);
   if (!report) {
     return Response.json({ code: "not_found" }, { status: 404 });
   }
+  if (report.status === "queued") {
+    after(() => dispatchPendingInvestigations(1, report.id));
+  }
   const events = await repository.listEvents(
     report.id,
-    Number.isSafeInteger(after) && after >= 0 ? after : 0,
+    Number.isSafeInteger(afterSequence) && afterSequence >= 0
+      ? afterSequence
+      : 0,
   );
   return Response.json(
     { report: toPublicReport(report), events },
