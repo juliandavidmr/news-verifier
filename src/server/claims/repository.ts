@@ -41,7 +41,7 @@ export class ClaimsRepository {
       ...claim,
     }));
     const eventPayload = JSON.stringify({
-      status: "partial",
+      status: "researching",
       detectedClaims: claims.length,
       selectedClaims: claims.filter(
         (claim) => claim.selectionStatus === "selected",
@@ -74,17 +74,13 @@ export class ClaimsRepository {
         )
       ), updated AS (
         UPDATE reports
-        SET status = 'partial', updated_at = now(),
+        SET status = 'researching', updated_at = now(),
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'identifying_claims'
         RETURNING id, next_event_sequence - 1 AS sequence
-      ), consumed AS (
-        UPDATE quota_reservations
-        SET status = 'consumed', updated_at = now()
-        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
       ), event AS (
         INSERT INTO report_events (report_id, sequence, stage, public_payload)
-        SELECT id, sequence, 'partial', $3::jsonb FROM updated
+        SELECT id, sequence, 'researching', $3::jsonb FROM updated
       )
       INSERT INTO ai_calls (
         report_id, phase, requested_model, response_model, usage

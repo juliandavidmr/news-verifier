@@ -132,7 +132,7 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - Exa Search es el proveedor inicial de descubrimiento y recuperación de evidencia mediante la herramienta `gateway.tools.exaSearch()` de Vercel AI Gateway.
 - Cada investigación aplica un presupuesto máximo configurable de búsquedas y resultados. No existe recarga automática ni fallback de búsqueda pago fuera de ese presupuesto.
 - Si el crédito o presupuesto de búsqueda se agota, se conserva la evidencia ya validada y la investigación termina parcial o fallida según las reglas de cobertura.
-- La `EXA_API_KEY` directa queda disponible para experimentación, pero no forma parte del camino inicial de producción mientras la integración de AI Gateway cubra la necesidad.
+- La herramienta `gateway.tools.exaSearch()` es la ruta primaria. Si AI Gateway rechaza la operación por verificación de cuenta, cuota o indisponibilidad, el mismo adaptador puede usar `EXA_API_KEY` directamente; ambas rutas comparten el mismo presupuesto duro, contrato de auditoría y validación de páginas. No existe fallback de búsqueda pago ni se aceptan snippets como evidencia.
 - OCR se ejecuta en el servidor detrás de un adaptador reemplazable.
 - El Índice de respaldo, la Cobertura de evidencia y las reglas de cierre se calculan en código determinista.
 - Eve y JEV no son dependencias del MVP.

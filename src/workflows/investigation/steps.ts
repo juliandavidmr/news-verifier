@@ -2,6 +2,9 @@ import { messages } from "../../lib/i18n";
 import { GatewayClaimIdentifier } from "../../server/claims/gateway-identifier";
 import { prioritizeClaims } from "../../server/claims/prioritize";
 import { ClaimsRepository } from "../../server/claims/repository";
+import { EvidenceRepository } from "../../server/evidence/repository";
+import { researchEvidence } from "../../server/evidence/research";
+import { ResilientExaSearchAdapter } from "../../server/evidence/search";
 import { SafeRemoteDocumentFetcher } from "../../server/ingestion/public-url";
 import { extractReadableContent } from "../../server/ingestion/readable-content";
 import { NeonReportsRepository } from "../../server/reports/neon-repository";
@@ -80,6 +83,37 @@ export async function identifyQueuedClaims(
       input.maxClaims,
     );
     await claims.persistIdentification(reportId, prioritized, result);
+  } finally {
+    clearInterval(heartbeat);
+  }
+}
+
+export async function researchQueuedEvidence(
+  reportId: string,
+  workflowRunId: string,
+) {
+  "use step";
+  const queue = new ResearchQueueRepository();
+  const repository = new EvidenceRepository();
+  const input = await repository.getResearchInput(reportId);
+  if (!input) throw new Error("Evidence research input is unavailable");
+
+  let heartbeatError: unknown;
+  const heartbeat = setInterval(() => {
+    void queue.heartbeat(reportId, workflowRunId).catch((error: unknown) => {
+      heartbeatError = error;
+    });
+  }, 20_000);
+  try {
+    await researchEvidence(input, repository, {
+      search: new ResilientExaSearchAdapter(),
+      fetcher: new SafeRemoteDocumentFetcher(),
+    });
+    if (heartbeatError) throw heartbeatError;
+    if (!(await queue.heartbeat(reportId, workflowRunId))) {
+      throw new Error("Research lease expired during evidence discovery");
+    }
+    await repository.finishResearch(reportId);
   } finally {
     clearInterval(heartbeat);
   }

@@ -4,7 +4,7 @@ import type { ExtractedContent } from "../../domain/reports";
 import type { RemoteDocument } from "./public-url";
 import { RemoteContentError } from "./public-url";
 
-const maxWords = 2_000;
+const defaultMaxWords = 2_000;
 const minimumCharacters = 80;
 
 function normalizeText(value: string) {
@@ -17,7 +17,7 @@ function normalizeText(value: string) {
     .trim();
 }
 
-function limitWords(text: string) {
+function limitWords(text: string, maxWords: number) {
   const words = text.match(/\S+/gu) ?? [];
   const analyzed = words.slice(0, maxWords);
   return {
@@ -30,6 +30,7 @@ function limitWords(text: string) {
 
 export function extractReadableContent(
   document: RemoteDocument,
+  options: { maxWords?: number } = {},
 ): ExtractedContent {
   let title: string | null = null;
   let author: string | null = null;
@@ -66,6 +67,6 @@ export function extractReadableContent(
     canonicalUrl: document.finalUrl,
     title,
     author,
-    ...limitWords(text),
+    ...limitWords(text, options.maxWords ?? defaultMaxWords),
   };
 }

@@ -5,6 +5,7 @@ import {
   failQueuedInvestigation,
   identifyQueuedClaims,
   releaseResearchLease,
+  researchQueuedEvidence,
 } from "./steps";
 
 export async function investigationWorkflow(reportId: string) {
@@ -22,6 +23,7 @@ export async function investigationWorkflow(reportId: string) {
     try {
       await extractQueuedUrl(reportId, workflowRunId);
       await identifyQueuedClaims(reportId, workflowRunId);
+      await researchQueuedEvidence(reportId, workflowRunId);
       return { outcome: "partial" as const };
     } catch {
       await failQueuedInvestigation(reportId);

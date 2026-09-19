@@ -88,7 +88,7 @@ describe.skipIf(!runDatabaseTests)("claim persistence", () => {
       "queued",
       "extracting",
       "identifying_claims",
-      "partial",
+      "researching",
     ]);
   });
 });
