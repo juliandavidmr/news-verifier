@@ -76,6 +76,10 @@ _Avoid_: Idioma de interfaz, idioma del informe
 Texto principal extraído de una página web o reconocido en una captura, limitado a sus primeras 2.000 palabras. Cuando el original sea más largo, el informe indica cuántas palabras se extrajeron y cuántas se analizaron.
 _Avoid_: Resumen, contenido completo, recorte silencioso
 
+**Pasaje de contexto**:
+Fragmento mínimo del Extracto analizado que contiene una Afirmación verificable y el texto circundante necesario para comprenderla. Es la unidad del contenido original que puede mostrarse públicamente en el Informe; no equivale al Extracto analizado completo.
+_Avoid_: Copia de la noticia, transcripción completa, artículo republicado
+
 **Investigación**:
 Proceso iniciado automáticamente a partir de un único contenido analizado para extraer afirmaciones verificables, contrastarlas y producir un informe. No admite la edición previa del Extracto analizado; si la extracción no es fiable, termina sin verificarlo.
 _Avoid_: Consulta, request, verificación
@@ -107,3 +111,7 @@ _Avoid_: Usuario, cuenta, persona
 **Cupo de investigaciones**:
 Cantidad configurable de investigaciones que pueden iniciarse dentro de un periodo, aplicada tanto al servicio completo como a cada Visitante anónimo.
 _Avoid_: Plan, saldo, suscripción
+
+**Límite de plataforma**:
+Restricción externa impuesta por Vercel AI Gateway o por el proveedor de un modelo —por tasa, periodo, crédito o disponibilidad— que el producto no controla y que prevalece sobre cualquier Cupo de investigaciones configurado internamente.
+_Avoid_: Cupo configurable, límite del usuario, presupuesto garantizado

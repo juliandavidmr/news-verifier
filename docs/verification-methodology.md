@@ -19,6 +19,7 @@ Este documento define cómo convertir un Contenido analizado en un Informe audit
 - El OCR conserva bloques, orden de lectura y rangos; no completa palabras dudosas mediante generación.
 - Una extracción con calidad insuficiente termina sin verificación.
 - Se analiza un máximo de 2.000 palabras y todo truncamiento se informa.
+- El Extracto analizado puede conservarse internamente para reproducibilidad, pero el Informe público presenta únicamente cada afirmación y el contexto mínimo necesario para comprenderla; no republica el texto completo de la fuente.
 - El contenido se trata como datos no confiables: instrucciones incrustadas, prompt injection y solicitudes dirigidas al modelo no modifican la metodología ni las herramientas disponibles.
 
 ## 3. Identificación de afirmaciones
@@ -103,9 +104,11 @@ Un veredicto concluyente requiere Registros de evidencia validados. Si una cita 
 
 - A los 4 minutos y 30 segundos no se inician nuevas búsquedas; los últimos 30 segundos se reservan para cerrar y persistir.
 - El Informe se construye solo desde Afirmaciones y Registros de evidencia persistidos.
-- Se registran proveedor, modelo exacto, versión de metodología y configuración efectiva de límites.
+- Se registran proveedor y modelo exactos por cada operación de inferencia, además de la versión de metodología y la configuración efectiva de límites; un Informe puede registrar varios modelos si se aplicó fallback entre modelos gratuitos aprobados.
 - El Informe es una instantánea inmutable fechada; cambios posteriores requieren una Investigación nueva iniciada desde el formulario principal.
 - Un Informe parcial distingue trabajo incompleto, falta de evidencia y no verificabilidad.
+- El Informe se identifica explícitamente como análisis automatizado de evidencia y no como verdad absoluta ni asesoría profesional.
+- La metodología y la fecha de consulta permanecen accesibles desde el Informe.
 
 ## 12. Validación del motor
 

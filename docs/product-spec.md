@@ -15,6 +15,15 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - Se analiza un máximo de 2.000 palabras del contenido principal extraído o reconocido por OCR.
 - Cuando el contenido excede el límite, se trunca y se informa cuántas palabras se extrajeron y cuántas se analizaron.
 
+## Seguridad de contenido remoto
+
+- El servidor solo recupera URLs `http` o `https`; rechaza credenciales embebidas, hosts locales y direcciones privadas, reservadas, de enlace local o de metadatos de infraestructura.
+- Cada redirección y resolución DNS se vuelve a validar para impedir SSRF y DNS rebinding.
+- La descarga aplica límites estrictos de tiempo, bytes, redirecciones y tipo de contenido, y nunca reenvía cookies, autorización ni encabezados privados del usuario.
+- Las mismas reglas se aplican tanto a la URL inicial como a toda Fuente de evidencia recuperada durante la Investigación.
+- HTML, texto extraído, OCR y datos del modelo se tratan siempre como contenido no confiable: se normalizan y escapan antes de mostrarse, sin ejecutar scripts, eventos, estilos o URLs activas provenientes de la fuente.
+- Una página que infringe estas reglas termina como extracción fallida o fuente inaccesible; el motor nunca relaja las protecciones para completar el informe.
+
 ## Idiomas
 
 - La interfaz admite español, inglés, francés y portugués.
@@ -92,6 +101,13 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - El informe es inconcluso y no publica índice si la cobertura ponderada es menor al 60 % o si alguna afirmación principal carece de conclusión.
 - El informe muestra la fórmula, los pesos y los aportes de cada afirmación.
 
+## Autoridad y límites del informe
+
+- Cada informe se presenta como un análisis automatizado y fechado de evidencia, no como una declaración de verdad absoluta.
+- El límite se muestra de forma visible y comprensible; no queda relegado únicamente a términos legales.
+- El informe no sustituye asesoría médica, legal o financiera.
+- Cada conclusión permite inspeccionar sus fuentes, fragmentos y fecha de consulta, y el informe enlaza la metodología aplicada.
+
 ## Duración y resultado parcial
 
 - La investigación puede tardar hasta cinco minutos.
@@ -105,9 +121,18 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 
 - El motor es una pipeline propia, acotada y durable construida con Vercel Workflow SDK y AI SDK Core.
 - Cada fase expone contratos explícitos para extracción, inferencia, búsqueda, recuperación y evaluación de evidencia.
-- Los proveedores se conectan mediante adaptadores intercambiables y el informe registra el proveedor y modelo exactos utilizados.
-- Workers AI es el proveedor inicial de inferencia con free tier.
-- Exa Search/Contents es el proveedor inicial de descubrimiento y recuperación de evidencia.
+- Los proveedores se conectan mediante adaptadores intercambiables y el informe registra los proveedores y modelos exactos utilizados.
+- Vercel AI Gateway es la puerta de enlace inicial de inferencia.
+- La configuración contiene un pool ordenado de modelos de AI Gateway que deben ser gratuitos en el momento de uso y superar el corpus multilingüe de evaluación antes de ser promovidos.
+- El pool configurado funciona como allowlist; el servidor contrasta periódicamente sus identificadores, elegibilidad Free Tier y precio vigente con el catálogo de AI Gateway, y desactiva cualquier integrante que deje de ser gratuito o disponible.
+- `inclusionai/ling-3.0-flash-vl-free` es el candidato primario inicial; su selección es provisional hasta completar esa evaluación.
+- Ante `429`, indisponibilidad o agotamiento de un modelo, el motor respeta `retry-after` cuando cabe dentro del presupuesto temporal y puede continuar con el siguiente modelo gratuito aprobado.
+- No existe fallback a modelos pagos ni recarga automática. Si todos los modelos gratuitos aprobados están limitados o no disponibles, la investigación termina parcial o fallida antes de generar un cargo.
+- Cada llamada conserva el proveedor y modelo exactos utilizados; un mismo informe puede registrar más de uno cuando haya fallback.
+- Exa Search es el proveedor inicial de descubrimiento y recuperación de evidencia mediante la herramienta `gateway.tools.exaSearch()` de Vercel AI Gateway.
+- Cada investigación aplica un presupuesto máximo configurable de búsquedas y resultados. No existe recarga automática ni fallback de búsqueda pago fuera de ese presupuesto.
+- Si el crédito o presupuesto de búsqueda se agota, se conserva la evidencia ya validada y la investigación termina parcial o fallida según las reglas de cobertura.
+- La `EXA_API_KEY` directa queda disponible para experimentación, pero no forma parte del camino inicial de producción mientras la integración de AI Gateway cubra la necesidad.
 - OCR se ejecuta en el servidor detrás de un adaptador reemplazable.
 - El Índice de respaldo, la Cobertura de evidencia y las reglas de cierre se calculan en código determinista.
 - Eve y JEV no son dependencias del MVP.
@@ -123,7 +148,6 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - El OCR usa Tesseract.js 7 con `tessdata_fast` dentro de una Vercel Function Node.
 - El OCR ocurre durante la ingesta, antes de la cola, con un máximo de 60 segundos; el blob permanece solo en memoria y se descarta al terminar.
 - La adopción queda condicionada a un spike desplegado que valide precisión, bundle, memoria y latencia; `tesseract-wasm` es el challenger si falla por peso o inicialización.
-- Exa se configura mediante `EXA_API_KEY` y solo se invoca detrás del adaptador de búsqueda cuando una investigación necesite descubrir o recuperar evidencia.
 
 ## Progreso
 
@@ -152,7 +176,7 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 ## Informe
 
 - El encabezado muestra Índice de respaldo, Cobertura de evidencia, estado terminal y fecha de investigación.
-- En escritorio, el Extracto analizado ocupa la columna izquierda y el detalle de la afirmación seleccionada la derecha.
+- En escritorio, los Pasajes de contexto ocupan la columna izquierda y el detalle de la afirmación seleccionada la derecha.
 - Seleccionar un resaltado muestra su veredicto, Fuerza de evidencia, explicación y Registros de evidencia.
 - En móvil, el detalle aparece en un panel debajo del fragmento seleccionado.
 - Una lista-resumen permite recorrer las afirmaciones en el orden del contenido.
@@ -166,14 +190,24 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - La URL es el único medio de recuperación; no existen cuentas ni recuperación de enlaces perdidos.
 - La URL y el informe final no caducan automáticamente.
 - Se conservan el informe, el Extracto analizado y los fragmentos de evidencia necesarios para auditar el resultado.
+- El informe público no reproduce el Extracto analizado completo: muestra únicamente cada afirmación con su Pasaje de contexto mínimo y enlaza la URL original cuando exista.
 - El archivo de imagen original y sus metadatos se eliminan después del procesamiento.
-- En informes originados por una captura, los resaltados se presentan sobre una representación textual del OCR, no sobre el archivo original.
+- En informes originados por una captura, los resaltados se presentan sobre Pasajes de contexto derivados del OCR, no sobre el archivo original ni sobre su transcripción completa.
 - El MVP no permite que el usuario elimine un informe ni proporciona una clave de eliminación.
-- El footer incluye una acción para reportar contenido.
+- El MVP no incluye un botón ni un flujo para reportar contenido.
 - El operador puede ocultar o eliminar informes por razones legales, de privacidad o abuso.
 - Cada informe muestra la fecha y hora en que fue investigado y permanece como una instantánea inmutable.
 - Un informe nunca se recalcula silenciosamente cuando cambian el contenido, las fuentes o el conocimiento.
 - El MVP no muestra un botón para volver a investigar desde un informe.
+
+## Privacidad y retención
+
+- Subir una captura inicia su procesamiento inmediatamente, sin advertencia, confirmación adicional ni detección preventiva de datos sensibles.
+- La página correspondiente es la **Política de privacidad**, disponible desde el footer en los cuatro idiomas soportados; no se crea una página legal separada únicamente para retención.
+- La Política de privacidad contiene una sección explícita “Retención de datos” que distingue el blob temporal de la captura, el Extracto analizado persistido, los fragmentos de evidencia, el identificador firmado del navegador y la señal de red seudonimizada.
+- La política explica finalidad, destinatarios o proveedores, periodo o criterio de conservación, procesamiento automatizado y datos que quedan visibles para quien posea la URL.
+- La captura original y sus metadatos se descartan al terminar el OCR; el Extracto analizado y el informe no tienen caducidad automática mientras el servicio permanezca operativo.
+- Antes del lanzamiento deben definirse en esa política la identidad y el contacto del responsable, la base jurídica y los derechos aplicables según las jurisdicciones donde opere el servicio.
 
 ## Uso anónimo
 
@@ -184,10 +218,14 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - El límite no pretende demostrar identidad ni ser imposible de evadir.
 - Existe además un cupo global que protege la capacidad gratuita total del servicio.
 - Los cupos global y por Visitante anónimo son configurables desde la base de datos.
+- Los Límites de plataforma de AI Gateway y de sus proveedores prevalecen sobre ambos cupos configurables: que exista capacidad interna nunca garantiza que Vercel acepte una llamada.
+- La capacidad efectiva del servicio es la intersección entre los cupos internos, los modelos elegibles del Free Tier, sus límites por modelo, el crédito disponible y la disponibilidad del proveedor.
+- Los números de los Límites de plataforma no se duplican como configuración estática porque Vercel puede modificarlos; el runtime interpreta `429`, `402`, `retry-after` y errores de disponibilidad, y mantiene un estado temporal para evitar nuevos trabajos destinados a fallar.
 - Ambos cupos permanecen ocultos hasta que uno de ellos bloquea un nuevo envío.
 - Si el cupo global está agotado, se rechazan nuevas investigaciones y los informes existentes permanecen accesibles.
 - Ambos cupos se reservan atómicamente cuando el servidor acepta un envío válido.
 - Una entrada rechazada antes de comenzar no consume cupo.
 - Una investigación iniciada consume cupo aunque concluya sin evidencia o produzca un informe parcial.
 - Un fallo interno o de proveedor devuelve el cupo al Visitante anónimo.
+- Un trabajo que no puede continuar porque todos los modelos gratuitos alcanzaron un Límite de plataforma se trata como fallo de proveedor a efectos de devolución del cupo del Visitante anónimo.
 - El consumo real de capacidad global se registra aunque se devuelva el cupo individual.
