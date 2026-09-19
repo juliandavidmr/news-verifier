@@ -229,9 +229,11 @@ export class NeonReportsRepository implements ReportsRepository {
 
   async findByShortId(shortId: string) {
     const sql = getDatabase();
-    const rows = await sql.query(`SELECT * FROM reports WHERE short_id = $1`, [
-      shortId,
-    ]);
+    const rows = await sql.query(
+      `SELECT * FROM reports
+       WHERE short_id = $1 AND publicly_visible = true`,
+      [shortId],
+    );
     const row = firstRow<ReportRow>(rows as unknown[]);
     return row ? mapReport(row) : null;
   }

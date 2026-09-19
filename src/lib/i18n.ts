@@ -57,7 +57,7 @@ export const messages = {
     source: "Original page",
     createdAt: "Investigation started",
     automatedLimit:
-      "This is an automated, dated analysis of evidence—not a declaration of absolute truth.",
+      "This is an automated, dated analysis of evidence—not a declaration of absolute truth or a substitute for medical, legal or financial advice.",
     notifyWhenReady: "Notify me when it’s ready",
     notificationsEnabled:
       "We’ll notify you in this tab when the report is ready.",
@@ -129,7 +129,7 @@ export const messages = {
     source: "Página original",
     createdAt: "Investigación iniciada",
     automatedLimit:
-      "Este es un análisis automatizado y fechado de evidencia, no una declaración de verdad absoluta.",
+      "Este es un análisis automatizado y fechado de evidencia, no una declaración de verdad absoluta ni un sustituto de asesoría médica, jurídica o financiera.",
     notifyWhenReady: "Avisarme cuando termine",
     notificationsEnabled:
       "Te avisaremos en esta pestaña cuando el informe esté listo.",
@@ -203,7 +203,7 @@ export const messages = {
     source: "Page d’origine",
     createdAt: "Enquête démarrée",
     automatedLimit:
-      "Il s’agit d’une analyse automatisée et datée des preuves, et non d’une vérité absolue.",
+      "Il s’agit d’une analyse automatisée et datée des preuves, et non d’une vérité absolue ni d’un conseil médical, juridique ou financier.",
     notifyWhenReady: "Me prévenir quand il sera prêt",
     notificationsEnabled:
       "Nous vous préviendrons dans cet onglet lorsque le rapport sera prêt.",
@@ -277,7 +277,7 @@ export const messages = {
     source: "Página original",
     createdAt: "Investigação iniciada",
     automatedLimit:
-      "Esta é uma análise automatizada e datada de evidências, não uma declaração de verdade absoluta.",
+      "Esta é uma análise automatizada e datada de evidências, não uma declaração de verdade absoluta nem orientação médica, jurídica ou financeira.",
     notifyWhenReady: "Avisar quando estiver pronto",
     notificationsEnabled:
       "Avisaremos nesta aba quando o relatório estiver pronto.",

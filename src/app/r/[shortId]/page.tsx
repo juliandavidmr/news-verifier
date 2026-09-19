@@ -8,7 +8,7 @@ import { toPublicReport } from "../../../server/reports/repository";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  robots: { index: false, follow: false },
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 export default async function ReportPage({

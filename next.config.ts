@@ -3,6 +3,20 @@ import { withWorkflow } from "workflow/next";
 
 const nextConfig: NextConfig = {
   distDir: process.env.NV_BUILD_DIST_DIR ?? ".next",
+  async headers() {
+    return [
+      {
+        source: "/r/:path*",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive",
+          },
+          { key: "Referrer-Policy", value: "no-referrer" },
+        ],
+      },
+    ];
+  },
   output: process.env.VERCEL ? undefined : "standalone",
   serverExternalPackages: ["tesseract.js", "tesseract.js-core"],
   outputFileTracingIncludes: {

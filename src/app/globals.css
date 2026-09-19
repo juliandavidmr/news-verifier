@@ -806,6 +806,38 @@ a {
   line-height: 1.65;
 }
 
+.legal-shell > p.legal-effective {
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.legal-sections {
+  display: grid;
+  gap: 22px;
+  margin-top: 48px;
+}
+
+.legal-sections section {
+  padding: 26px;
+  border: var(--border);
+  background: var(--paper-light);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.legal-sections h2 {
+  margin: 0 0 14px;
+  font-size: 1.55rem;
+}
+
+.legal-sections p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
 .legal-back {
   display: inline-block;
   margin-top: 35px;
