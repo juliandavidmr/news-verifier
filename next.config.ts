@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import { withWorkflow } from "workflow/next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: process.env.VERCEL ? undefined : "standalone",
   serverExternalPackages: [
     "tesseract.js",
     "@tesseract.js-data/eng",
@@ -13,10 +13,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/reports": [
       "./node_modules/.pnpm/tesseract.js-core@*/node_modules/tesseract.js-core/*.wasm",
-      "./node_modules/@tesseract.js-data/eng/**/*",
-      "./node_modules/@tesseract.js-data/spa/**/*",
-      "./node_modules/@tesseract.js-data/fra/**/*",
-      "./node_modules/@tesseract.js-data/por/**/*",
+      "./node_modules/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz",
+      "./node_modules/@tesseract.js-data/spa/4.0.0/spa.traineddata.gz",
+      "./node_modules/@tesseract.js-data/fra/4.0.0/fra.traineddata.gz",
+      "./node_modules/@tesseract.js-data/por/4.0.0/por.traineddata.gz",
     ],
   },
 };
