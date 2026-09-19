@@ -1,4 +1,10 @@
 import { APICallError, gateway, generateText } from "ai";
+import {
+  type AiPlatformRepository,
+  capacityFailure,
+  freeEligibleGatewayModels,
+  PlatformCapacityError,
+} from "../ai/platform-capacity";
 import type {
   EvidenceCandidate,
   EvidenceSearchAdapter,
@@ -54,6 +60,9 @@ function toCandidates(value: unknown): EvidenceCandidate[] {
 export class GatewayExaSearchAdapter implements EvidenceSearchAdapter {
   async search(request: EvidenceSearchRequest): Promise<EvidenceSearchResult> {
     const modelId = process.env.AI_SEARCH_MODEL ?? defaultSearchModel;
+    if ((await freeEligibleGatewayModels([modelId])).length === 0) {
+      throw new PlatformCapacityError("ai_gateway", "search_model_not_free");
+    }
     const result = await generateText({
       model: gateway(modelId),
       tools: {
@@ -119,6 +128,12 @@ export class DirectExaSearchAdapter implements EvidenceSearchAdapter {
       signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) {
+      if ([402, 429, 503].includes(response.status)) {
+        throw new PlatformCapacityError(
+          "direct_exa",
+          `http_${response.status}`,
+        );
+      }
       throw new Error(`Direct Exa search returned HTTP ${response.status}`);
     }
     const body: unknown = await response.json();
@@ -132,14 +147,55 @@ export class ResilientExaSearchAdapter implements EvidenceSearchAdapter {
   constructor(
     private readonly primary: EvidenceSearchAdapter = new GatewayExaSearchAdapter(),
     private readonly fallback: EvidenceSearchAdapter = new DirectExaSearchAdapter(),
+    private readonly platform?: AiPlatformRepository,
   ) {}
 
   async search(request: EvidenceSearchRequest) {
+    if (
+      !this.gatewayUnavailable &&
+      (await this.platform?.isCircuitOpen("ai_gateway"))
+    ) {
+      this.gatewayUnavailable = true;
+      await this.platform?.recordAttempt({
+        reportId: request.reportId,
+        phase: "evidence_search",
+        requestedModel: process.env.AI_SEARCH_MODEL ?? defaultSearchModel,
+        outcome: "circuit_open",
+        errorCode: "circuit_open",
+      });
+    }
     if (!this.gatewayUnavailable) {
       try {
-        return await this.primary.search(request);
+        const result = await this.primary.search(request);
+        await this.platform?.recordAttempt({
+          reportId: request.reportId,
+          phase: "evidence_search",
+          requestedModel:
+            result.modelCall?.requestedModel ??
+            process.env.AI_SEARCH_MODEL ??
+            defaultSearchModel,
+          outcome: "succeeded",
+        });
+        return result;
       } catch (error) {
         this.gatewayUnavailable = true;
+        const capacity = capacityFailure(error);
+        await this.platform?.recordAttempt({
+          reportId: request.reportId,
+          phase: "evidence_search",
+          requestedModel: process.env.AI_SEARCH_MODEL ?? defaultSearchModel,
+          outcome: "failed",
+          errorCode: capacity?.code ?? "gateway_search_error",
+        });
+        if (capacity) {
+          await this.platform?.openCircuit(
+            "ai_gateway",
+            capacity.code,
+            capacity.retryAfterSeconds,
+          );
+        } else if (error instanceof PlatformCapacityError) {
+          await this.platform?.openCircuit(error.provider, error.code);
+        }
         if (
           APICallError.isInstance(error) &&
           error.statusCode !== 402 &&
@@ -151,6 +207,16 @@ export class ResilientExaSearchAdapter implements EvidenceSearchAdapter {
         }
       }
     }
-    return this.fallback.search(request);
+    if (await this.platform?.isCircuitOpen("direct_exa")) {
+      throw new PlatformCapacityError("direct_exa", "circuit_open");
+    }
+    try {
+      return await this.fallback.search(request);
+    } catch (error) {
+      if (error instanceof PlatformCapacityError) {
+        await this.platform?.openCircuit(error.provider, error.code);
+      }
+      throw error;
+    }
   }
 }

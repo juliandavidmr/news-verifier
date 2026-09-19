@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
+import { AiPlatformRepository } from "../ai/platform-capacity";
 import { ClaimsRepository } from "../claims/repository";
 import { getDatabase } from "../db";
 import { NeonReportsRepository } from "../reports/neon-repository";
@@ -11,6 +12,7 @@ import { EvidenceRepository } from "./repository";
 const runDatabaseTests = process.env.RUN_DATABASE_TESTS === "1";
 const usageDate = "2100-03-03";
 let reportId: string | undefined;
+const circuitProvider = `test-provider-${randomUUID()}`;
 
 describe.skipIf(!runDatabaseTests)("evidence persistence", () => {
   afterAll(async () => {
@@ -18,6 +20,9 @@ describe.skipIf(!runDatabaseTests)("evidence persistence", () => {
     const sql = getDatabase();
     if (reportId)
       await sql.query("DELETE FROM reports WHERE id = $1", [reportId]);
+    await sql.query("DELETE FROM provider_circuits WHERE provider = $1", [
+      circuitProvider,
+    ]);
     await sql.query("DELETE FROM daily_usage WHERE usage_date = $1", [
       usageDate,
     ]);
@@ -192,5 +197,24 @@ describe.skipIf(!runDatabaseTests)("evidence persistence", () => {
         scope_compatible: true,
       },
     ]);
+
+    const platform = new AiPlatformRepository();
+    await platform.openCircuit(circuitProvider, "http_429", 120);
+    expect(await platform.isCircuitOpen(circuitProvider)).toBe(true);
+    await platform.recordAttempt({
+      reportId,
+      phase: "claim_identification",
+      requestedModel: "inclusionai/test-free",
+      outcome: "failed",
+      errorCode: "http_429",
+    });
+    const attempts = await getDatabase().query(
+      `SELECT outcome, error_code FROM ai_attempts WHERE report_id = $1`,
+      [reportId],
+    );
+    expect(attempts).toContainEqual({
+      outcome: "failed",
+      error_code: "http_429",
+    });
   });
 });

@@ -54,12 +54,14 @@ export class ClaimsRepository {
         INSERT INTO claims (
           report_id, ordinal, statement, source_start, source_end,
           context_passage, importance, reference_period, reference_scope,
-          canonical_key, selection_status
+          canonical_key, selection_status, research_status
         )
         SELECT
           $1, item.ordinal, item.statement, item."sourceStart", item."sourceEnd",
           item."contextPassage", item.importance, item."referencePeriod",
           item."referenceScope", item."canonicalKey", item."selectionStatus"
+          , CASE WHEN item."selectionStatus" = 'selected'
+              THEN 'pending' ELSE 'uninvestigated_limit' END
         FROM jsonb_to_recordset($2::jsonb) AS item(
           ordinal integer,
           statement text,

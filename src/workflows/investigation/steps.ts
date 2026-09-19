@@ -1,4 +1,8 @@
 import { messages } from "../../lib/i18n";
+import {
+  AiPlatformRepository,
+  PlatformCapacityError,
+} from "../../server/ai/platform-capacity";
 import { GatewayClaimIdentifier } from "../../server/claims/gateway-identifier";
 import { prioritizeClaims } from "../../server/claims/prioritize";
 import { ClaimsRepository } from "../../server/claims/repository";
@@ -109,7 +113,11 @@ export async function researchQueuedEvidence(
   }, 20_000);
   try {
     await researchEvidence(input, repository, {
-      search: new ResilientExaSearchAdapter(),
+      search: new ResilientExaSearchAdapter(
+        undefined,
+        undefined,
+        new AiPlatformRepository(),
+      ),
       fetcher: new SafeRemoteDocumentFetcher(),
     });
     if (heartbeatError) throw heartbeatError;
@@ -139,7 +147,15 @@ export async function evaluateQueuedReport(
     });
   }, 20_000);
   try {
-    const result = await new GatewayVerdictEvaluator().evaluate(input);
+    let result: Awaited<ReturnType<GatewayVerdictEvaluator["evaluate"]>>;
+    try {
+      result = await new GatewayVerdictEvaluator().evaluate(input);
+    } catch (error) {
+      if (!(error instanceof PlatformCapacityError)) throw error;
+      const evaluation = applyVerdictRules(input.claims, [], true);
+      await repository.persistEvaluation(reportId, input, evaluation, null);
+      return;
+    }
     if (heartbeatError) throw heartbeatError;
     if (!(await queue.heartbeat(reportId, workflowRunId))) {
       throw new Error("Research lease expired during verdict evaluation");

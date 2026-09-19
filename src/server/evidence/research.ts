@@ -18,7 +18,7 @@ import {
 
 export type EvidenceResearchStore = Pick<
   EvidenceRepository,
-  "reserveSearch" | "completeSearch" | "failSearch"
+  "reserveSearch" | "completeSearch" | "failSearch" | "markTimeLimited"
 >;
 
 function validPublishedDate(value: string | null) {
@@ -47,8 +47,13 @@ export async function researchEvidence(
   const reportSource = canonicalizeEvidenceUrl(input.sourceUrl);
   let completedSearches = 0;
   let evidenceRecords = 0;
+  let nextClaim = 0;
+  const claims = input.claims.slice(0, input.maxSearches);
+  const timeLimited = new Set<string>();
+  const now = dependencies.now ?? (() => new Date());
+  const cutoff = new Date(input.stopStartingAt).valueOf();
 
-  for (const claim of input.claims.slice(0, input.maxSearches)) {
+  const researchClaim = async (claim: (typeof claims)[number]) => {
     const query = buildEvidenceQuery(claim, input.reportLocale);
     const searchId = await store.reserveSearch({
       reportId: input.reportId,
@@ -56,7 +61,7 @@ export async function researchEvidence(
       query,
       maxSearches: input.maxSearches,
     });
-    if (!searchId) continue;
+    if (!searchId) return;
 
     try {
       const result = await dependencies.search.search({
@@ -142,7 +147,36 @@ export async function researchEvidence(
     } catch {
       await store.failSearch(searchId, "search_unavailable");
     }
-  }
+  };
 
-  return { completedSearches, evidenceRecords };
+  const worker = async () => {
+    while (true) {
+      const index = nextClaim;
+      nextClaim += 1;
+      const claim = claims[index];
+      if (!claim) return;
+      if (now().valueOf() >= cutoff) {
+        timeLimited.add(claim.id);
+        for (const remaining of claims.slice(nextClaim)) {
+          timeLimited.add(remaining.id);
+        }
+        return;
+      }
+      await researchClaim(claim);
+    }
+  };
+
+  await Promise.all(
+    Array.from(
+      { length: Math.min(Math.max(1, input.concurrency), claims.length) },
+      () => worker(),
+    ),
+  );
+  await store.markTimeLimited(input.reportId, [...timeLimited]);
+
+  return {
+    completedSearches,
+    evidenceRecords,
+    timeLimitedClaims: timeLimited.size,
+  };
 }

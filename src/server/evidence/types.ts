@@ -19,6 +19,8 @@ export type EvidenceResearchInput = {
   maxSearches: number;
   maxResults: number;
   maxEvidencePerClaim: number;
+  concurrency: number;
+  stopStartingAt: string;
 };
 
 export type EvidenceSearchRequest = {
@@ -68,4 +70,5 @@ export type ValidatedEvidence = {
 export type EvidenceResearchDependencies = {
   search: EvidenceSearchAdapter;
   fetcher: RemoteDocumentFetcher;
+  now?: () => Date;
 };

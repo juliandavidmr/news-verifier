@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getDatabase } from "../db";
 import { NeonReportsRepository } from "./neon-repository";
 
@@ -9,7 +9,28 @@ const visitorKey = `test-visitor-${randomUUID()}`;
 const networkKey = `test-network-${randomUUID()}`;
 const createdReportIds: string[] = [];
 
+async function removeQuotaFixtures() {
+  const sql = getDatabase();
+  await sql.query(
+    `DELETE FROM reports
+     WHERE id IN (
+       SELECT report_id FROM quota_reservations
+       WHERE usage_date = $1
+         AND (
+           idempotency_key LIKE 'quota-test-%'
+           OR idempotency_key LIKE 'refund-test-%'
+         )
+     )`,
+    [usageDate],
+  );
+  await sql.query("DELETE FROM daily_usage WHERE usage_date = $1", [usageDate]);
+}
+
 describe.skipIf(!runDatabaseTests)("Neon quota admission", () => {
+  beforeAll(async () => {
+    if (runDatabaseTests) await removeQuotaFixtures();
+  });
+
   afterAll(async () => {
     if (!runDatabaseTests) return;
     const sql = getDatabase();
@@ -18,9 +39,7 @@ describe.skipIf(!runDatabaseTests)("Neon quota admission", () => {
         createdReportIds,
       ]);
     }
-    await sql.query("DELETE FROM daily_usage WHERE usage_date = $1", [
-      usageDate,
-    ]);
+    await removeQuotaFixtures();
   });
 
   it("admits exactly the configured visitor limit under concurrency", async () => {

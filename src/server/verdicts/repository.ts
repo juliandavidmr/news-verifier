@@ -16,6 +16,9 @@ type ReportRow = {
   max_evidence_searches: number;
   max_search_results: number;
   max_evidence_per_claim: number;
+  claim_concurrency: number;
+  search_cutoff_seconds: number;
+  research_budget_seconds: number;
 };
 
 type ClaimRow = {
@@ -23,6 +26,7 @@ type ClaimRow = {
   statement: string;
   importance: number;
   selection_status: EvaluationClaim["selectionStatus"];
+  research_status: EvaluationClaim["researchStatus"];
   reference_period: string;
   reference_scope: string;
 };
@@ -55,14 +59,15 @@ export class VerdictRepository {
       database.query(
         `SELECT reports.report_locale, config.max_claims,
                 config.max_evidence_searches, config.max_search_results,
-                config.max_evidence_per_claim
+                config.max_evidence_per_claim, config.claim_concurrency,
+                config.search_cutoff_seconds, config.research_budget_seconds
          FROM reports CROSS JOIN quota_config config
          WHERE reports.id = $1 AND config.id = 1
            AND reports.status = 'evaluating'`,
         [reportId],
       ),
       database.query(
-        `SELECT id, statement, importance, selection_status,
+        `SELECT id, statement, importance, selection_status, research_status,
                 reference_period, reference_scope
          FROM claims WHERE report_id = $1 ORDER BY ordinal`,
         [reportId],
@@ -105,6 +110,7 @@ export class VerdictRepository {
         statement: claim.statement,
         importance: claim.importance,
         selectionStatus: claim.selection_status,
+        researchStatus: claim.research_status,
         referencePeriod: claim.reference_period,
         referenceScope: claim.reference_scope,
         evidence: evidenceByClaim.get(claim.id) ?? [],
@@ -114,6 +120,9 @@ export class VerdictRepository {
         maxEvidenceSearches: report.max_evidence_searches,
         maxSearchResults: report.max_search_results,
         maxEvidencePerClaim: report.max_evidence_per_claim,
+        claimConcurrency: report.claim_concurrency,
+        searchCutoffSeconds: report.search_cutoff_seconds,
+        researchBudgetSeconds: report.research_budget_seconds,
       },
       previousModels: (modelRows as unknown as ModelRow[]).map((model) => ({
         phase: model.phase,
@@ -128,7 +137,7 @@ export class VerdictRepository {
     reportId: string,
     input: ReportEvaluationInput,
     evaluation: AppliedReportEvaluation,
-    model: Omit<VerdictModelResult, "verdicts">,
+    model: Omit<VerdictModelResult, "verdicts"> | null,
   ) {
     const verdicts = evaluation.verdicts.map((verdict) => ({
       ...verdict,
@@ -140,20 +149,23 @@ export class VerdictRepository {
         ...relation,
       })),
     );
-    const modelSnapshot = [
-      ...input.previousModels,
-      {
-        phase: "verdict_evaluation",
-        requestedModel: model.requestedModel,
-        responseModel: model.responseModel,
-        usage: model.usage,
-      },
-    ];
+    const modelSnapshot = model
+      ? [
+          ...input.previousModels,
+          {
+            phase: "verdict_evaluation",
+            requestedModel: model.requestedModel,
+            responseModel: model.responseModel,
+            usage: model.usage,
+          },
+        ]
+      : input.previousModels;
     const eventPayload = JSON.stringify({
-      status: "completed",
+      status: evaluation.terminalStatus,
       evidenceCoverage: evaluation.evidenceCoverage,
       supportIndex: evaluation.supportIndex,
       reportOutcome: evaluation.reportOutcome,
+      partialReason: evaluation.partialReason,
     });
     await getDatabase().query(
       `WITH removed AS (
@@ -204,10 +216,11 @@ export class VerdictRepository {
         ON CONFLICT DO NOTHING
       ), updated AS (
         UPDATE reports
-        SET status = 'completed', evidence_coverage = $4,
+        SET status = $14, evidence_coverage = $4,
             support_index = $5, report_outcome = $6,
             methodology_version = $7, configuration_snapshot = $8::jsonb,
-            model_snapshot = $9::jsonb, completed_at = now(), updated_at = now(),
+            model_snapshot = $9::jsonb, partial_reason = $15,
+            completed_at = now(), updated_at = now(),
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'evaluating'
         RETURNING id, next_event_sequence - 1 AS sequence
@@ -217,11 +230,12 @@ export class VerdictRepository {
         WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
       ), event AS (
         INSERT INTO report_events (report_id, sequence, stage, public_payload)
-        SELECT id, sequence, 'completed', $10::jsonb FROM updated
+        SELECT id, sequence, $14, $10::jsonb FROM updated
       ), ai AS (
         INSERT INTO ai_calls (
           report_id, phase, requested_model, response_model, usage
-        ) VALUES ($1, 'verdict_evaluation', $11, $12, $13::jsonb)
+        ) SELECT $1, 'verdict_evaluation', $11, $12, $13::jsonb
+        WHERE $11::text IS NOT NULL
       )
       SELECT count(*)::integer AS verdict_count FROM inserted_verdicts`,
       [
@@ -235,9 +249,11 @@ export class VerdictRepository {
         JSON.stringify(input.configuration),
         JSON.stringify(modelSnapshot),
         eventPayload,
-        model.requestedModel,
-        model.responseModel,
-        JSON.stringify(model.usage),
+        model?.requestedModel ?? null,
+        model?.responseModel ?? null,
+        model ? JSON.stringify(model.usage) : null,
+        evaluation.terminalStatus,
+        evaluation.partialReason,
       ],
     );
   }

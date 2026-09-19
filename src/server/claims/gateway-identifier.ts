@@ -1,4 +1,10 @@
 import { APICallError, gateway, generateText, jsonSchema, tool } from "ai";
+import {
+  AiPlatformRepository,
+  capacityFailure,
+  freeEligibleGatewayModels,
+  PlatformCapacityError,
+} from "../ai/platform-capacity";
 import type { ClaimIdentifier, ClaimModelResult, DetectedClaim } from "./types";
 
 const defaultModels = [
@@ -73,32 +79,6 @@ const claimBatchSchema = jsonSchema<ClaimBatch>(
   },
 );
 
-type GatewayModel = {
-  id: string;
-  pricing?: { input?: string; output?: string };
-  tags?: string[] | null;
-  supported_parameters?: string[];
-};
-
-async function freeEligibleModels(configured: string[]) {
-  const response = await fetch("https://ai-gateway.vercel.sh/v1/models", {
-    signal: AbortSignal.timeout(5_000),
-  });
-  if (!response.ok) throw new Error("AI Gateway model catalog unavailable");
-  const body = (await response.json()) as { data?: GatewayModel[] };
-  const models = new Map((body.data ?? []).map((model) => [model.id, model]));
-  return configured.filter((id) => {
-    const model = models.get(id);
-    return (
-      model?.pricing?.input === "0" &&
-      model.pricing.output === "0" &&
-      model.tags?.includes("free") === true &&
-      model.supported_parameters?.includes("tools") === true &&
-      model.supported_parameters.includes("tool_choice")
-    );
-  });
-}
-
 function configuredModels() {
   const configured = process.env.AI_CLAIM_MODELS?.split(",")
     .map((model) => model.trim())
@@ -122,12 +102,39 @@ export function buildClaimIdentificationPrompt(
 }
 
 export class GatewayClaimIdentifier implements ClaimIdentifier {
+  constructor(private readonly platform = new AiPlatformRepository()) {}
+
   async identify(
     input: Parameters<ClaimIdentifier["identify"]>[0],
   ): Promise<ClaimModelResult> {
-    const models = await freeEligibleModels(configuredModels());
+    const configured = configuredModels();
+    if (await this.platform.isCircuitOpen("ai_gateway")) {
+      await this.platform.recordAttempt({
+        reportId: input.reportId,
+        phase: "claim_identification",
+        requestedModel: configured[0] ?? "none",
+        outcome: "circuit_open",
+        errorCode: "circuit_open",
+      });
+      throw new PlatformCapacityError("ai_gateway", "circuit_open");
+    }
+    let models: string[];
+    try {
+      models = await freeEligibleGatewayModels(configured);
+    } catch {
+      await this.platform.openCircuit("ai_gateway", "catalog_unavailable", 60);
+      throw new PlatformCapacityError("ai_gateway", "catalog_unavailable");
+    }
     if (models.length === 0) {
-      throw new Error("No approved free claim model is currently available");
+      await this.platform.openCircuit("ai_gateway", "no_approved_free_model");
+      await this.platform.recordAttempt({
+        reportId: input.reportId,
+        phase: "claim_identification",
+        requestedModel: configured[0] ?? "none",
+        outcome: "failed",
+        errorCode: "no_approved_free_model",
+      });
+      throw new PlatformCapacityError("ai_gateway", "no_approved_free_model");
     }
 
     let lastError: unknown;
@@ -160,6 +167,12 @@ export class GatewayClaimIdentifier implements ClaimIdentifier {
         if (!call || !isClaimBatch(call.input)) {
           throw new Error("The model returned no valid claim batch");
         }
+        await this.platform.recordAttempt({
+          reportId: input.reportId,
+          phase: "claim_identification",
+          requestedModel: modelId,
+          outcome: "succeeded",
+        });
         return {
           claims: call.input.claims,
           requestedModel: modelId,
@@ -168,21 +181,36 @@ export class GatewayClaimIdentifier implements ClaimIdentifier {
         };
       } catch (error) {
         lastError = error;
+        const capacity = capacityFailure(error);
+        await this.platform.recordAttempt({
+          reportId: input.reportId,
+          phase: "claim_identification",
+          requestedModel: modelId,
+          outcome: "failed",
+          errorCode: capacity?.code ?? "model_error",
+        });
+        if (capacity && capacity.code !== "http_503") {
+          await this.platform.openCircuit(
+            "ai_gateway",
+            capacity.code,
+            capacity.retryAfterSeconds,
+          );
+          throw new PlatformCapacityError("ai_gateway", capacity.code);
+        }
         if (
           APICallError.isInstance(error) &&
-          error.statusCode === 403 &&
-          error.responseBody?.includes("customer_verification_required")
+          ![402, 429, 503].includes(error.statusCode ?? 0)
         ) {
           throw error;
         }
-        if (
-          APICallError.isInstance(error) &&
-          error.statusCode !== 402 &&
-          error.statusCode !== 429 &&
-          error.statusCode !== 503
-        ) {
-        }
       }
+    }
+    await this.platform.openCircuit("ai_gateway", "free_models_unavailable");
+    if (capacityFailure(lastError)) {
+      throw new PlatformCapacityError(
+        "ai_gateway",
+        capacityFailure(lastError)?.code ?? "free_models_unavailable",
+      );
     }
     throw lastError instanceof Error
       ? lastError

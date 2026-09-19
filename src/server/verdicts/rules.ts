@@ -126,12 +126,18 @@ function applyClaim(
 export function applyVerdictRules(
   claims: EvaluationClaim[],
   proposals: ProposedVerdict[],
+  forcePartial = false,
 ): AppliedReportEvaluation {
   const proposalByClaim = new Map(
     proposals.map((item) => [item.claimId, item]),
   );
   const verdicts = claims.flatMap((claim) => {
-    if (claim.selectionStatus !== "selected") return [];
+    if (
+      claim.selectionStatus !== "selected" ||
+      claim.researchStatus !== "completed"
+    ) {
+      return [];
+    }
     const proposal = proposalByClaim.get(claim.id) ?? {
       claimId: claim.id,
       verdict: "insufficient_evidence" as const,
@@ -173,10 +179,28 @@ export function applyVerdictRules(
     evidenceCoverage < 60 || primaryWithoutConclusion || coveredWeight === 0
       ? null
       : Math.round((indexNumerator / coveredWeight) * 100) / 100;
+  const incomplete =
+    forcePartial ||
+    claims.some(
+      (claim) =>
+        claim.selectionStatus === "selected" &&
+        claim.researchStatus !== "completed",
+    );
+  const partialReason = incomplete
+    ? claims.some((claim) => claim.researchStatus === "uninvestigated_time")
+      ? ("time_limit" as const)
+      : ("platform_limit" as const)
+    : null;
   return {
     verdicts,
     evidenceCoverage,
     supportIndex,
-    reportOutcome: supportIndex === null ? "inconclusive" : "conclusive",
+    reportOutcome: incomplete
+      ? "partial"
+      : supportIndex === null
+        ? "inconclusive"
+        : "conclusive",
+    terminalStatus: incomplete ? "partial" : "completed",
+    partialReason,
   };
 }

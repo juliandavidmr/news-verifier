@@ -30,6 +30,12 @@ export type EvaluationClaim = {
   statement: string;
   importance: number;
   selectionStatus: "selected" | "uninvestigated_limit";
+  researchStatus:
+    | "pending"
+    | "completed"
+    | "uninvestigated_limit"
+    | "uninvestigated_time"
+    | "uninvestigated_platform";
   referencePeriod: string;
   referenceScope: string;
   evidence: EvaluationEvidence[];
@@ -89,7 +95,9 @@ export type AppliedReportEvaluation = {
   verdicts: AppliedVerdict[];
   evidenceCoverage: number;
   supportIndex: number | null;
-  reportOutcome: "conclusive" | "inconclusive";
+  reportOutcome: "conclusive" | "inconclusive" | "partial";
+  terminalStatus: "completed" | "partial";
+  partialReason: "time_limit" | "platform_limit" | null;
 };
 
 export interface VerdictEvaluator {

@@ -8,6 +8,7 @@ function claim(overrides: Partial<EvaluationClaim> = {}): EvaluationClaim {
     statement: "The city opened 12 libraries in 2025.",
     importance: 5,
     selectionStatus: "selected",
+    researchStatus: "completed",
     referencePeriod: "2025",
     referenceScope: "the city",
     evidence: [
@@ -182,5 +183,28 @@ describe("deterministic verdict rules", () => {
       [proposal({ claimId: "relevant" })],
     );
     expect(primaryGap.supportIndex).toBeNull();
+  });
+
+  it("distinguishes unfinished time and platform branches from insufficient evidence", () => {
+    const timeLimited = applyVerdictRules(
+      [claim({ researchStatus: "uninvestigated_time" })],
+      [],
+    );
+    expect(timeLimited).toMatchObject({
+      terminalStatus: "partial",
+      reportOutcome: "partial",
+      partialReason: "time_limit",
+    });
+    expect(timeLimited.verdicts).toEqual([]);
+
+    const noEvidence = applyVerdictRules(
+      [claim({ evidence: [] })],
+      [proposal({ verdict: "insufficient_evidence", relations: [] })],
+    );
+    expect(noEvidence).toMatchObject({
+      terminalStatus: "completed",
+      partialReason: null,
+    });
+    expect(noEvidence.verdicts[0].finalVerdict).toBe("insufficient_evidence");
   });
 });

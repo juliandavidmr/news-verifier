@@ -13,6 +13,9 @@ type ResearchRow = {
   max_evidence_searches: number;
   max_search_results: number;
   max_evidence_per_claim: number;
+  claim_concurrency: number;
+  research_started_at: string;
+  search_cutoff_seconds: number;
   claims: unknown;
 };
 
@@ -49,6 +52,8 @@ export class EvidenceRepository {
       `SELECT reports.id AS report_id, reports.report_locale, reports.source_url,
               config.max_evidence_searches, config.max_search_results,
               config.max_evidence_per_claim,
+              config.claim_concurrency, reports.research_started_at,
+              config.search_cutoff_seconds,
               COALESCE(jsonb_agg(jsonb_build_object(
                 'id', claims.id,
                 'statement', claims.statement,
@@ -73,6 +78,11 @@ export class EvidenceRepository {
       maxSearches: row.max_evidence_searches,
       maxResults: row.max_search_results,
       maxEvidencePerClaim: row.max_evidence_per_claim,
+      concurrency: row.claim_concurrency,
+      stopStartingAt: new Date(
+        new Date(row.research_started_at).valueOf() +
+          row.search_cutoff_seconds * 1_000,
+      ).toISOString(),
     };
   }
 
@@ -129,6 +139,10 @@ export class EvidenceRepository {
           usage jsonb
         )
         WHERE $5::jsonb IS NOT NULL
+      ), researched AS (
+        UPDATE claims
+        SET research_status = 'completed'
+        WHERE id = (SELECT claim_id FROM search)
       )
       INSERT INTO evidence_records (
         report_id, claim_id, search_id, source_url, canonical_url,
@@ -170,10 +184,26 @@ export class EvidenceRepository {
 
   async failSearch(searchId: string, code: string) {
     await getDatabase().query(
-      `UPDATE evidence_searches
-       SET status = 'failed', error_code = $2, finished_at = now()
-       WHERE id = $1 AND status = 'reserved'`,
+      `WITH failed AS (
+        UPDATE evidence_searches
+        SET status = 'failed', error_code = $2, finished_at = now()
+        WHERE id = $1 AND status = 'reserved'
+        RETURNING claim_id
+      )
+      UPDATE claims SET research_status = 'uninvestigated_platform'
+      WHERE id IN (SELECT claim_id FROM failed)`,
       [searchId, code],
+    );
+  }
+
+  async markTimeLimited(reportId: string, claimIds: string[]) {
+    if (claimIds.length === 0) return;
+    await getDatabase().query(
+      `UPDATE claims
+       SET research_status = 'uninvestigated_time'
+       WHERE report_id = $1 AND id = ANY($2::uuid[])
+         AND research_status = 'pending'`,
+      [reportId, claimIds],
     );
   }
 
