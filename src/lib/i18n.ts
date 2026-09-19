@@ -15,7 +15,7 @@ export const messages = {
     linkLabel: "Public page URL",
     linkPlaceholder: "https://example.com/article",
     imageLabel: "PNG, JPEG or WebP",
-    imageSoon: "Screenshot verification is being prepared.",
+    imageHelp: "Maximum 4 MB · clear, readable text",
     submit: "Verify this source",
     submitting: "Creating report…",
     inputNote: "One source at a time · up to 2,000 words",
@@ -28,6 +28,12 @@ export const messages = {
       "This browser has reached today’s verification limit. Try again tomorrow.",
     globalQuotaReached:
       "Today’s shared verification capacity has been reached. Try again tomorrow.",
+    imageTooLarge: "The screenshot must be 4 MB or smaller.",
+    invalidImage: "Choose a valid PNG, JPEG or WebP screenshot.",
+    ocrQualityInsufficient:
+      "We could not read enough reliable text from this screenshot. Try a clearer image.",
+    ocrTimeout:
+      "Reading this screenshot took too long. Try a smaller or clearer image.",
     reportTitle: "Investigation report",
     reportQueued: "Waiting for capacity",
     reportExtracting: "Extracting the main content",
@@ -66,7 +72,7 @@ export const messages = {
     linkLabel: "URL de la página pública",
     linkPlaceholder: "https://ejemplo.com/articulo",
     imageLabel: "PNG, JPEG o WebP",
-    imageSoon: "La verificación de capturas se está preparando.",
+    imageHelp: "Máximo 4 MB · texto claro y legible",
     submit: "Verificar esta fuente",
     submitting: "Creando informe…",
     inputNote: "Una fuente a la vez · hasta 2.000 palabras",
@@ -79,6 +85,12 @@ export const messages = {
       "Este navegador alcanzó el límite de verificaciones de hoy. Inténtalo mañana.",
     globalQuotaReached:
       "Se alcanzó la capacidad compartida de verificaciones de hoy. Inténtalo mañana.",
+    imageTooLarge: "La captura debe pesar 4 MB o menos.",
+    invalidImage: "Elige una captura PNG, JPEG o WebP válida.",
+    ocrQualityInsufficient:
+      "No pudimos leer suficiente texto fiable en esta captura. Prueba con una imagen más clara.",
+    ocrTimeout:
+      "La lectura de esta captura tardó demasiado. Prueba con una imagen más pequeña o clara.",
     reportTitle: "Informe de investigación",
     reportQueued: "Esperando capacidad",
     reportExtracting: "Extrayendo el contenido principal",
@@ -117,7 +129,7 @@ export const messages = {
     linkLabel: "URL de la page publique",
     linkPlaceholder: "https://exemple.com/article",
     imageLabel: "PNG, JPEG ou WebP",
-    imageSoon: "La vérification des captures est en préparation.",
+    imageHelp: "4 Mo maximum · texte clair et lisible",
     submit: "Vérifier cette source",
     submitting: "Création du rapport…",
     inputNote: "Une source à la fois · jusqu’à 2 000 mots",
@@ -130,6 +142,12 @@ export const messages = {
       "Ce navigateur a atteint la limite de vérifications du jour. Réessayez demain.",
     globalQuotaReached:
       "La capacité partagée de vérification du jour est atteinte. Réessayez demain.",
+    imageTooLarge: "La capture doit peser 4 Mo ou moins.",
+    invalidImage: "Choisissez une capture PNG, JPEG ou WebP valide.",
+    ocrQualityInsufficient:
+      "Nous n’avons pas pu lire assez de texte fiable sur cette capture. Essayez une image plus nette.",
+    ocrTimeout:
+      "La lecture de cette capture a pris trop de temps. Essayez une image plus petite ou plus nette.",
     reportTitle: "Rapport d’enquête",
     reportQueued: "En attente de capacité",
     reportExtracting: "Extraction du contenu principal",
@@ -168,7 +186,7 @@ export const messages = {
     linkLabel: "URL da página pública",
     linkPlaceholder: "https://exemplo.com/artigo",
     imageLabel: "PNG, JPEG ou WebP",
-    imageSoon: "A verificação de capturas está sendo preparada.",
+    imageHelp: "Máximo de 4 MB · texto claro e legível",
     submit: "Verificar esta fonte",
     submitting: "Criando relatório…",
     inputNote: "Uma fonte por vez · até 2.000 palavras",
@@ -181,6 +199,12 @@ export const messages = {
       "Este navegador atingiu o limite de verificações de hoje. Tente novamente amanhã.",
     globalQuotaReached:
       "A capacidade compartilhada de verificações de hoje foi atingida. Tente novamente amanhã.",
+    imageTooLarge: "A captura deve ter no máximo 4 MB.",
+    invalidImage: "Escolha uma captura PNG, JPEG ou WebP válida.",
+    ocrQualityInsufficient:
+      "Não foi possível ler texto confiável suficiente nesta captura. Tente uma imagem mais nítida.",
+    ocrTimeout:
+      "A leitura desta captura demorou demais. Tente uma imagem menor ou mais nítida.",
     reportTitle: "Relatório da investigação",
     reportQueued: "Aguardando capacidade",
     reportExtracting: "Extraindo o conteúdo principal",

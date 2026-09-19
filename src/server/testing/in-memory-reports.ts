@@ -4,6 +4,7 @@ import type {
   ReportEvent,
 } from "../../domain/reports";
 import type {
+  CreateImageReportInput,
   CreateUrlReportInput,
   ReportsRepository,
 } from "../reports/repository";
@@ -40,6 +41,53 @@ export class InMemoryReportsRepository implements ReportsRepository {
       extractedWordCount: null,
       analyzedWordCount: null,
       truncated: false,
+      errorCode: null,
+      errorMessage: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    this.reports.set(report.id, report);
+    this.idempotency.set(input.idempotencyKey, report.id);
+    this.events.set(report.id, [
+      {
+        sequence: 1,
+        stage: "queued",
+        payload: { status: "queued" },
+        createdAt: timestamp,
+      },
+    ]);
+    return {
+      accepted: true as const,
+      replayed: false,
+      report: structuredClone(report),
+    };
+  }
+
+  async createImageReport(input: CreateImageReportInput) {
+    const existingId = this.idempotency.get(input.idempotencyKey);
+    if (existingId) {
+      const existing = this.reports.get(existingId);
+      if (!existing) throw new Error("Missing idempotent report");
+      return {
+        accepted: true as const,
+        replayed: true,
+        report: structuredClone(existing),
+      };
+    }
+    const timestamp = this.now().toISOString();
+    const report: Report = {
+      id: crypto.randomUUID(),
+      shortId: input.shortId,
+      sourceKind: "image",
+      sourceUrl: null,
+      reportLocale: input.reportLocale,
+      status: "queued",
+      extractedTitle: null,
+      extractedAuthor: null,
+      analyzedExcerpt: input.extracted.text,
+      extractedWordCount: input.extracted.extractedWordCount,
+      analyzedWordCount: input.extracted.analyzedWordCount,
+      truncated: input.extracted.truncated,
       errorCode: null,
       errorMessage: null,
       createdAt: timestamp,

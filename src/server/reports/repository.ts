@@ -16,12 +16,19 @@ export type CreateUrlReportInput = {
   usageDate?: string;
 };
 
+export type CreateImageReportInput = Omit<CreateUrlReportInput, "sourceUrl"> & {
+  extracted: ExtractedContent & { confidence: number };
+};
+
 export type CreateUrlReportResult =
   | { accepted: true; report: Report; replayed: boolean }
   | { accepted: false; reason: "global" | "visitor" };
 
 export interface ReportsRepository {
   createUrlReport(input: CreateUrlReportInput): Promise<CreateUrlReportResult>;
+  createImageReport(
+    input: CreateImageReportInput,
+  ): Promise<CreateUrlReportResult>;
   markExtracted(reportId: string, content: ExtractedContent): Promise<void>;
   markFailed(
     reportId: string,

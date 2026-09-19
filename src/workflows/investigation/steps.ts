@@ -37,10 +37,22 @@ export async function extractQueuedUrl(
   const source = await queue.getSource(reportId);
   if (!source) throw new Error("Queued URL source is unavailable");
 
-  const remoteDocument = await new SafeRemoteDocumentFetcher().fetch(
-    new URL(source.sourceUrl),
-  );
-  const extracted = extractReadableContent(remoteDocument);
+  const extracted =
+    source.sourceKind === "url"
+      ? extractReadableContent(
+          await new SafeRemoteDocumentFetcher().fetch(
+            new URL(source.sourceUrl),
+          ),
+        )
+      : {
+          canonicalUrl: "",
+          title: null,
+          author: null,
+          text: source.text,
+          extractedWordCount: source.extractedWordCount,
+          analyzedWordCount: source.analyzedWordCount,
+          truncated: source.truncated,
+        };
 
   if (!(await queue.heartbeat(reportId, workflowRunId))) {
     throw new Error("Research lease expired during extraction");

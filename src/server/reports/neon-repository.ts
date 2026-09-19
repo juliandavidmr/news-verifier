@@ -6,7 +6,11 @@ import type {
   SupportedLocale,
 } from "../../domain/reports";
 import { getDatabase } from "../db";
-import type { CreateUrlReportInput, ReportsRepository } from "./repository";
+import type {
+  CreateImageReportInput,
+  CreateUrlReportInput,
+  ReportsRepository,
+} from "./repository";
 
 type ReportRow = {
   id: string;
@@ -106,6 +110,40 @@ export class NeonReportsRepository implements ReportsRepository {
     };
   }
 
+  async createImageReport(input: CreateImageReportInput) {
+    const rows = await getDatabase().query(
+      `SELECT accept_image_investigation(
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+         COALESCE($11::date, current_date)
+       ) AS decision`,
+      [
+        input.shortId,
+        input.reportLocale,
+        input.visitorKey,
+        input.networkKey,
+        input.idempotencyKey,
+        input.extracted.text,
+        input.extracted.extractedWordCount,
+        input.extracted.analyzedWordCount,
+        input.extracted.truncated,
+        input.extracted.confidence,
+        input.usageDate ?? null,
+      ],
+    );
+    const row = firstRow<{
+      decision:
+        | { accepted: false; reason: "global" | "visitor" }
+        | { accepted: true; replayed: boolean; report: ReportRow };
+    }>(rows as unknown[]);
+    if (!row) throw new Error("Image report admission returned no row");
+    if (!row.decision.accepted) return row.decision;
+    return {
+      accepted: true as const,
+      replayed: row.decision.replayed,
+      report: mapReport(row.decision.report),
+    };
+  }
+
   async markExtracted(reportId: string, content: ExtractedContent) {
     const sql = getDatabase();
     const payload = JSON.stringify({
@@ -118,7 +156,7 @@ export class NeonReportsRepository implements ReportsRepository {
     await sql.query(
       `WITH updated AS (
         UPDATE reports
-        SET source_url = $2,
+        SET source_url = CASE WHEN source_kind = 'url' THEN $2 ELSE source_url END,
             status = 'identifying_claims',
             extracted_title = $3,
             extracted_author = $4,

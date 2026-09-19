@@ -34,20 +34,30 @@ export function HomeVerifier({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (mode !== "url") return;
     setError(null);
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          url,
-          reportLocale: locale,
-          idempotencyKey: idempotencyKey.current,
-        }),
-      });
+      const response =
+        mode === "image" && image
+          ? await fetch("/api/reports", {
+              method: "POST",
+              headers: {
+                "content-type": image.type,
+                "x-report-locale": locale,
+                "x-idempotency-key": idempotencyKey.current,
+              },
+              body: image,
+            })
+          : await fetch("/api/reports", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                url,
+                reportLocale: locale,
+                idempotencyKey: idempotencyKey.current,
+              }),
+            });
       const result = (await response.json()) as {
         shortId?: string;
         code?: string;
@@ -60,7 +70,18 @@ export function HomeVerifier({
               ? copy.visitorQuotaReached
               : result.code === "global_quota_reached"
                 ? copy.globalQuotaReached
-                : copy.genericError,
+                : result.code === "image_too_large"
+                  ? copy.imageTooLarge
+                  : result.code === "unsupported_image" ||
+                      result.code === "image_type_mismatch" ||
+                      result.code === "invalid_image" ||
+                      result.code === "image_dimensions_exceeded"
+                    ? copy.invalidImage
+                    : result.code === "ocr_quality_insufficient"
+                      ? copy.ocrQualityInsufficient
+                      : result.code === "ocr_timeout"
+                        ? copy.ocrTimeout
+                        : copy.genericError,
         );
         return;
       }
@@ -143,12 +164,16 @@ export function HomeVerifier({
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setImage(event.target.files?.[0] ?? null)}
+                required
+                onChange={(event) => {
+                  setImage(event.target.files?.[0] ?? null);
+                  idempotencyKey.current = crypto.randomUUID();
+                }}
               />
               {image ? (
                 <small>{image.name}</small>
               ) : (
-                <small>{copy.imageSoon}</small>
+                <small>{copy.imageHelp}</small>
               )}
             </label>
           )}
@@ -162,7 +187,7 @@ export function HomeVerifier({
           <button
             className="submit-button"
             type="submit"
-            disabled={mode === "image" || submitting}
+            disabled={submitting || (mode === "image" ? !image : !url)}
           >
             {submitting ? copy.submitting : copy.submit}
             <span aria-hidden="true">→</span>
