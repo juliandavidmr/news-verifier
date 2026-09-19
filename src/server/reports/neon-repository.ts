@@ -109,7 +109,7 @@ export class NeonReportsRepository implements ReportsRepository {
   async markExtracted(reportId: string, content: ExtractedContent) {
     const sql = getDatabase();
     const payload = JSON.stringify({
-      status: "partial",
+      status: "identifying_claims",
       title: content.title,
       extractedWordCount: content.extractedWordCount,
       analyzedWordCount: content.analyzedWordCount,
@@ -119,7 +119,7 @@ export class NeonReportsRepository implements ReportsRepository {
       `WITH updated AS (
         UPDATE reports
         SET source_url = $2,
-            status = 'partial',
+            status = 'identifying_claims',
             extracted_title = $3,
             extracted_author = $4,
             analyzed_excerpt = $5,
@@ -131,13 +131,9 @@ export class NeonReportsRepository implements ReportsRepository {
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'extracting'
         RETURNING id, next_event_sequence - 1 AS sequence
-      ), consumed AS (
-        UPDATE quota_reservations
-        SET status = 'consumed', updated_at = now()
-        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
       )
       INSERT INTO report_events (report_id, sequence, stage, public_payload)
-      SELECT id, sequence, 'partial', $9::jsonb FROM updated`,
+      SELECT id, sequence, 'identifying_claims', $9::jsonb FROM updated`,
       [
         reportId,
         content.canonicalUrl,
@@ -171,12 +167,13 @@ export class NeonReportsRepository implements ReportsRepository {
             extraction_finished_at = now(),
             updated_at = now(),
             next_event_sequence = next_event_sequence + 1
-        WHERE id = $1 AND status IN ('queued', 'extracting')
+        WHERE id = $1 AND status NOT IN ('completed', 'partial', 'failed')
         RETURNING id, next_event_sequence - 1 AS sequence
       ), refunded AS (
         UPDATE quota_reservations
         SET status = 'refunded', refund_reason = $2, updated_at = now()
-        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
+        WHERE report_id IN (SELECT id FROM updated)
+          AND status IN ('reserved', 'consumed')
         RETURNING visitor_key, usage_date
       ), released AS (
         UPDATE daily_usage usage

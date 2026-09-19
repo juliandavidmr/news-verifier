@@ -3,6 +3,7 @@ import {
   acquireResearchLease,
   extractQueuedUrl,
   failQueuedInvestigation,
+  identifyQueuedClaims,
   releaseResearchLease,
 } from "./steps";
 
@@ -20,6 +21,7 @@ export async function investigationWorkflow(reportId: string) {
 
     try {
       await extractQueuedUrl(reportId, workflowRunId);
+      await identifyQueuedClaims(reportId, workflowRunId);
       return { outcome: "partial" as const };
     } catch {
       await failQueuedInvestigation(reportId);

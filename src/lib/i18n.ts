@@ -35,6 +35,8 @@ export const messages = {
     reportFailed: "Extraction could not be completed",
     extractionError:
       "We could not extract enough reliable text from this page. Check that it is public and try another source.",
+    investigationError:
+      "The investigation could not be completed because its research service was unavailable.",
     partialNotice:
       "The source was extracted successfully. Factual research will continue as the investigation engine is enabled.",
     analyzedWords: "Words analyzed",
@@ -84,6 +86,8 @@ export const messages = {
     reportFailed: "No se pudo completar la extracción",
     extractionError:
       "No pudimos extraer suficiente texto fiable de esta página. Comprueba que sea pública e intenta con otra fuente.",
+    investigationError:
+      "No se pudo completar la investigación porque el servicio de análisis no estaba disponible.",
     partialNotice:
       "La fuente se extrajo correctamente. La investigación factual continuará cuando se habilite el motor de investigación.",
     analyzedWords: "Palabras analizadas",
@@ -133,6 +137,8 @@ export const messages = {
     reportFailed: "L’extraction n’a pas pu être terminée",
     extractionError:
       "Nous n’avons pas pu extraire assez de texte fiable de cette page. Vérifiez qu’elle est publique et essayez une autre source.",
+    investigationError:
+      "L’enquête n’a pas pu être terminée car le service d’analyse était indisponible.",
     partialNotice:
       "La source a été extraite. La recherche factuelle continuera lorsque le moteur d’enquête sera activé.",
     analyzedWords: "Mots analysés",
@@ -182,6 +188,8 @@ export const messages = {
     reportFailed: "Não foi possível concluir a extração",
     extractionError:
       "Não foi possível extrair texto confiável suficiente desta página. Verifique se ela é pública e tente outra fonte.",
+    investigationError:
+      "Não foi possível concluir a investigação porque o serviço de análise estava indisponível.",
     partialNotice:
       "A fonte foi extraída com sucesso. A pesquisa factual continuará quando o mecanismo de investigação estiver ativo.",
     analyzedWords: "Palavras analisadas",

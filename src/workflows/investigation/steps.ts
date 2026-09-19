@@ -1,4 +1,7 @@
 import { messages } from "../../lib/i18n";
+import { GatewayClaimIdentifier } from "../../server/claims/gateway-identifier";
+import { prioritizeClaims } from "../../server/claims/prioritize";
+import { ClaimsRepository } from "../../server/claims/repository";
 import { SafeRemoteDocumentFetcher } from "../../server/ingestion/public-url";
 import { extractReadableContent } from "../../server/ingestion/readable-content";
 import { NeonReportsRepository } from "../../server/reports/neon-repository";
@@ -40,9 +43,46 @@ export async function failQueuedInvestigation(reportId: string) {
   const queue = new ResearchQueueRepository();
   const source = await queue.getSource(reportId);
   await new NeonReportsRepository().markFailed(reportId, {
-    code: "extraction_failed",
-    publicMessage: messages[source?.reportLocale ?? "en"].extractionError,
+    code: "investigation_failed",
+    publicMessage: messages[source?.reportLocale ?? "en"].investigationError,
   });
+}
+
+export async function identifyQueuedClaims(
+  reportId: string,
+  workflowRunId: string,
+) {
+  "use step";
+  const queue = new ResearchQueueRepository();
+  const claims = new ClaimsRepository();
+  const input = await claims.getIdentificationInput(reportId);
+  if (!input) throw new Error("Claim identification input is unavailable");
+
+  let heartbeatError: unknown;
+  const heartbeat = setInterval(() => {
+    void queue.heartbeat(reportId, workflowRunId).catch((error: unknown) => {
+      heartbeatError = error;
+    });
+  }, 20_000);
+  try {
+    const result = await new GatewayClaimIdentifier().identify({
+      text: input.text,
+      reportLocale: input.reportLocale,
+      reportId,
+    });
+    if (heartbeatError) throw heartbeatError;
+    if (!(await queue.heartbeat(reportId, workflowRunId))) {
+      throw new Error("Research lease expired during claim identification");
+    }
+    const prioritized = prioritizeClaims(
+      input.text,
+      result.claims,
+      input.maxClaims,
+    );
+    await claims.persistIdentification(reportId, prioritized, result);
+  } finally {
+    clearInterval(heartbeat);
+  }
 }
 
 export async function releaseResearchLease(
