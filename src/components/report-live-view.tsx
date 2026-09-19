@@ -2,6 +2,7 @@
 
 import {
   Campana,
+  Compartir,
   EnlaceExterno,
   Sincronizar,
 } from "@mteherandev/colombia-icons-react";
@@ -34,6 +35,7 @@ function statusLabel(report: PublicReport, locale: SupportedLocale) {
 }
 
 type NotificationState = "idle" | "enabled" | "denied" | "unavailable";
+type ShareState = "idle" | "shared" | "copied" | "error";
 
 export function ReportLiveView({
   initialReport,
@@ -50,6 +52,7 @@ export function ReportLiveView({
   const [connectionInterrupted, setConnectionInterrupted] = useState(false);
   const [notificationState, setNotificationState] =
     useState<NotificationState>("idle");
+  const [shareState, setShareState] = useState<ShareState>("idle");
   const reportRef = useRef(initialReport);
   const sequenceRef = useRef(0);
   const notificationArmedRef = useRef(false);
@@ -202,6 +205,30 @@ export function ReportLiveView({
     setNotificationState("enabled");
   };
 
+  const shareReport = async () => {
+    const shareData = {
+      title: report.extractedTitle ?? copy.reportTitle,
+      text: copy.shareText,
+      url: window.location.href,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setShareState("shared");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareData.url);
+      setShareState("copied");
+    } catch {
+      setShareState("error");
+    }
+  };
+
   const ready = report.status === "partial" || report.status === "completed";
 
   return (
@@ -225,6 +252,19 @@ export function ReportLiveView({
             }).format(new Date(report.createdAt))}
           </time>
         </p>
+        <div className="share-report-action">
+          <button type="button" onClick={shareReport}>
+            <Compartir size={20} aria-hidden="true" />
+            {shareState === "shared"
+              ? copy.reportShared
+              : shareState === "copied"
+                ? copy.reportLinkCopied
+                : copy.shareReport}
+          </button>
+          {shareState === "error" ? (
+            <p role="alert">{copy.shareError}</p>
+          ) : null}
+        </div>
       </section>
 
       {!isTerminalStatus(report.status) ? (

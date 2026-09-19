@@ -3,6 +3,7 @@
 import {
   Alerta,
   Cancelar,
+  ChevronAbajo,
   CircleCheck,
   EnlaceExterno,
   Informacion,
@@ -10,7 +11,7 @@ import {
   RelojArena,
   Sincronizar,
 } from "@mteherandev/colombia-icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import type {
   PublicReportClaim,
@@ -26,6 +27,13 @@ const readerCopy = {
     partial: "Partial",
     conclusive: "Conclusive",
     inconclusive: "Inconclusive",
+    conclusiveSummary:
+      "The report reached an overall conclusion because enough weighted evidence was found and every primary claim has a conclusion. This does not mean every statement is true; review each claim and source below.",
+    inconclusiveSummary:
+      "The report remains inconclusive because the available evidence does not cover enough of the source for an overall result. Claim-level findings are still shown below, while unresolved claims stay explicitly excluded.",
+    partialSummary:
+      "This is a partial result because the investigation ended before every selected claim could be evaluated. The findings below remain auditable, but they do not represent the whole source.",
+    resultExplanation: "What this result means",
     passages: "Context passages",
     claim: "Claim",
     verdict: "Verdict",
@@ -46,6 +54,8 @@ const readerCopy = {
     contribution: "Contribution",
     included: "Included",
     excluded: "Excluded",
+    showMoreClaims: "Show {count} more uninvestigated claims",
+    showFewerClaims: "Hide additional uninvestigated claims",
     lowCoverage:
       "The index is withheld because weighted coverage is below 60%.",
     primaryMissing:
@@ -88,6 +98,13 @@ const readerCopy = {
     partial: "Parcial",
     conclusive: "Concluyente",
     inconclusive: "Inconcluso",
+    conclusiveSummary:
+      "El informe alcanzó un resultado general porque encontró suficiente evidencia ponderada y todas las afirmaciones principales tienen una conclusión. Esto no significa que cada frase sea verdadera; revisa cada afirmación y sus fuentes.",
+    inconclusiveSummary:
+      "El informe permanece inconcluso porque la evidencia disponible no cubre suficiente contenido para sostener un resultado general. Los hallazgos por afirmación aparecen abajo y lo no resuelto queda excluido explícitamente.",
+    partialSummary:
+      "Este es un resultado parcial porque la investigación terminó antes de evaluar todas las afirmaciones seleccionadas. Los hallazgos disponibles siguen siendo auditables, pero no representan toda la fuente.",
+    resultExplanation: "Qué significa este resultado",
     passages: "Pasajes de contexto",
     claim: "Afirmación",
     verdict: "Veredicto",
@@ -109,6 +126,8 @@ const readerCopy = {
     contribution: "Aporte",
     included: "Incluida",
     excluded: "Excluida",
+    showMoreClaims: "Mostrar {count} afirmaciones no investigadas más",
+    showFewerClaims: "Ocultar afirmaciones no investigadas adicionales",
     lowCoverage:
       "El índice no se publica porque la cobertura ponderada es menor al 60 %.",
     primaryMissing:
@@ -152,6 +171,13 @@ const readerCopy = {
     partial: "Partiel",
     conclusive: "Concluant",
     inconclusive: "Non concluant",
+    conclusiveSummary:
+      "Le rapport aboutit à un résultat global car les preuves pondérées sont suffisantes et chaque affirmation principale a une conclusion. Cela ne signifie pas que chaque phrase est vraie ; examinez chaque affirmation et ses sources.",
+    inconclusiveSummary:
+      "Le rapport reste non concluant car les preuves disponibles ne couvrent pas assez la source pour établir un résultat global. Les constats par affirmation restent visibles et les points non résolus sont explicitement exclus.",
+    partialSummary:
+      "Ce résultat est partiel car l’enquête s’est terminée avant l’évaluation de toutes les affirmations sélectionnées. Les constats disponibles restent auditables, mais ne représentent pas toute la source.",
+    resultExplanation: "Ce que signifie ce résultat",
     passages: "Passages de contexte",
     claim: "Affirmation",
     verdict: "Verdict",
@@ -172,6 +198,8 @@ const readerCopy = {
     contribution: "Contribution",
     included: "Incluse",
     excluded: "Exclue",
+    showMoreClaims: "Afficher {count} affirmations non étudiées de plus",
+    showFewerClaims: "Masquer les affirmations non étudiées supplémentaires",
     lowCoverage:
       "L’indice n’est pas publié car la couverture pondérée est inférieure à 60 %.",
     primaryMissing:
@@ -215,6 +243,13 @@ const readerCopy = {
     partial: "Parcial",
     conclusive: "Conclusivo",
     inconclusive: "Inconclusivo",
+    conclusiveSummary:
+      "O relatório chegou a um resultado geral porque encontrou evidências ponderadas suficientes e todas as afirmações principais têm uma conclusão. Isso não significa que cada frase seja verdadeira; revise cada afirmação e suas fontes.",
+    inconclusiveSummary:
+      "O relatório permanece inconclusivo porque as evidências disponíveis não cobrem conteúdo suficiente para sustentar um resultado geral. Os achados por afirmação aparecem abaixo e os pontos não resolvidos ficam explicitamente excluídos.",
+    partialSummary:
+      "Este é um resultado parcial porque a investigação terminou antes de avaliar todas as afirmações selecionadas. Os achados disponíveis continuam auditáveis, mas não representam toda a fonte.",
+    resultExplanation: "O que este resultado significa",
     passages: "Trechos de contexto",
     claim: "Afirmação",
     verdict: "Veredito",
@@ -236,6 +271,8 @@ const readerCopy = {
     contribution: "Contribuição",
     included: "Incluída",
     excluded: "Excluída",
+    showMoreClaims: "Mostrar mais {count} afirmações não investigadas",
+    showFewerClaims: "Ocultar afirmações não investigadas adicionais",
     lowCoverage:
       "O índice não é publicado porque a cobertura ponderada está abaixo de 60%.",
     primaryMissing:
@@ -296,6 +333,14 @@ function claimVerdict(claim: PublicReportClaim) {
   return claim.verdict ?? "pending";
 }
 
+export function orderClaimsForDisplay(claims: PublicReportClaim[]) {
+  return [...claims].sort((left, right) => {
+    const leftPending = left.verdict === null ? 1 : 0;
+    const rightPending = right.verdict === null ? 1 : 0;
+    return leftPending - rightPending || left.ordinal - right.ordinal;
+  });
+}
+
 function LocalDate({
   value,
   locale,
@@ -335,15 +380,29 @@ export function ReportReader({
   details: PublicReportDetails;
 }) {
   const copy = readerCopy[locale];
-  const [selectedId, setSelectedId] = useState(details.claims[0]?.id ?? null);
+  const orderedClaims = useMemo(
+    () => orderClaimsForDisplay(details.claims),
+    [details.claims],
+  );
+  const investigatedClaims = orderedClaims.filter(
+    (claim) => claim.verdict !== null,
+  );
+  const uninvestigatedClaims = orderedClaims.filter(
+    (claim) => claim.verdict === null,
+  );
+  const initialClaims = [
+    ...investigatedClaims,
+    ...uninvestigatedClaims.slice(0, 3),
+  ];
+  const [selectedId, setSelectedId] = useState(initialClaims[0]?.id ?? null);
+  const [showAllUninvestigated, setShowAllUninvestigated] = useState(false);
   useEffect(() => {
-    if (!details.claims.some((claim) => claim.id === selectedId)) {
-      setSelectedId(details.claims[0]?.id ?? null);
+    if (!orderedClaims.some((claim) => claim.id === selectedId)) {
+      setSelectedId(orderedClaims[0]?.id ?? null);
     }
-  }, [details.claims, selectedId]);
+  }, [orderedClaims, selectedId]);
   const selected =
-    details.claims.find((claim) => claim.id === selectedId) ??
-    details.claims[0];
+    orderedClaims.find((claim) => claim.id === selectedId) ?? orderedClaims[0];
   const outcome =
     details.outcome === "partial"
       ? copy.partial
@@ -357,28 +416,46 @@ export function ReportReader({
     : (details.evidenceCoverage ?? 0) < 60
       ? copy.lowCoverage
       : copy.primaryMissing;
+  const outcomeSummary =
+    details.outcome === "partial"
+      ? copy.partialSummary
+      : details.outcome === "conclusive"
+        ? copy.conclusiveSummary
+        : copy.inconclusiveSummary;
+  const hiddenUninvestigated = Math.max(uninvestigatedClaims.length - 3, 0);
+
+  const renderClaim = (claim: PublicReportClaim) => {
+    const verdict = claimVerdict(claim);
+    return (
+      <li key={claim.id}>
+        <button
+          type="button"
+          className={`claim-passage verdict-${verdict} ${selected?.id === claim.id ? "selected" : ""}`}
+          aria-pressed={selected?.id === claim.id}
+          onClick={() => setSelectedId(claim.id)}
+        >
+          <span className="claim-number">
+            {copy.claim} {claim.ordinal}
+          </span>
+          <HighlightedPassage claim={claim} />
+          <span className="verdict-label">
+            <VerdictIcon verdict={verdict} />
+            {copy.verdicts[verdict]}
+          </span>
+        </button>
+      </li>
+    );
+  };
 
   return (
     <>
-      <section className="report-scoreboard" aria-label={outcome}>
-        <article>
-          <span>{copy.supportIndex}</span>
-          <strong>
-            {details.supportIndex === null
-              ? copy.unavailable
-              : `${details.supportIndex}%`}
-          </strong>
-          {details.supportIndex === null ? <p>{absenceReason}</p> : null}
-        </article>
-        <article>
-          <span>{copy.coverage}</span>
-          <strong>
-            {details.evidenceCoverage === null
-              ? "—"
-              : `${details.evidenceCoverage}%`}
-          </strong>
-          <p>{outcome}</p>
-        </article>
+      <section className="report-outcome-summary" aria-label={outcome}>
+        <span>{copy.resultExplanation}</span>
+        <h2>{outcome}</h2>
+        <p>{outcomeSummary}</p>
+        {details.outcome !== "conclusive" ? (
+          <p className="result-reason">{absenceReason}</p>
+        ) : null}
       </section>
 
       {details.claims.length > 0 && selected ? (
@@ -386,29 +463,39 @@ export function ReportReader({
           <div className="passage-column">
             <h2>{copy.passages}</h2>
             <ol className="claim-passage-list">
-              {details.claims.map((claim) => {
-                const verdict = claimVerdict(claim);
-                return (
-                  <li key={claim.id}>
-                    <button
-                      type="button"
-                      className={`claim-passage verdict-${verdict} ${selected.id === claim.id ? "selected" : ""}`}
-                      aria-pressed={selected.id === claim.id}
-                      onClick={() => setSelectedId(claim.id)}
-                    >
-                      <span className="claim-number">
-                        {copy.claim} {claim.ordinal}
-                      </span>
-                      <HighlightedPassage claim={claim} />
-                      <span className="verdict-label">
-                        <VerdictIcon verdict={verdict} />
-                        {copy.verdicts[verdict]}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
+              {investigatedClaims.map(renderClaim)}
+              {uninvestigatedClaims.slice(0, 3).map(renderClaim)}
             </ol>
+            {hiddenUninvestigated > 0 ? (
+              <>
+                <div
+                  className={`pending-claims-overflow ${showAllUninvestigated ? "expanded" : ""}`}
+                  aria-hidden={!showAllUninvestigated}
+                >
+                  <div>
+                    <ol className="claim-passage-list pending-claim-list">
+                      {uninvestigatedClaims.slice(3).map(renderClaim)}
+                    </ol>
+                  </div>
+                </div>
+                <button
+                  className="pending-claims-toggle"
+                  type="button"
+                  aria-expanded={showAllUninvestigated}
+                  onClick={() =>
+                    setShowAllUninvestigated((current) => !current)
+                  }
+                >
+                  {showAllUninvestigated
+                    ? copy.showFewerClaims
+                    : copy.showMoreClaims.replace(
+                        "{count}",
+                        String(hiddenUninvestigated),
+                      )}
+                  <ChevronAbajo aria-hidden="true" size={18} />
+                </button>
+              </>
+            ) : null}
           </div>
 
           <article className="claim-detail" aria-live="polite">
@@ -501,6 +588,28 @@ export function ReportReader({
           </article>
         </section>
       ) : null}
+
+      <section className="report-metrics-footer" aria-label={copy.formula}>
+        <dl>
+          <div>
+            <dt>{copy.coverage}</dt>
+            <dd>
+              {details.evidenceCoverage === null
+                ? "—"
+                : `${details.evidenceCoverage}%`}
+            </dd>
+          </div>
+          <div>
+            <dt>{copy.supportIndex}</dt>
+            <dd>
+              {details.supportIndex === null
+                ? copy.unavailable
+                : `${details.supportIndex}%`}
+            </dd>
+          </div>
+        </dl>
+        {details.supportIndex === null ? <p>{absenceReason}</p> : null}
+      </section>
 
       <details className="score-formula">
         <summary>{copy.formula}</summary>
