@@ -163,7 +163,7 @@ export function HomeVerifier({
               <span>{copy.imageLabel}</span>
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
                 required
                 onChange={(event) => {
                   setImage(event.target.files?.[0] ?? null);

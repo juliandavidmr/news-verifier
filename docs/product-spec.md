@@ -6,7 +6,7 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 
 - Cada investigación recibe exactamente una entrada: una URL o una imagen, nunca ambas.
 - Las URLs deben apuntar a páginas públicas accesibles sin autenticación ni paywall.
-- Las imágenes admitidas inicialmente son capturas PNG, JPEG o WebP que contengan texto.
+- Las imágenes admitidas inicialmente son capturas PNG, JPG/JPEG o WebP que contengan texto.
 - Se admiten artículos, comunicados, blogs y publicaciones sociales capturadas como imagen.
 - PDF, audio y video quedan fuera del MVP.
 - El contenido analizado puede estar en cualquier idioma.
@@ -143,7 +143,7 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - El estado administrado de Workflow no se usa como almacenamiento permanente del producto.
 - Las capturas no se guardan en base de datos ni object storage: el blob se envía al backend, se valida, se procesa mediante OCR y se descarta.
 - El workflow recibe solamente el texto extraído y los metadatos necesarios, nunca el archivo original.
-- Las capturas admitidas son PNG, JPEG o WebP de hasta 4 MB y 20 megapíxeles.
+- Las capturas admitidas son PNG, JPG/JPEG o WebP de hasta 4 MB y 20 megapíxeles.
 - El backend valida tipo declarado, firma real, dimensiones y orientación antes del OCR; los archivos que superan los límites se rechazan sin almacenarse.
 - El OCR usa Tesseract.js 7 con `tessdata_fast` dentro de una Vercel Function Node.
 - El OCR ocurre durante la ingesta, antes de la cola, con un máximo de 60 segundos; el blob permanece solo en memoria y se descarta al terminar.

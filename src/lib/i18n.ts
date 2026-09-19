@@ -15,7 +15,7 @@ export const messages = {
     inputType: "Input type",
     linkLabel: "Public page URL",
     linkPlaceholder: "https://example.com/article",
-    imageLabel: "PNG, JPEG or WebP",
+    imageLabel: "PNG, JPG/JPEG or WebP",
     imageHelp: "Maximum 4 MB · clear, readable text",
     submit: "Verify this source",
     submitting: "Creating report…",
@@ -34,7 +34,7 @@ export const messages = {
     globalQuotaReached:
       "Today’s shared verification capacity has been reached. Try again tomorrow.",
     imageTooLarge: "The screenshot must be 4 MB or smaller.",
-    invalidImage: "Choose a valid PNG, JPEG or WebP screenshot.",
+    invalidImage: "Choose a valid PNG, JPG/JPEG or WebP screenshot.",
     ocrQualityInsufficient:
       "We could not read enough reliable text from this screenshot. Try a clearer image.",
     ocrTimeout:
@@ -92,7 +92,7 @@ export const messages = {
     inputType: "Tipo de entrada",
     linkLabel: "URL de la página pública",
     linkPlaceholder: "https://ejemplo.com/articulo",
-    imageLabel: "PNG, JPEG o WebP",
+    imageLabel: "PNG, JPG/JPEG o WebP",
     imageHelp: "Máximo 4 MB · texto claro y legible",
     submit: "Verificar esta fuente",
     submitting: "Creando informe…",
@@ -111,7 +111,7 @@ export const messages = {
     globalQuotaReached:
       "Se alcanzó la capacidad compartida de verificaciones de hoy. Inténtalo mañana.",
     imageTooLarge: "La captura debe pesar 4 MB o menos.",
-    invalidImage: "Elige una captura PNG, JPEG o WebP válida.",
+    invalidImage: "Elige una captura PNG, JPG/JPEG o WebP válida.",
     ocrQualityInsufficient:
       "No pudimos leer suficiente texto fiable en esta captura. Prueba con una imagen más clara.",
     ocrTimeout:
@@ -171,7 +171,7 @@ export const messages = {
     inputType: "Type d’entrée",
     linkLabel: "URL de la page publique",
     linkPlaceholder: "https://exemple.com/article",
-    imageLabel: "PNG, JPEG ou WebP",
+    imageLabel: "PNG, JPG/JPEG ou WebP",
     imageHelp: "4 Mo maximum · texte clair et lisible",
     submit: "Vérifier cette source",
     submitting: "Création du rapport…",
@@ -190,7 +190,7 @@ export const messages = {
     globalQuotaReached:
       "La capacité partagée de vérification du jour est atteinte. Réessayez demain.",
     imageTooLarge: "La capture doit peser 4 Mo ou moins.",
-    invalidImage: "Choisissez une capture PNG, JPEG ou WebP valide.",
+    invalidImage: "Choisissez une capture PNG, JPG/JPEG ou WebP valide.",
     ocrQualityInsufficient:
       "Nous n’avons pas pu lire assez de texte fiable sur cette capture. Essayez une image plus nette.",
     ocrTimeout:
@@ -250,7 +250,7 @@ export const messages = {
     inputType: "Tipo de entrada",
     linkLabel: "URL da página pública",
     linkPlaceholder: "https://exemplo.com/artigo",
-    imageLabel: "PNG, JPEG ou WebP",
+    imageLabel: "PNG, JPG/JPEG ou WebP",
     imageHelp: "Máximo de 4 MB · texto claro e legível",
     submit: "Verificar esta fonte",
     submitting: "Criando relatório…",
@@ -269,7 +269,7 @@ export const messages = {
     globalQuotaReached:
       "A capacidade compartilhada de verificações de hoje foi atingida. Tente novamente amanhã.",
     imageTooLarge: "A captura deve ter no máximo 4 MB.",
-    invalidImage: "Escolha uma captura PNG, JPEG ou WebP válida.",
+    invalidImage: "Escolha uma captura PNG, JPG/JPEG ou WebP válida.",
     ocrQualityInsufficient:
       "Não foi possível ler texto confiável suficiente nesta captura. Tente uma imagem mais nítida.",
     ocrTimeout:

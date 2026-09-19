@@ -3,7 +3,11 @@ export const imageUploadLimits = {
   maxPixels: 20_000_000,
 } as const;
 
-export type AcceptedImageMime = "image/png" | "image/jpeg" | "image/webp";
+export type AcceptedImageMime =
+  | "image/png"
+  | "image/jpeg"
+  | "image/jpg"
+  | "image/webp";
 
 export class ImageValidationError extends Error {
   constructor(
@@ -175,9 +179,11 @@ export function validateImageUpload(bytes: Uint8Array, declaredMime: string) {
   if (bytes.byteLength > imageUploadLimits.maxBytes) {
     throw new ImageValidationError("image_too_large");
   }
+  const normalizedMime =
+    declaredMime === "image/jpg" ? "image/jpeg" : declaredMime;
   if (
     !(["image/png", "image/jpeg", "image/webp"] as string[]).includes(
-      declaredMime,
+      normalizedMime,
     )
   ) {
     throw new ImageValidationError("unsupported_image");
@@ -185,7 +191,7 @@ export function validateImageUpload(bytes: Uint8Array, declaredMime: string) {
   const metadata =
     pngDimensions(bytes) ?? jpegDimensions(bytes) ?? webpDimensions(bytes);
   if (!metadata) throw new ImageValidationError("invalid_image");
-  if (metadata.mime !== declaredMime) {
+  if (metadata.mime !== normalizedMime) {
     throw new ImageValidationError("image_type_mismatch");
   }
   if (
