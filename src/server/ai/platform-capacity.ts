@@ -48,15 +48,32 @@ export class PlatformCapacityError extends Error {
 }
 
 export function capacityFailure(error: unknown) {
-  if (!APICallError.isInstance(error)) return null;
-  if (![402, 403, 429, 503].includes(error.statusCode ?? 0)) return null;
-  const retryAfter = Number(error.responseHeaders?.["retry-after"] ?? 0);
+  const wrappedCause =
+    typeof error === "object" && error !== null && "cause" in error
+      ? error.cause
+      : null;
+  const apiError = APICallError.isInstance(error)
+    ? error
+    : APICallError.isInstance(wrappedCause)
+      ? wrappedCause
+      : null;
+  const statusCode =
+    apiError?.statusCode ??
+    (typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    typeof error.statusCode === "number"
+      ? error.statusCode
+      : 0);
+  if (![402, 403, 429, 503].includes(statusCode ?? 0)) return null;
+  const retryAfter = Number(apiError?.responseHeaders?.["retry-after"] ?? 0);
+  const responseBody = apiError?.responseBody ?? "";
   return {
     code:
-      error.statusCode === 403 &&
-      error.responseBody?.includes("customer_verification_required")
+      statusCode === 403 &&
+      responseBody.includes("customer_verification_required")
         ? "customer_verification_required"
-        : `http_${error.statusCode}`,
+        : `http_${statusCode}`,
     retryAfterSeconds:
       Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 300,
   };

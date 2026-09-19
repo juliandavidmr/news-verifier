@@ -17,17 +17,17 @@ describe("platform capacity classification", () => {
   });
 
   it("identifies account verification without interpreting it as paid fallback", () => {
-    const failure = capacityFailure(
-      new APICallError({
-        message: "verification required",
-        url: "https://ai-gateway.vercel.sh/v1",
-        requestBodyValues: {},
-        statusCode: 403,
-        responseBody: "customer_verification_required",
-      }),
-    );
-    expect(failure).toMatchObject({
-      code: "customer_verification_required",
+    const apiError = new APICallError({
+      message: "verification required",
+      url: "https://ai-gateway.vercel.sh/v1",
+      requestBodyValues: {},
+      statusCode: 403,
+      responseBody: "customer_verification_required",
     });
+    for (const error of [apiError, { statusCode: 403, cause: apiError }]) {
+      expect(capacityFailure(error)).toMatchObject({
+        code: "customer_verification_required",
+      });
+    }
   });
 });

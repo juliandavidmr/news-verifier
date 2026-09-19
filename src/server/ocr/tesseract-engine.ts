@@ -3,20 +3,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createWorker, OEM, type Worker } from "tesseract.js";
 import type { ExtractedContent } from "../../domain/reports";
+import { OcrProcessingError } from "./ocr-errors";
+import { assessOcrQuality } from "./ocr-quality";
+
+export { OcrProcessingError } from "./ocr-errors";
 
 const languages = ["eng", "spa", "fra", "por"] as const;
 const languageSet = languages.join("+");
-const maximumWords = 2_000;
 const deadlineMs = 60_000;
-
-export class OcrProcessingError extends Error {
-  constructor(
-    readonly code: "ocr_timeout" | "ocr_quality_insufficient" | "ocr_failed",
-  ) {
-    super(code);
-    this.name = "OcrProcessingError";
-  }
-}
 
 export type OcrResult = ExtractedContent & {
   confidence: number;
@@ -57,40 +51,6 @@ async function prepareLanguageDirectory() {
   return directory;
 }
 
-function normalizeOcrText(value: string) {
-  return value
-    .normalize("NFKC")
-    .replaceAll(/\r\n?/gu, "\n")
-    .split(/\n+/u)
-    .map((line) => line.replaceAll(/\s+/gu, " ").trim())
-    .filter(Boolean)
-    .join("\n\n")
-    .trim();
-}
-
-function assessAndLimit(text: string, confidence: number) {
-  const normalized = normalizeOcrText(text);
-  const words = normalized.match(/\S+/gu) ?? [];
-  const visible = normalized.match(/[\p{L}\p{N}]/gu)?.length ?? 0;
-  const suspicious = normalized.match(/[�□]/gu)?.length ?? 0;
-  if (
-    normalized.length < 80 ||
-    words.length < 8 ||
-    visible / Math.max(1, normalized.length) < 0.45 ||
-    suspicious / Math.max(1, normalized.length) > 0.02 ||
-    confidence < 35
-  ) {
-    throw new OcrProcessingError("ocr_quality_insufficient");
-  }
-  const analyzed = words.slice(0, maximumWords);
-  return {
-    text: analyzed.join(" "),
-    extractedWordCount: words.length,
-    analyzedWordCount: analyzed.length,
-    truncated: words.length > maximumWords,
-  };
-}
-
 export class TesseractOcrEngine {
   async recognize(bytes: Uint8Array): Promise<OcrResult> {
     const languageDirectory = await prepareLanguageDirectory();
@@ -123,7 +83,10 @@ export class TesseractOcrEngine {
     });
     try {
       const result = await Promise.race([work, timeout]);
-      const limited = assessAndLimit(result.data.text, result.data.confidence);
+      const limited = assessOcrQuality(
+        result.data.text,
+        result.data.confidence,
+      );
       return {
         canonicalUrl: "",
         title: null,

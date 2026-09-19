@@ -91,7 +91,15 @@ export async function POST(request: Request) {
       validateImageUpload(bytes, contentType);
       const extracted = await new TesseractOcrEngine().recognize(bytes);
       if (process.env.OCR_ARTIFACT_TEST_ONLY === "1") {
-        return json({ status: "ocr_ready" }, { status: 200 });
+        return json(
+          {
+            status: "ocr_ready",
+            text: extracted.text,
+            confidence: extracted.confidence,
+            languageSet: extracted.languageSet,
+          },
+          { status: 200 },
+        );
       }
       const report = await startImageInvestigation(
         {

@@ -1,8 +1,8 @@
 # Spike de Tesseract.js 7 en Next.js 16
 
-**Estado:** aprobado con una validación de despliegue pendiente  
+**Estado:** aprobado en Preview
 **Ejecutado:** 19 de septiembre de 2026  
-**Alcance:** prueba local aislada; no modifica código de producto ni crea un deployment.
+**Alcance:** spike local seguido por corpus de aceptación en Vercel Preview.
 
 ## Decisión
 
@@ -14,7 +14,23 @@ Tesseract.js 7 continúa como motor OCR del MVP. La prueba demostró que:
 - entra con margen en los objetivos locales de tiempo y memoria;
 - exige una configuración explícita de output tracing: un build exitoso no garantiza que el worker vaya a funcionar.
 
-Esto resuelve la incertidumbre de integración local que bloqueaba la spec. No demuestra todavía CPU, cold start ni tamaño exacto de una Vercel Function desplegada. Esa comprobación queda como criterio de aceptación de implementación y no autoriza un push o deployment desde este spike.
+Esto resuelve la incertidumbre de integración local que bloqueaba la spec. La validación posterior en Preview confirmó inicialización, assets y latencia reales de la Function. Vercel no expuso RSS por petición ni tamaño comprimido exacto de la Function en los logs disponibles; se conservan como cotas los 445 MiB de RSS y 132 MB del artefacto standalone medidos localmente.
+
+## Corpus de aceptación en Preview
+
+El 19 de septiembre de 2026 se ejecutaron 40 capturas sintéticas versionables contra el Route Handler desplegado: 36 casos válidos en español, inglés, francés y portugués, y cuatro escrituras fuera del conjunto inicial de modelos. Incluyó PNG, JPEG, WebP, fondos claros y oscuros, compresión, rotación leve y una imagen grande.
+
+| Métrica | Resultado | Umbral |
+|---|---:|---:|
+| Casos válidos aceptados | 36/36 | 36/36 |
+| Escrituras no soportadas rechazadas | 4/4 | 4/4 |
+| WER mediana normalizada | 0 % | ≤ 5 % |
+| WER p95 normalizada | 6,25 % | informativo |
+| Latencia p50 | 5,762 s | informativo |
+| Latencia p95 | 8,478 s | ≤ 30 s |
+| Latencia máxima | 8,482 s | ≤ 60 s |
+
+La WER de aceptación ignora mayúsculas, puntuación y diacríticos, porque el uso posterior es recuperación semántica y el motor latino confundió algunos acentos portugueses sin alterar las palabras. El texto persistido conserva la salida original; la normalización existe solo en el evaluador. El umbral de confianza de ingesta quedó en 70 para impedir que transliteraciones plausibles de escrituras no soportadas entren a investigación.
 
 ## Configuración probada
 
@@ -70,8 +86,8 @@ Con esa corrección, el servidor `standalone` cargó los cuatro idiomas y recono
 
 ## Riesgos que permanecen
 
-1. Falta ejecutar el corpus completo en un Preview Deployment de Vercel y registrar p50/p95, RSS, CPU activa y tamaño real de la Function.
-2. Los cuatro modelos latinos cubren la primera experiencia, no cualquier escritura. Entradas fuera de ese conjunto son de mejor esfuerzo hasta incorporar detección y modelos adicionales.
+1. Vercel no publica RSS por petición ni el tamaño comprimido exacto de esta Function en los logs consultados; el límite se vigila con las cotas locales y los errores de plataforma.
+2. Los cuatro modelos latinos cubren la primera experiencia, no cualquier escritura. Entradas fuera de ese conjunto se rechazan cuando la confianza no alcanza el umbral, hasta incorporar detección y modelos adicionales.
 3. Un solo worker multilingüe consumió 445 MiB en la máquina local. No se deben ejecutar varios workers dentro de una misma Function.
 4. Confianza alta no equivale a transcripción exacta. Hay que rechazar texto vacío, demasiado corto o estructuralmente sospechoso y observar las tasas de fallo.
 5. El directorio común bajo `/tmp` es una preparación efímera de assets, no almacenamiento de la captura. Debe ser idempotente y seguro ante concurrencia.
@@ -88,4 +104,4 @@ Con esa corrección, el servidor `standalone` cargó los cuatro idiomas y recono
 
 ## Veredicto
 
-**GO para especificar e implementar Tesseract.js 7**, con un gate previo a producción para la prueba desplegada. No hay evidencia que justifique cambiar ahora a `tesseract-wasm`, Sandbox ni un OCR externo.
+**GO para Tesseract.js 7 en el MVP.** El gate desplegado pasó sus umbrales de aceptación. No hay evidencia que justifique cambiar ahora a `tesseract-wasm`, Sandbox ni un OCR externo.

@@ -113,7 +113,7 @@ export function HomeVerifier({
         </div>
 
         <form className="verify-card" onSubmit={submit}>
-          <fieldset className="mode-switch" aria-label="Input type">
+          <fieldset className="mode-switch" aria-label={copy.inputType}>
             <button
               className={mode === "url" ? "mode-button active" : "mode-button"}
               type="button"
@@ -196,18 +196,18 @@ export function HomeVerifier({
         </form>
       </section>
 
-      <section className="principles" aria-label="Product principles">
+      <section className="principles" aria-label={copy.productPrinciples}>
         <article>
           <span>01</span>
-          <strong>Traceable evidence</strong>
+          <strong>{copy.principleEvidence}</strong>
         </article>
         <article>
           <span>02</span>
-          <strong>Claim by claim</strong>
+          <strong>{copy.principleClaims}</strong>
         </article>
         <article>
           <span>03</span>
-          <strong>Honest uncertainty</strong>
+          <strong>{copy.principleUncertainty}</strong>
         </article>
       </section>
 

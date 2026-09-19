@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getRequestLocale } from "../server/request-locale";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
     "Analyze claims in public pages and screenshots against traceable evidence.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    <html lang={await getRequestLocale()}>
       <body>{children}</body>
     </html>
   );
