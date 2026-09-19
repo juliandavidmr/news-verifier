@@ -28,7 +28,13 @@ export class InvestigationScenario {
         backgroundTasks: { defer: (task) => this.tasks.push(task) },
         createShortId: () => "scenario1234",
       },
-      { url, reportLocale: "en" },
+      {
+        url,
+        reportLocale: "en",
+        visitorKey: "scenario-visitor",
+        networkKey: "scenario-network",
+        idempotencyKey: "scenario-request",
+      },
     );
   }
 

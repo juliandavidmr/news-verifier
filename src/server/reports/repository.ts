@@ -10,10 +10,18 @@ export type CreateUrlReportInput = {
   shortId: string;
   sourceUrl: string;
   reportLocale: SupportedLocale;
+  visitorKey: string;
+  networkKey: string;
+  idempotencyKey: string;
+  usageDate?: string;
 };
 
+export type CreateUrlReportResult =
+  | { accepted: true; report: Report; replayed: boolean }
+  | { accepted: false; reason: "global" | "visitor" };
+
 export interface ReportsRepository {
-  createUrlReport(input: CreateUrlReportInput): Promise<Report>;
+  createUrlReport(input: CreateUrlReportInput): Promise<CreateUrlReportResult>;
   markExtracted(reportId: string, content: ExtractedContent): Promise<void>;
   markFailed(
     reportId: string,

@@ -1,6 +1,13 @@
-import { after } from "next/server";
+import { after, NextResponse } from "next/server";
 import { isSupportedLocale } from "../../../domain/reports";
-import { startUrlInvestigation } from "../../../server/application/start-url-investigation";
+import {
+  QuotaExceededError,
+  startUrlInvestigation,
+} from "../../../server/application/start-url-investigation";
+import {
+  resolveAnonymousIdentity,
+  visitorCookieName,
+} from "../../../server/identity/anonymous-visitor";
 import {
   RemoteContentError,
   SafeRemoteDocumentFetcher,
@@ -29,10 +36,29 @@ export async function POST(request: Request) {
     typeof body.url !== "string" ||
     body.url.length > 2_048 ||
     !("reportLocale" in body) ||
-    !isSupportedLocale(body.reportLocale)
+    !isSupportedLocale(body.reportLocale) ||
+    !("idempotencyKey" in body) ||
+    typeof body.idempotencyKey !== "string" ||
+    body.idempotencyKey.length < 8 ||
+    body.idempotencyKey.length > 128
   ) {
     return Response.json({ code: "invalid_request" }, { status: 400 });
   }
+
+  const identity = resolveAnonymousIdentity(request);
+  const json = (payload: unknown, init: ResponseInit) => {
+    const response = NextResponse.json(payload, init);
+    if (identity.cookie) {
+      response.cookies.set(visitorCookieName, identity.cookie, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 365,
+        path: "/",
+      });
+    }
+    return response;
+  };
 
   try {
     const report = await startUrlInvestigation(
@@ -41,17 +67,26 @@ export async function POST(request: Request) {
         fetcher: new SafeRemoteDocumentFetcher(),
         backgroundTasks: { defer: (task) => after(task) },
       },
-      { url: body.url, reportLocale: body.reportLocale },
+      {
+        url: body.url,
+        reportLocale: body.reportLocale,
+        visitorKey: identity.visitorKey,
+        networkKey: identity.networkKey,
+        idempotencyKey: body.idempotencyKey,
+      },
     );
 
-    return Response.json(
+    return json(
       { shortId: report.shortId, status: report.status },
       { status: 202, headers: { location: `/r/${report.shortId}` } },
     );
   } catch (error) {
-    if (error instanceof RemoteContentError) {
-      return Response.json({ code: error.code }, { status: 400 });
+    if (error instanceof QuotaExceededError) {
+      return json({ code: `${error.scope}_quota_reached` }, { status: 429 });
     }
-    return Response.json({ code: "internal_error" }, { status: 500 });
+    if (error instanceof RemoteContentError) {
+      return json({ code: error.code }, { status: 400 });
+    }
+    return json({ code: "internal_error" }, { status: 500 });
   }
 }

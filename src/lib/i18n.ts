@@ -24,6 +24,10 @@ export const messages = {
     language: "Language",
     genericError: "We could not start the investigation. Please try again.",
     invalidUrl: "Enter a valid public HTTP or HTTPS URL.",
+    visitorQuotaReached:
+      "This browser has reached today’s verification limit. Try again tomorrow.",
+    globalQuotaReached:
+      "Today’s shared verification capacity has been reached. Try again tomorrow.",
     reportTitle: "Investigation report",
     reportQueued: "Waiting for capacity",
     reportExtracting: "Extracting the main content",
@@ -69,6 +73,10 @@ export const messages = {
     language: "Idioma",
     genericError: "No pudimos iniciar la investigación. Inténtalo de nuevo.",
     invalidUrl: "Ingresa una URL pública HTTP o HTTPS válida.",
+    visitorQuotaReached:
+      "Este navegador alcanzó el límite de verificaciones de hoy. Inténtalo mañana.",
+    globalQuotaReached:
+      "Se alcanzó la capacidad compartida de verificaciones de hoy. Inténtalo mañana.",
     reportTitle: "Informe de investigación",
     reportQueued: "Esperando capacidad",
     reportExtracting: "Extrayendo el contenido principal",
@@ -114,6 +122,10 @@ export const messages = {
     language: "Langue",
     genericError: "Impossible de lancer l’enquête. Veuillez réessayer.",
     invalidUrl: "Saisissez une URL publique HTTP ou HTTPS valide.",
+    visitorQuotaReached:
+      "Ce navigateur a atteint la limite de vérifications du jour. Réessayez demain.",
+    globalQuotaReached:
+      "La capacité partagée de vérification du jour est atteinte. Réessayez demain.",
     reportTitle: "Rapport d’enquête",
     reportQueued: "En attente de capacité",
     reportExtracting: "Extraction du contenu principal",
@@ -159,6 +171,10 @@ export const messages = {
     language: "Idioma",
     genericError: "Não foi possível iniciar a investigação. Tente novamente.",
     invalidUrl: "Insira uma URL pública HTTP ou HTTPS válida.",
+    visitorQuotaReached:
+      "Este navegador atingiu o limite de verificações de hoje. Tente novamente amanhã.",
+    globalQuotaReached:
+      "A capacidade compartilhada de verificações de hoje foi atingida. Tente novamente amanhã.",
     reportTitle: "Relatório da investigação",
     reportQueued: "Aguardando capacidade",
     reportExtracting: "Extraindo o conteúdo principal",

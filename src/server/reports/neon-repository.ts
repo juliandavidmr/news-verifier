@@ -80,22 +80,30 @@ function firstRow<T>(rows: readonly unknown[]) {
 export class NeonReportsRepository implements ReportsRepository {
   async createUrlReport(input: CreateUrlReportInput) {
     const sql = getDatabase();
-    const payload = JSON.stringify({ status: "extracting" });
     const rows = await sql.query(
-      `WITH inserted AS (
-        INSERT INTO reports (short_id, source_kind, source_url, report_locale, status)
-        VALUES ($1, 'url', $2, $3, 'extracting')
-        RETURNING *
-      ), event AS (
-        INSERT INTO report_events (report_id, sequence, stage, public_payload)
-        SELECT id, 1, 'extracting', $4::jsonb FROM inserted
-      )
-      SELECT * FROM inserted`,
-      [input.shortId, input.sourceUrl, input.reportLocale, payload],
+      `SELECT accept_url_investigation($1, $2, $3, $4, $5, $6, COALESCE($7::date, current_date)) AS decision`,
+      [
+        input.shortId,
+        input.sourceUrl,
+        input.reportLocale,
+        input.visitorKey,
+        input.networkKey,
+        input.idempotencyKey,
+        input.usageDate ?? null,
+      ],
     );
-    const row = firstRow<ReportRow>(rows as unknown[]);
-    if (!row) throw new Error("Report creation returned no row");
-    return mapReport(row);
+    const row = firstRow<{
+      decision:
+        | { accepted: false; reason: "global" | "visitor" }
+        | { accepted: true; replayed: boolean; report: ReportRow };
+    }>(rows as unknown[]);
+    if (!row) throw new Error("Report admission returned no row");
+    if (!row.decision.accepted) return row.decision;
+    return {
+      accepted: true as const,
+      replayed: row.decision.replayed,
+      report: mapReport(row.decision.report),
+    };
   }
 
   async markExtracted(reportId: string, content: ExtractedContent) {
@@ -123,6 +131,10 @@ export class NeonReportsRepository implements ReportsRepository {
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'extracting'
         RETURNING id, next_event_sequence - 1 AS sequence
+      ), consumed AS (
+        UPDATE quota_reservations
+        SET status = 'consumed', updated_at = now()
+        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
       )
       INSERT INTO report_events (report_id, sequence, stage, public_payload)
       SELECT id, sequence, 'partial', $9::jsonb FROM updated`,
@@ -161,6 +173,18 @@ export class NeonReportsRepository implements ReportsRepository {
             next_event_sequence = next_event_sequence + 1
         WHERE id = $1 AND status = 'extracting'
         RETURNING id, next_event_sequence - 1 AS sequence
+      ), refunded AS (
+        UPDATE quota_reservations
+        SET status = 'refunded', refund_reason = $2, updated_at = now()
+        WHERE report_id IN (SELECT id FROM updated) AND status = 'reserved'
+        RETURNING visitor_key, usage_date
+      ), released AS (
+        UPDATE daily_usage usage
+        SET used_count = GREATEST(0, used_count - 1), updated_at = now()
+        FROM refunded
+        WHERE usage.usage_date = refunded.usage_date
+          AND usage.scope = 'visitor'
+          AND usage.scope_key = refunded.visitor_key
       )
       INSERT INTO report_events (report_id, sequence, stage, public_payload)
       SELECT id, sequence, 'failed', $4::jsonb FROM updated`,

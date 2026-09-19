@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
 
@@ -19,6 +19,7 @@ export function HomeVerifier({
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const idempotencyKey = useRef(crypto.randomUUID());
   const copy = messages[locale];
 
   useEffect(() => {
@@ -41,7 +42,11 @@ export function HomeVerifier({
       const response = await fetch("/api/reports", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ url, reportLocale: locale }),
+        body: JSON.stringify({
+          url,
+          reportLocale: locale,
+          idempotencyKey: idempotencyKey.current,
+        }),
       });
       const result = (await response.json()) as {
         shortId?: string;
@@ -49,7 +54,13 @@ export function HomeVerifier({
       };
       if (!response.ok || !result.shortId) {
         setError(
-          result.code === "invalid_url" ? copy.invalidUrl : copy.genericError,
+          result.code === "invalid_url"
+            ? copy.invalidUrl
+            : result.code === "visitor_quota_reached"
+              ? copy.visitorQuotaReached
+              : result.code === "global_quota_reached"
+                ? copy.globalQuotaReached
+                : copy.genericError,
         );
         return;
       }
@@ -113,7 +124,10 @@ export function HomeVerifier({
                 type="url"
                 name="url"
                 value={url}
-                onChange={(event) => setUrl(event.target.value)}
+                onChange={(event) => {
+                  setUrl(event.target.value);
+                  idempotencyKey.current = crypto.randomUUID();
+                }}
                 placeholder={copy.linkPlaceholder}
                 autoComplete="url"
                 required

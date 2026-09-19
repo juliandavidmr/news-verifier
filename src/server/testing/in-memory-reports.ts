@@ -11,10 +11,21 @@ import type {
 export class InMemoryReportsRepository implements ReportsRepository {
   readonly reports = new Map<string, Report>();
   readonly events = new Map<string, ReportEvent[]>();
+  readonly idempotency = new Map<string, string>();
 
   constructor(private readonly now = () => new Date("2026-09-19T00:00:00Z")) {}
 
   async createUrlReport(input: CreateUrlReportInput) {
+    const existingId = this.idempotency.get(input.idempotencyKey);
+    if (existingId) {
+      const existing = this.reports.get(existingId);
+      if (!existing) throw new Error("Missing idempotent report");
+      return {
+        accepted: true as const,
+        replayed: true,
+        report: structuredClone(existing),
+      };
+    }
     const timestamp = this.now().toISOString();
     const report: Report = {
       id: crypto.randomUUID(),
@@ -35,6 +46,7 @@ export class InMemoryReportsRepository implements ReportsRepository {
       updatedAt: timestamp,
     };
     this.reports.set(report.id, report);
+    this.idempotency.set(input.idempotencyKey, report.id);
     this.events.set(report.id, [
       {
         sequence: 1,
@@ -43,7 +55,11 @@ export class InMemoryReportsRepository implements ReportsRepository {
         createdAt: timestamp,
       },
     ]);
-    return structuredClone(report);
+    return {
+      accepted: true as const,
+      replayed: false,
+      report: structuredClone(report),
+    };
   }
 
   async markExtracted(reportId: string, content: ExtractedContent) {

@@ -42,4 +42,20 @@ describe("URL investigation scenario", () => {
       errorCode: "unsupported_content",
     });
   });
+
+  it("replays an idempotent request without scheduling duplicate work", async () => {
+    const scenario = new InvestigationScenario();
+    const first = await scenario.startUrl();
+    const replay = await scenario.startUrl();
+
+    expect(replay.id).toBe(first.id);
+    expect(scenario.reports.reports.size).toBe(1);
+
+    await scenario.runBackgroundTasks();
+    const events = await scenario.reports.listEvents(first.id, 0);
+    expect(events.map((event) => event.stage)).toEqual([
+      "extracting",
+      "partial",
+    ]);
+  });
 });
