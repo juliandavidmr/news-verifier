@@ -4,24 +4,28 @@ import { useEffect, useState } from "react";
 import type { ReportEvent } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
 import { messages } from "../lib/i18n";
+import type { PublicReportDetails } from "../server/reports/report-reader";
 import type { PublicReport } from "../server/reports/repository";
+import { ReportReader } from "./report-reader";
 
 function statusLabel(report: PublicReport) {
   const copy = messages[report.reportLocale];
   if (report.status === "failed") return copy.reportFailed;
-  if (report.status === "partial" || report.status === "completed") {
-    return copy.reportReady;
-  }
+  if (report.status === "partial") return copy.reportPartial;
+  if (report.status === "completed") return copy.reportCompleted;
   if (report.status === "queued") return copy.reportQueued;
   return copy.reportExtracting;
 }
 
 export function ReportLiveView({
   initialReport,
+  initialDetails,
 }: {
   initialReport: PublicReport;
+  initialDetails: PublicReportDetails | null;
 }) {
   const [report, setReport] = useState(initialReport);
+  const [details, setDetails] = useState(initialDetails);
   const copy = messages[report.reportLocale];
 
   useEffect(() => {
@@ -41,8 +45,10 @@ export function ReportLiveView({
         const result = (await response.json()) as {
           report: PublicReport;
           events: ReportEvent[];
+          details: PublicReportDetails | null;
         };
         setReport(result.report);
+        if (result.details) setDetails(result.details);
         const last = result.events.at(-1);
         if (last) sequence = last.sequence;
       } finally {
@@ -77,10 +83,12 @@ export function ReportLiveView({
         <h1>{report.extractedTitle ?? statusLabel(report)}</h1>
         <p className="report-date">
           {copy.createdAt}:{" "}
-          {new Intl.DateTimeFormat(report.reportLocale, {
-            dateStyle: "long",
-            timeStyle: "short",
-          }).format(new Date(report.createdAt))}
+          <time dateTime={report.createdAt} suppressHydrationWarning>
+            {new Intl.DateTimeFormat(report.reportLocale, {
+              dateStyle: "long",
+              timeStyle: "short",
+            }).format(new Date(report.createdAt))}
+          </time>
         </p>
       </section>
 
@@ -94,29 +102,8 @@ export function ReportLiveView({
         </section>
       ) : null}
 
-      {ready ? (
-        <section className="result-grid">
-          <article className="result-card accent-card">
-            <span>Extract</span>
-            <strong>{copy.reportReady}</strong>
-            <p>{copy.partialNotice}</p>
-          </article>
-          <article className="result-card metrics-card">
-            <dl>
-              <div>
-                <dt>{copy.extractedWords}</dt>
-                <dd>{report.extractedWordCount ?? 0}</dd>
-              </div>
-              <div>
-                <dt>{copy.analyzedWords}</dt>
-                <dd>{report.analyzedWordCount ?? 0}</dd>
-              </div>
-            </dl>
-            {report.truncated ? (
-              <p className="truncate-note">{copy.truncated}</p>
-            ) : null}
-          </article>
-        </section>
+      {ready && details ? (
+        <ReportReader locale={report.reportLocale} details={details} />
       ) : null}
 
       {report.status === "failed" ? (

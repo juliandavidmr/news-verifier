@@ -1,5 +1,6 @@
 import { after } from "next/server";
 import { NeonReportsRepository } from "@/server/reports/neon-repository";
+import { ReportReaderRepository } from "@/server/reports/report-reader";
 import { toPublicReport } from "@/server/reports/repository";
 import { dispatchPendingInvestigations } from "../../../../../server/research/dispatcher";
 
@@ -22,14 +23,19 @@ export async function GET(
   if (report.status === "queued") {
     after(() => dispatchPendingInvestigations(1, report.id));
   }
-  const events = await repository.listEvents(
-    report.id,
-    Number.isSafeInteger(afterSequence) && afterSequence >= 0
-      ? afterSequence
-      : 0,
-  );
+  const [events, details] = await Promise.all([
+    repository.listEvents(
+      report.id,
+      Number.isSafeInteger(afterSequence) && afterSequence >= 0
+        ? afterSequence
+        : 0,
+    ),
+    ["completed", "partial"].includes(report.status)
+      ? new ReportReaderRepository().findDetails(report.id)
+      : Promise.resolve(null),
+  ]);
   return Response.json(
-    { report: toPublicReport(report), events },
+    { report: toPublicReport(report), events, details },
     { headers: { "cache-control": "no-store" } },
   );
 }
