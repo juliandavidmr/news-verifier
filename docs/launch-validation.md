@@ -6,7 +6,7 @@
 
 ## Resultado ejecutivo
 
-La aplicación, la persistencia, la cola durable, la extracción URL, el OCR y la lectura de informes están desplegados y probados. El lanzamiento no puede declararse completo porque Vercel AI Gateway rechaza toda inferencia con HTTP 403 `customer_verification_required`: exige una tarjeta válida en el equipo para desbloquear incluso los créditos gratuitos. Registrar una tarjeta es una acción del propietario de la cuenta y no una corrección de código.
+La aplicación, la persistencia, la cola durable, la extracción URL, el OCR y la lectura de informes están desplegados y probados. El lanzamiento no puede declararse completo porque Vercel AI Gateway rechaza toda inferencia con HTTP 403 `customer_verification_required`: exige una tarjeta válida en el equipo para desbloquear incluso los créditos gratuitos. Registrar una tarjeta es una acción del propietario de la cuenta y no una corrección de código. El propio error proporciona el acceso oficial para resolverlo: [desbloquear créditos gratuitos de AI Gateway](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card).
 
 Hasta resolverlo, las entradas llegan a la fase de identificación de afirmaciones y terminan con un fallo de proveedor correctamente visible. El ticket de lanzamiento debe permanecer abierto y no se debe afirmar que URL e Imagen completan un Informe auditable.
 
@@ -25,7 +25,7 @@ Hasta resolverlo, las entradas llegan a la fase de identificación de afirmacion
 
 ## Gates todavía pendientes
 
-1. El propietario registra una tarjeta válida en el equipo de Vercel para desbloquear los créditos gratuitos de AI Gateway. No se habilita recarga automática ni fallback pago.
+1. El propietario [registra una tarjeta válida en el equipo de Vercel](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card) para desbloquear los créditos gratuitos de AI Gateway. No se habilita recarga automática ni fallback pago.
 2. Se repite la prueba `RUN_AI_TESTS=1` y debe pasar con un modelo `-free`.
 3. El corpus de verificación se revisa por una persona y se ejecuta contra el pool aprobado; debe medir citas literales, falsos concluyentes, los cuatro idiomas, prompt injection, duplicados y conflictos.
 4. Se repiten los smoke tests URL e Imagen y ambos deben terminar como `completed` o `partial` con evidencia auditable, nunca `failed` por capacidad.
