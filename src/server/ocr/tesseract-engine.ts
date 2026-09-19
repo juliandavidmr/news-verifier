@@ -97,6 +97,13 @@ export class TesseractOcrEngine {
     let worker: Worker | undefined;
     let timedOut = false;
     const workerPromise = createWorker(languageSet, OEM.LSTM_ONLY, {
+      workerPath: join(
+        process.cwd(),
+        "src",
+        "server",
+        "ocr",
+        "tesseract-worker.cjs",
+      ),
       langPath: languageDirectory,
       gzip: true,
       cacheMethod: "none",
