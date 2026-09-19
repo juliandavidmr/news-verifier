@@ -91,18 +91,45 @@ describe("deterministic verdict rules", () => {
         {
           ...claim().evidence[0],
           fragment:
+            "Coupled with enhanced capabilities to accelerate finding the remaining hazardous asteroid population by our next Planetary Defense mission, the Near-Earth Object (NEO) Surveyor, a DART successor could provide what we need to save the day. With the asteroid pair within 7 million miles (11 million kilometers) of Earth, a global team is using dozens of telescopes stationed around the world and in space to observe the asteroid system.",
+        },
+        {
+          ...claim().evidence[0],
+          id: "evidence-2",
+          fragment:
             "NASA's Planetary Defense Coordination Office is the lead for planetary defense activities and is sponsoring the DART mission.",
+        },
+        {
+          ...claim().evidence[0],
+          id: "evidence-3",
+          fragment:
+            "Relevant Links and Resources Pre- and Post-Impact Imagery Mission Resources DART Fact Sheet Press Kit Become a Planetary Defender Relevant Mission Releases NASA, SpaceX Launch DART: First Test Mission to Defend Planet Earth NASA’s DART Mission Hits Asteroid in First-Ever Planetary Defense Test NASA DART Imagery Shows Changed Orbit of Target Asteroid NASA Confirms DART Mission Impact Changed Asteroid’s Motion in Space NASA’s DART Data Validates Kinetic Impact as Planetary Defense Method Media 10 Images Planetary Defense Missions NEO Surveyor Designed to help NASA discover and characterize most of the potentially hazardous asteroids and comets that come within 30 million miles of Earth.",
         },
       ],
     });
-    const result = applyVerdictRules([dartClaim], [proposal()], false, "es");
+    const result = applyVerdictRules(
+      [dartClaim],
+      [
+        proposal({
+          relations: dartClaim.evidence.map((evidence) => ({
+            ...proposal().relations[0],
+            evidenceId: evidence.id,
+          })),
+        }),
+      ],
+      false,
+      "es",
+    );
 
     expect(result.verdicts[0]).toMatchObject({
       finalVerdict: "insufficient_evidence",
       evidenceStrength: "low",
       includedInIndex: false,
-      relations: [{ relation: "context" }],
     });
+    expect(result.verdicts[0].relations).toHaveLength(3);
+    expect(
+      result.verdicts[0].relations.map((relation) => relation.relation),
+    ).toEqual(["context", "context", "context"]);
     expect(result.verdicts[0].explanation).toContain(
       "no abordan explícitamente",
     );
