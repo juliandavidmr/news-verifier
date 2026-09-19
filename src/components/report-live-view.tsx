@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReportEvent } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import type { PublicReportDetails } from "../server/reports/report-reader";
 import type { PublicReport } from "../server/reports/repository";
+import {
+  advanceEventCursor,
+  initialPollDelay,
+  retryDelay,
+  shouldAnnounceReady,
+} from "./report-live-state";
 import { ReportReader } from "./report-reader";
 
 function statusLabel(report: PublicReport) {
@@ -14,8 +20,14 @@ function statusLabel(report: PublicReport) {
   if (report.status === "partial") return copy.reportPartial;
   if (report.status === "completed") return copy.reportCompleted;
   if (report.status === "queued") return copy.reportQueued;
-  return copy.reportExtracting;
+  if (report.status === "extracting") return copy.reportExtracting;
+  if (report.status === "identifying_claims") return copy.reportIdentifying;
+  if (report.status === "researching") return copy.reportResearching;
+  if (report.status === "evaluating") return copy.reportEvaluating;
+  return copy.reportGenerating;
 }
+
+type NotificationState = "idle" | "enabled" | "denied" | "unavailable";
 
 export function ReportLiveView({
   initialReport,
@@ -26,41 +38,154 @@ export function ReportLiveView({
 }) {
   const [report, setReport] = useState(initialReport);
   const [details, setDetails] = useState(initialDetails);
+  const [connectionInterrupted, setConnectionInterrupted] = useState(false);
+  const [notificationState, setNotificationState] =
+    useState<NotificationState>("idle");
+  const reportRef = useRef(initialReport);
+  const sequenceRef = useRef(0);
+  const notificationArmedRef = useRef(false);
+  const notificationSentRef = useRef(false);
+  const previousStatusRef = useRef(initialReport.status);
   const copy = messages[report.reportLocale];
 
   useEffect(() => {
     document.documentElement.lang = report.reportLocale;
-    if (isTerminalStatus(report.status)) return;
+  }, [report.reportLocale]);
+
+  useEffect(() => {
+    reportRef.current = report;
+  }, [report]);
+
+  useEffect(() => {
+    const armedKey = `report-notification:${initialReport.shortId}:armed`;
+    const sentKey = `report-notification:${initialReport.shortId}:sent`;
+    notificationArmedRef.current = sessionStorage.getItem(armedKey) === "1";
+    notificationSentRef.current = sessionStorage.getItem(sentKey) === "1";
+    if (!("Notification" in window)) {
+      setNotificationState("unavailable");
+    } else if (Notification.permission === "denied") {
+      setNotificationState("denied");
+    } else if (
+      notificationArmedRef.current &&
+      Notification.permission === "granted"
+    ) {
+      setNotificationState("enabled");
+    }
+  }, [initialReport.shortId]);
+
+  useEffect(() => {
+    if (isTerminalStatus(initialReport.status)) return;
 
     let cancelled = false;
-    let sequence = 0;
+    let inFlight = false;
+    let failures = 0;
     let timer: number | undefined;
+
+    const schedule = (delay: number) => {
+      if (cancelled || isTerminalStatus(reportRef.current.status)) return;
+      if (timer !== undefined) window.clearTimeout(timer);
+      timer = window.setTimeout(poll, delay);
+    };
+
     const poll = async () => {
+      if (cancelled || inFlight || isTerminalStatus(reportRef.current.status)) {
+        return;
+      }
+      inFlight = true;
       try {
         const response = await fetch(
-          `/api/reports/${report.shortId}/events?after=${sequence}`,
+          `/api/reports/${initialReport.shortId}/events?after=${sequenceRef.current}`,
           { cache: "no-store" },
         );
-        if (!response.ok || cancelled) return;
+        if (!response.ok)
+          throw new Error(`Report polling failed: ${response.status}`);
+        if (cancelled) return;
         const result = (await response.json()) as {
           report: PublicReport;
           events: ReportEvent[];
           details: PublicReportDetails | null;
         };
+        sequenceRef.current = advanceEventCursor(
+          sequenceRef.current,
+          result.events,
+        );
+        failures = 0;
+        setConnectionInterrupted(false);
+        reportRef.current = result.report;
         setReport(result.report);
         if (result.details) setDetails(result.details);
-        const last = result.events.at(-1);
-        if (last) sequence = last.sequence;
+      } catch {
+        failures += 1;
+        if (!cancelled) setConnectionInterrupted(true);
       } finally {
-        if (!cancelled) timer = window.setTimeout(poll, 1_500);
+        inFlight = false;
+        schedule(retryDelay(failures));
       }
     };
-    timer = window.setTimeout(poll, 600);
+
+    const recoverNow = () => {
+      failures = 0;
+      schedule(0);
+    };
+
+    window.addEventListener("online", recoverNow);
+    schedule(initialPollDelay);
     return () => {
       cancelled = true;
+      window.removeEventListener("online", recoverNow);
       if (timer !== undefined) window.clearTimeout(timer);
     };
-  }, [report.shortId, report.reportLocale, report.status]);
+  }, [initialReport.shortId, initialReport.status]);
+
+  useEffect(() => {
+    const previousStatus = previousStatusRef.current;
+    previousStatusRef.current = report.status;
+    if (
+      !shouldAnnounceReady(
+        previousStatus,
+        report.status,
+        notificationSentRef.current,
+      )
+    ) {
+      return;
+    }
+
+    const originalTitle = document.title;
+    document.title = `${copy.reportReadyTitle} · ${copy.brand}`;
+    if (
+      notificationArmedRef.current &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      new Notification(copy.reportReadyTitle, {
+        body: copy.reportReadyNotification,
+      });
+      notificationSentRef.current = true;
+      sessionStorage.setItem(`report-notification:${report.shortId}:sent`, "1");
+    }
+
+    return () => {
+      document.title = originalTitle;
+    };
+  }, [copy, report.shortId, report.status]);
+
+  const requestNotification = async () => {
+    if (!("Notification" in window)) {
+      setNotificationState("unavailable");
+      return;
+    }
+    const permission =
+      Notification.permission === "default"
+        ? await Notification.requestPermission()
+        : Notification.permission;
+    if (permission !== "granted") {
+      setNotificationState("denied");
+      return;
+    }
+    notificationArmedRef.current = true;
+    sessionStorage.setItem(`report-notification:${report.shortId}:armed`, "1");
+    setNotificationState("enabled");
+  };
 
   const ready = report.status === "partial" || report.status === "completed";
 
@@ -95,9 +220,28 @@ export function ReportLiveView({
       {!isTerminalStatus(report.status) ? (
         <section className="progress-card" aria-live="polite">
           <div className="activity-dot" aria-hidden="true" />
-          <div>
+          <div className="progress-copy">
             <strong>{statusLabel(report)}</strong>
-            <p>{copy.automatedLimit}</p>
+            <p>
+              {connectionInterrupted ? copy.reconnecting : copy.automatedLimit}
+            </p>
+            {notificationState === "idle" ? (
+              <button
+                className="notify-button"
+                type="button"
+                onClick={requestNotification}
+              >
+                <span aria-hidden="true">◉</span> {copy.notifyWhenReady}
+              </button>
+            ) : (
+              <output className="notification-note">
+                {notificationState === "enabled"
+                  ? copy.notificationsEnabled
+                  : notificationState === "denied"
+                    ? copy.notificationsDenied
+                    : copy.notificationsUnavailable}
+              </output>
+            )}
           </div>
         </section>
       ) : null}

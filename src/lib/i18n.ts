@@ -37,6 +37,10 @@ export const messages = {
     reportTitle: "Investigation report",
     reportQueued: "Waiting for capacity",
     reportExtracting: "Extracting the main content",
+    reportIdentifying: "Identifying verifiable claims",
+    reportResearching: "Researching evidence",
+    reportEvaluating: "Evaluating the evidence",
+    reportGenerating: "Preparing the report",
     reportReady: "Content prepared",
     reportCompleted: "Investigation completed",
     reportPartial: "Partial investigation",
@@ -54,6 +58,15 @@ export const messages = {
     createdAt: "Investigation started",
     automatedLimit:
       "This is an automated, dated analysis of evidence—not a declaration of absolute truth.",
+    notifyWhenReady: "Notify me when it’s ready",
+    notificationsEnabled:
+      "We’ll notify you in this tab when the report is ready.",
+    notificationsDenied: "Notifications are blocked in your browser settings.",
+    notificationsUnavailable:
+      "Notifications are not available in this browser.",
+    reportReadyTitle: "Report ready",
+    reportReadyNotification: "Your evidence report is ready to review.",
+    reconnecting: "Connection interrupted. Reconnecting automatically…",
     notFound: "This report does not exist or is unavailable.",
     backHome: "Back to verifier",
     privacyTitle: "Privacy policy",
@@ -96,6 +109,10 @@ export const messages = {
     reportTitle: "Informe de investigación",
     reportQueued: "Esperando capacidad",
     reportExtracting: "Extrayendo el contenido principal",
+    reportIdentifying: "Identificando afirmaciones verificables",
+    reportResearching: "Buscando evidencia",
+    reportEvaluating: "Evaluando la evidencia",
+    reportGenerating: "Preparando el informe",
     reportReady: "Contenido preparado",
     reportCompleted: "Investigación completada",
     reportPartial: "Investigación parcial",
@@ -113,6 +130,17 @@ export const messages = {
     createdAt: "Investigación iniciada",
     automatedLimit:
       "Este es un análisis automatizado y fechado de evidencia, no una declaración de verdad absoluta.",
+    notifyWhenReady: "Avisarme cuando termine",
+    notificationsEnabled:
+      "Te avisaremos en esta pestaña cuando el informe esté listo.",
+    notificationsDenied:
+      "Las notificaciones están bloqueadas en la configuración del navegador.",
+    notificationsUnavailable:
+      "Las notificaciones no están disponibles en este navegador.",
+    reportReadyTitle: "Informe listo",
+    reportReadyNotification:
+      "Tu informe de evidencia ya está listo para revisar.",
+    reconnecting: "Se interrumpió la conexión. Reconectando automáticamente…",
     notFound: "Este informe no existe o no está disponible.",
     backHome: "Volver al verificador",
     privacyTitle: "Política de privacidad",
@@ -155,6 +183,10 @@ export const messages = {
     reportTitle: "Rapport d’enquête",
     reportQueued: "En attente de capacité",
     reportExtracting: "Extraction du contenu principal",
+    reportIdentifying: "Identification des affirmations vérifiables",
+    reportResearching: "Recherche de preuves",
+    reportEvaluating: "Évaluation des preuves",
+    reportGenerating: "Préparation du rapport",
     reportReady: "Contenu préparé",
     reportCompleted: "Enquête terminée",
     reportPartial: "Enquête partielle",
@@ -172,6 +204,17 @@ export const messages = {
     createdAt: "Enquête démarrée",
     automatedLimit:
       "Il s’agit d’une analyse automatisée et datée des preuves, et non d’une vérité absolue.",
+    notifyWhenReady: "Me prévenir quand il sera prêt",
+    notificationsEnabled:
+      "Nous vous préviendrons dans cet onglet lorsque le rapport sera prêt.",
+    notificationsDenied:
+      "Les notifications sont bloquées dans les réglages du navigateur.",
+    notificationsUnavailable:
+      "Les notifications ne sont pas disponibles dans ce navigateur.",
+    reportReadyTitle: "Rapport prêt",
+    reportReadyNotification:
+      "Votre rapport de preuves est prêt à être consulté.",
+    reconnecting: "Connexion interrompue. Reconnexion automatique…",
     notFound: "Ce rapport n’existe pas ou n’est pas disponible.",
     backHome: "Retour au vérificateur",
     privacyTitle: "Politique de confidentialité",
@@ -214,6 +257,10 @@ export const messages = {
     reportTitle: "Relatório da investigação",
     reportQueued: "Aguardando capacidade",
     reportExtracting: "Extraindo o conteúdo principal",
+    reportIdentifying: "Identificando afirmações verificáveis",
+    reportResearching: "Pesquisando evidências",
+    reportEvaluating: "Avaliando as evidências",
+    reportGenerating: "Preparando o relatório",
     reportReady: "Conteúdo preparado",
     reportCompleted: "Investigação concluída",
     reportPartial: "Investigação parcial",
@@ -231,6 +278,17 @@ export const messages = {
     createdAt: "Investigação iniciada",
     automatedLimit:
       "Esta é uma análise automatizada e datada de evidências, não uma declaração de verdade absoluta.",
+    notifyWhenReady: "Avisar quando estiver pronto",
+    notificationsEnabled:
+      "Avisaremos nesta aba quando o relatório estiver pronto.",
+    notificationsDenied:
+      "As notificações estão bloqueadas nas configurações do navegador.",
+    notificationsUnavailable:
+      "As notificações não estão disponíveis neste navegador.",
+    reportReadyTitle: "Relatório pronto",
+    reportReadyNotification:
+      "Seu relatório de evidências está pronto para revisão.",
+    reconnecting: "Conexão interrompida. Reconectando automaticamente…",
     notFound: "Este relatório não existe ou não está disponível.",
     backHome: "Voltar ao verificador",
     privacyTitle: "Política de privacidade",

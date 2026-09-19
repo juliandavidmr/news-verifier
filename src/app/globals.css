@@ -648,6 +648,31 @@ a {
   color: var(--muted);
 }
 
+.progress-copy {
+  flex: 1;
+}
+
+.notify-button {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 2px solid var(--ink);
+  background: var(--yellow);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.notify-button:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.notification-note {
+  font-weight: 750;
+}
+
 .activity-dot {
   width: 18px;
   height: 18px;
