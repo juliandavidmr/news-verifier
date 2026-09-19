@@ -1,48 +1,95 @@
 # Validación de lanzamiento
 
-**Última ejecución:** 19 de septiembre de 2026  
-**Commit revalidado:** `80c4c16`
-**Estado:** bloqueado por verificación de cuenta de AI Gateway
+**Última ejecución:** 19 de septiembre de 2026
+
+**Commit revalidado:** `9e1db6b`
+
+**Estado:** despliegue operativo; gate editorial del corpus de verificación pendiente
 
 ## Resultado ejecutivo
 
-La aplicación, la persistencia, la cola durable, la extracción URL, el OCR y la lectura de informes están desplegados y probados. El lanzamiento no puede declararse completo porque Vercel AI Gateway rechaza toda inferencia con HTTP 403 `customer_verification_required`: exige una tarjeta válida en el equipo para desbloquear incluso los créditos gratuitos. Registrar una tarjeta es una acción del propietario de la cuenta y no una corrección de código. El propio error proporciona el acceso oficial para resolverlo: [desbloquear créditos gratuitos de AI Gateway](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card).
+La credencial `AI_GATEWAY_API_KEY` quedó disponible en local y Production. La
+prueba de contrato de AI Gateway pasa con un modelo gratuito y los recorridos
+reales de URL y JPG cruzaron extracción u OCR, identificación, cola durable,
+búsqueda y persistencia de evidencia. Production está `READY` en
+<https://news-verifier-pi.vercel.app>.
 
-Hasta resolverlo, las entradas llegan a la fase de identificación de afirmaciones y terminan con un fallo de proveedor correctamente visible. El ticket de lanzamiento debe permanecer abierto y no se debe afirmar que URL e Imagen completan un Informe auditable.
+La validación descubrió y corrigió tres defectos de lanzamiento:
+
+1. evidencia meramente temática podía producir un falso concluyente;
+2. una captura sin URL original no podía entrar a investigación;
+3. un informe parcial ocultaba evidencia ya validada si el modelo no entregaba
+   relaciones finales.
+
+Los modelos gratuitos siguen siendo capacidad externa no garantizada. En los
+smokes más recientes identificaron afirmaciones y buscaron evidencia, pero los
+tres candidatos fallaron al generar el lote final de veredictos. El sistema
+terminó como `partial`, sin índice ni conclusión inventada, y conservó las
+fuentes auditables. Esa es la degradación aprobada, no un lanzamiento fallido.
+
+El ticket #13 permanece abierto porque el corpus multilingüe de verificación
+todavía requiere revisión humana y falta formalizar una matriz de navegador en
+los cuatro idiomas y viewports. No se declara completado ese gate por inferencia
+del agente.
 
 ## Evidencia completada
 
-- Next.js 16.3.5 compila el proyecto y Workflow; lint, TypeScript y la suite automatizada se ejecutan antes de cada push final.
-- Neon tiene 10 migraciones aplicadas. La configuración efectiva es: cupo global 100/día, visitante 30/día, dos investigaciones activas, tres afirmaciones concurrentes, máximo 15 afirmaciones y presupuesto de 300 segundos.
-- Las variables de Neon y Exa existen en Development, Preview y Production. `CRON_SECRET` y `VISITOR_SIGNING_SECRET` existen en Production. Los valores no se registraron.
-- El corpus OCR de Preview pasó 36/36 entradas válidas y rechazó 4/4 escrituras no soportadas. Véase [ocr-spike-results.md](./research/ocr-spike-results.md).
-- Un smoke de Imagen en producción completó OCR, persistió 129 palabras y avanzó hasta identificación de afirmaciones. Un smoke de URL sobre `/privacy` avanzó por extracción y cola hasta la misma fase. Ambos fallaron únicamente al invocar AI Gateway.
-- Las páginas de Informe se sirven con `X-Robots-Tag: noindex, nofollow, noarchive` y `Referrer-Policy: no-referrer`; el endpoint administrativo rechaza llamadas sin autorización.
-- El catálogo público actual conserva los tres modelos configurados con precio cero, etiqueta `free`, `tools` y `tool_choice`.
-- La prueba de contrato se repitió con credenciales OIDC recién obtenidas de Preview sobre `80c4c16`. Falló antes de inferencia con el mismo HTTP 403 `customer_verification_required`; no hubo consumo de tokens ni fallback pago.
-- Los logs de producción no muestran un error OCR después de la corrección del empaquetado WASM. El error actual es el circuito de AI Gateway originado por la verificación de cuenta.
-- El consumo interno observado el día de validación fue seis reservas globales y tres por visitante. Los intentos de IA no consumieron tokens porque el Gateway rechazó las peticiones antes de inferencia.
+- `npm test -- --run`: 67 pruebas pasan y nueve integraciones quedan opt-in.
+- La integración de lectura de informes pasa contra Neon con evidencia evaluada
+  y evidencia sin relación de modelo.
+- TypeScript, Biome y `next build --webpack` pasan desde el checkout de master.
+- La prueba real `RUN_AI_TESTS=1` pasa con AI Gateway y un modelo `-free`.
+- Neon conserva 10 migraciones y una configuración inicial de 100
+  investigaciones globales/día, 30 por navegador/día, dos investigaciones
+  activas, tres ramas de afirmaciones y un máximo de 15 afirmaciones.
+- El corpus OCR de Preview aceptó 36/36 entradas válidas y rechazó 4/4
+  escrituras no soportadas. Véase
+  [ocr-spike-results.md](./research/ocr-spike-results.md).
+- El reporte URL original
+  [z5i8ryGsWe78](https://news-verifier-pi.vercel.app/r/z5i8ryGsWe78)
+  completó 15 búsquedas y 43 evidencias. Su falso positivo DART produjo el
+  corpus exacto de regresión; los tres fragmentos ahora se degradan a
+  `context` y `insufficient_evidence`.
+- El segundo smoke URL
+  [IkFuV5KgNKlo](https://news-verifier-pi.vercel.app/r/IkFuV5KgNKlo)
+  terminó `partial` al agotarse el pool gratuito, sin publicar una conclusión.
+- El smoke JPG
+  [QDVPDSMlLZoY](https://news-verifier-pi.vercel.app/r/QDVPDSMlLZoY)
+  obtuvo 94 % de confianza OCR, identificó tres afirmaciones, completó tres
+  búsquedas y persistió nueve evidencias. La imagen no se almacenó:
+  `source_kind = image` y `source_url = NULL`. El informe público muestra las
+  fuentes como `context` aun cuando la evaluación final terminó `partial`.
+- Las páginas de informe conservan `noindex`, `nofollow`, `noarchive` y
+  `Referrer-Policy: no-referrer`.
+- Los logs revisados no expusieron texto de entrada, claves ni blobs. Los fallos
+  observados quedaron reducidos a códigos operativos y estados de Workflow.
 
-## Gates todavía pendientes
+## Gates pendientes
 
-1. El propietario [registra una tarjeta válida en el equipo de Vercel](https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card) para desbloquear los créditos gratuitos de AI Gateway. No se habilita recarga automática ni fallback pago.
-2. Se repite la prueba `RUN_AI_TESTS=1` y debe pasar con un modelo `-free`.
-3. El corpus de verificación se revisa por una persona y se ejecuta contra el pool aprobado; debe medir citas literales, falsos concluyentes, los cuatro idiomas, prompt injection, duplicados y conflictos.
-4. Se repiten los smoke tests URL e Imagen y ambos deben terminar como `completed` o `partial` con evidencia auditable, nunca `failed` por capacidad.
-5. Se revisan de nuevo logs y consumo, y solo entonces se cierra el ticket de lanzamiento.
+1. Versionar y someter a revisión humana el corpus de verificación. Debe medir
+   citas literales, falsos concluyentes, español, inglés, francés y portugués,
+   prompt injection, dependencias duplicadas y evidencia conflictiva.
+2. Ejecutar y guardar la matriz de navegador de los cuatro idiomas en viewport
+   móvil y escritorio.
+3. Repetir el corpus contra cada modelo gratuito candidato. Un modelo que no
+   entregue consistentemente la salida estructurada no se promueve al pool,
+   aunque figure como gratuito en el catálogo.
+4. Revisar una última vez logs y consumo tras esa ejecución y cerrar #13.
 
 ## Comandos reproducibles
 
 ```bash
 npm run lint
-npx tsc --noEmit
+./node_modules/.bin/tsc --noEmit
 npm test -- --run
 npm run build
-env RUN_AI_TESTS=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run src/server/claims/gateway-identifier.integration.test.ts
+env RUN_DATABASE_TESTS=1 node --env-file=.env --env-file=.env.local node_modules/vitest/vitest.mjs run
+env RUN_AI_TESTS=1 node --env-file=.env --env-file=.env.local node_modules/vitest/vitest.mjs run src/server/claims/gateway-identifier.integration.test.ts
 node scripts/run-ocr-acceptance.mjs https://PREVIEW_URL --protected
 ```
 
-La política aprobada sigue siendo free-only. La documentación oficial de precios de AI Gateway describe el crédito mensual gratuito, mientras que la documentación de presupuestos aclara que el equipo todavía necesita créditos o un método de pago para enviar peticiones. En esta cuenta, el runtime materializa ese requisito como `customer_verification_required` incluso al seleccionar modelos con precio cero:
-
-- <https://vercel.com/docs/ai-gateway/pricing>
-- <https://vercel.com/docs/ai-gateway/observability-and-spend/budgets>
+La política se mantiene `free-only`: no hay fallback pago ni recarga
+automática. Los límites y la disponibilidad de Vercel AI Gateway prevalecen
+sobre los cupos internos. JEV no forma parte del runtime actual; la arquitectura
+usa Vercel AI Gateway para inferencia, Exa para descubrimiento con fallback
+directo y reglas deterministas para aceptar o degradar conclusiones.
