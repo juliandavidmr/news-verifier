@@ -156,6 +156,21 @@ describe("evidence research", () => {
     ).toBe(false);
   });
 
+  it("researches screenshot claims without requiring an original URL", async () => {
+    const test = harness();
+    const result = await researchEvidence(
+      { ...input, sourceUrl: null },
+      test.store,
+      { search: test.search, fetcher: test.fetcher },
+    );
+
+    expect(result).toMatchObject({
+      completedSearches: 1,
+      evidenceRecords: 2,
+    });
+    expect(test.failed).toEqual([]);
+  });
+
   it("never exceeds the persisted search budget", async () => {
     let reservations = 0;
     const test = harness();

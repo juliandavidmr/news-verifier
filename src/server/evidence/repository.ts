@@ -9,7 +9,7 @@ import type {
 type ResearchRow = {
   report_id: string;
   report_locale: SupportedLocale;
-  source_url: string;
+  source_url: string | null;
   max_evidence_searches: number;
   max_search_results: number;
   max_evidence_per_claim: number;
@@ -69,7 +69,7 @@ export class EvidenceRepository {
       [reportId],
     );
     const row = (rows as unknown[])[0] as ResearchRow | undefined;
-    if (!row?.source_url) return null;
+    if (!row) return null;
     return {
       reportId: row.report_id,
       reportLocale: row.report_locale,

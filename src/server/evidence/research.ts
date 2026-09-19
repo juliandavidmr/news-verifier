@@ -44,7 +44,9 @@ export async function researchEvidence(
   store: EvidenceResearchStore,
   dependencies: EvidenceResearchDependencies,
 ) {
-  const reportSource = canonicalizeEvidenceUrl(input.sourceUrl);
+  const reportSource = input.sourceUrl
+    ? canonicalizeEvidenceUrl(input.sourceUrl)
+    : null;
   let completedSearches = 0;
   let evidenceRecords = 0;
   let nextClaim = 0;
@@ -87,7 +89,7 @@ export async function researchEvidence(
           continue;
         }
         if (
-          canonicalCandidate === reportSource ||
+          (reportSource !== null && canonicalCandidate === reportSource) ||
           seenUrls.has(canonicalCandidate)
         ) {
           continue;
@@ -96,7 +98,10 @@ export async function researchEvidence(
         try {
           const document = await dependencies.fetcher.fetch(requestedUrl);
           const canonicalFinal = canonicalizeEvidenceUrl(document.finalUrl);
-          if (canonicalFinal === reportSource || seenUrls.has(canonicalFinal)) {
+          if (
+            (reportSource !== null && canonicalFinal === reportSource) ||
+            seenUrls.has(canonicalFinal)
+          ) {
             continue;
           }
           const extracted = extractReadableContent(document, {

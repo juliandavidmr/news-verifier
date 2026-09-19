@@ -14,7 +14,7 @@ export type EvidenceClaim = {
 export type EvidenceResearchInput = {
   reportId: string;
   reportLocale: SupportedLocale;
-  sourceUrl: string;
+  sourceUrl: string | null;
   claims: EvidenceClaim[];
   maxSearches: number;
   maxResults: number;
