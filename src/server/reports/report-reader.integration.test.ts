@@ -95,6 +95,21 @@ describe.skipIf(!runDatabaseTests)("public report reader", () => {
       [verdictId, evidenceId],
     );
     await database.query(
+      `INSERT INTO evidence_records (
+         report_id, claim_id, search_id, source_url, canonical_url,
+         source_title, source_author, published_at, source_fragment,
+         source_language, translated_fragment, query, source_hierarchy,
+         content_fingerprint, dependency_fingerprint, search_provider
+       ) VALUES (
+         $1, $2, $3, 'https://example.edu/context',
+         'https://example.edu/context', 'Context record', 'University', now(),
+         'The record discusses the same public program.', 'en', null,
+         'public record result', 'expert', repeat('c', 64), repeat('d', 64),
+         'direct_exa'
+       )`,
+      [created.report.id, claimId, searchId],
+    );
+    await database.query(
       `UPDATE reports
        SET status = 'completed', analyzed_excerpt = $2,
            evidence_coverage = 100, support_index = 100,
@@ -122,6 +137,11 @@ describe.skipIf(!runDatabaseTests)("public report reader", () => {
               title: "Official record",
               relation: "supports",
               originalFragment: "The official record confirms the result.",
+            },
+            {
+              title: "Context record",
+              relation: "context",
+              originalFragment: "The record discusses the same public program.",
             },
           ],
         },

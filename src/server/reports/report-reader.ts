@@ -149,13 +149,17 @@ export class ReportReaderRepository {
                 evidence.source_author, evidence.published_at,
                 evidence.created_at, evidence.source_fragment,
                 evidence.source_language, evidence.translated_fragment,
-                evidence.source_hierarchy, relation.relation,
-                relation.temporal_compatible, relation.scope_compatible,
-                relation.rationale
-         FROM claim_evidence_relations relation
-         JOIN claim_verdicts verdict ON verdict.id = relation.verdict_id
-         JOIN evidence_records evidence ON evidence.id = relation.evidence_id
-         WHERE verdict.report_id = $1
+                evidence.source_hierarchy,
+                COALESCE(relation.relation, 'context') AS relation,
+                COALESCE(relation.temporal_compatible, false) AS temporal_compatible,
+                COALESCE(relation.scope_compatible, false) AS scope_compatible,
+                COALESCE(relation.rationale, '') AS rationale
+         FROM evidence_records evidence
+         LEFT JOIN claim_evidence_relations relation
+           ON relation.evidence_id = evidence.id
+         LEFT JOIN claim_verdicts verdict
+           ON verdict.id = relation.verdict_id AND verdict.report_id = $1
+         WHERE evidence.report_id = $1
          ORDER BY evidence.claim_id, evidence.created_at, evidence.id`,
         [reportId],
       ),
