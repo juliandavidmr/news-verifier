@@ -3,6 +3,9 @@ import { withWorkflow } from "workflow/next";
 
 const nextConfig: NextConfig = {
   distDir: process.env.NV_BUILD_DIST_DIR ?? ".next",
+  experimental: {
+    optimizePackageImports: ["@mteherandev/colombia-icons-react"],
+  },
   async headers() {
     return [
       {

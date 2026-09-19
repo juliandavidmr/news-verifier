@@ -1,9 +1,17 @@
 "use client";
 
+import {
+  EnlaceExterno,
+  FlechaDerecha,
+  Imagen,
+  Sincronizar,
+  Subir,
+} from "@mteherandev/colombia-icons-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
+import { BrandLink } from "./brand-link";
 
 type InputMode = "url" | "image";
 
@@ -21,6 +29,7 @@ export function HomeVerifier({
   const [submitting, setSubmitting] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
   const copy = messages[locale];
+  const SubmitIcon = submitting ? Sincronizar : FlechaDerecha;
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -96,12 +105,7 @@ export function HomeVerifier({
   return (
     <main className="site-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label={copy.brand}>
-          <span className="brand-mark" aria-hidden="true">
-            ✓
-          </span>
-          {copy.brand}
-        </a>
+        <BrandLink label={copy.brand} />
         <span className="topbar-note">{copy.eyebrow}</span>
       </header>
 
@@ -120,7 +124,7 @@ export function HomeVerifier({
               aria-pressed={mode === "url"}
               onClick={() => setMode("url")}
             >
-              <span aria-hidden="true">↗</span>
+              <EnlaceExterno size={20} aria-hidden="true" />
               {copy.linkMode}
             </button>
             <button
@@ -133,7 +137,7 @@ export function HomeVerifier({
               aria-pressed={mode === "image"}
               onClick={() => setMode("image")}
             >
-              <span aria-hidden="true">▣</span>
+              <Imagen size={20} aria-hidden="true" />
               {copy.imageMode}
             </button>
           </fieldset>
@@ -157,7 +161,7 @@ export function HomeVerifier({
           ) : (
             <label className="upload-dropzone">
               <span className="upload-icon" aria-hidden="true">
-                ＋
+                <Subir size={26} />
               </span>
               <strong>{copy.imageMode}</strong>
               <span>{copy.imageLabel}</span>
@@ -190,7 +194,12 @@ export function HomeVerifier({
             disabled={submitting || (mode === "image" ? !image : !url)}
           >
             {submitting ? copy.submitting : copy.submit}
-            <span aria-hidden="true">→</span>
+            <span
+              className={submitting ? "button-icon icon-spin" : "button-icon"}
+              aria-hidden="true"
+            >
+              <SubmitIcon size={20} />
+            </span>
           </button>
           <p className="input-note">{copy.inputNote}</p>
         </form>

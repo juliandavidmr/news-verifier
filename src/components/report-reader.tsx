@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Alerta,
+  Cancelar,
+  CircleCheck,
+  EnlaceExterno,
+  Informacion,
+  Interrogacion,
+  RelojArena,
+  Sincronizar,
+} from "@mteherandev/colombia-icons-react";
 import { useEffect, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import type {
@@ -264,14 +274,23 @@ const readerCopy = {
 } as const;
 
 const verdictIcons = {
-  supported: "✓",
-  contradicted: "×",
-  misleading: "!",
-  disputed: "↔",
-  insufficient_evidence: "?",
-  not_verifiable: "○",
-  pending: "…",
+  supported: CircleCheck,
+  contradicted: Cancelar,
+  misleading: Alerta,
+  disputed: Sincronizar,
+  insufficient_evidence: Interrogacion,
+  not_verifiable: Informacion,
+  pending: RelojArena,
 } as const;
+
+function VerdictIcon({ verdict }: { verdict: keyof typeof verdictIcons }) {
+  const Icon = verdictIcons[verdict];
+  return (
+    <span className="verdict-icon" aria-hidden="true">
+      <Icon size={16} />
+    </span>
+  );
+}
 
 function claimVerdict(claim: PublicReportClaim) {
   return claim.verdict ?? "pending";
@@ -382,7 +401,7 @@ export function ReportReader({
                       </span>
                       <HighlightedPassage claim={claim} />
                       <span className="verdict-label">
-                        <b aria-hidden="true">{verdictIcons[verdict]}</b>
+                        <VerdictIcon verdict={verdict} />
                         {copy.verdicts[verdict]}
                       </span>
                     </button>
@@ -398,7 +417,7 @@ export function ReportReader({
               return (
                 <>
                   <p className={`detail-verdict verdict-${verdict}`}>
-                    <b aria-hidden="true">{verdictIcons[verdict]}</b>
+                    <VerdictIcon verdict={verdict} />
                     {copy.verdicts[verdict]}
                   </p>
                   <h2>{selected.statement}</h2>
@@ -446,8 +465,8 @@ export function ReportReader({
                       rel="noreferrer noopener"
                     >
                       {evidence.title ??
-                        new URL(evidence.canonicalUrl).hostname}{" "}
-                      ↗
+                        new URL(evidence.canonicalUrl).hostname}
+                      <EnlaceExterno size={16} aria-hidden="true" />
                     </a>
                     <blockquote>
                       <b>{copy.original}</b>

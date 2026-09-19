@@ -1,11 +1,17 @@
 "use client";
 
+import {
+  Campana,
+  EnlaceExterno,
+  Sincronizar,
+} from "@mteherandev/colombia-icons-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReportEvent } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import type { PublicReportDetails } from "../server/reports/report-reader";
 import type { PublicReport } from "../server/reports/repository";
+import { BrandLink } from "./brand-link";
 import {
   advanceEventCursor,
   initialPollDelay,
@@ -192,12 +198,7 @@ export function ReportLiveView({
   return (
     <main className="report-shell">
       <header className="topbar report-topbar">
-        <a className="brand" href="/">
-          <span className="brand-mark" aria-hidden="true">
-            ✓
-          </span>
-          {copy.brand}
-        </a>
+        <BrandLink label={copy.brand} />
         <span className={`status-chip ${report.status}`}>
           {statusLabel(report)}
         </span>
@@ -219,7 +220,11 @@ export function ReportLiveView({
 
       {!isTerminalStatus(report.status) ? (
         <section className="progress-card" aria-live="polite">
-          <div className="activity-dot" aria-hidden="true" />
+          <span className="activity-icon" aria-hidden="true">
+            <span className="icon-spin">
+              <Sincronizar size={20} />
+            </span>
+          </span>
           <div className="progress-copy">
             <strong>{statusLabel(report)}</strong>
             <p>
@@ -231,7 +236,8 @@ export function ReportLiveView({
                 type="button"
                 onClick={requestNotification}
               >
-                <span aria-hidden="true">◉</span> {copy.notifyWhenReady}
+                <Campana size={18} aria-hidden="true" />
+                {copy.notifyWhenReady}
               </button>
             ) : (
               <output className="notification-note">
@@ -261,7 +267,8 @@ export function ReportLiveView({
         <span>{copy.source}</span>
         {report.sourceUrl ? (
           <a href={report.sourceUrl} target="_blank" rel="noreferrer noopener">
-            {new URL(report.sourceUrl).hostname} ↗
+            {new URL(report.sourceUrl).hostname}
+            <EnlaceExterno size={17} aria-hidden="true" />
           </a>
         ) : null}
       </section>

@@ -11,6 +11,9 @@ importers:
       '@mozilla/readability':
         specifier: ^0.6.0
         version: 0.6.0
+      '@mteherandev/colombia-icons-react':
+        specifier: 0.27.0
+        version: 0.27.0(react@19.2.8)
       '@neondatabase/serverless':
         specifier: ^1.1.0
         version: 1.1.0
@@ -581,6 +584,11 @@ packages:
   '@mozilla/readability@0.6.0':
     resolution: {integrity: sha512-juG5VWh4qAivzTAeMzvY9xs9HY5rAcr2E4I7tiSSCokRFi7XIZCAu92ZkSTsIj1OPceCifL3cpfteP3pDT9/QQ==}
     engines: {node: '>=14.0.0'}
+
+  '@mteherandev/colombia-icons-react@0.27.0':
+    resolution: {integrity: sha512-cRquxD5oAYFB/5GpsJ9+qgrXYEAwXBOjs8Z6crmbpQTivbQHx+dqhDoes08Tm5w+iB4SGASvTqWmRkRRcCDFcw==}
+    peerDependencies:
+      react: '>=17.0.0'
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
     resolution: {integrity: sha512-kjirL3N6TnRPv5iuHw36wnucNqXAO46dzK9oPb0wj076R5Xm8PfUVA9nAFB5ZNMmfJQJVKACAPd/Z2KYMppthw==}
@@ -3572,6 +3580,10 @@ snapshots:
   '@lukeed/csprng@1.1.0': {}
 
   '@mozilla/readability@0.6.0': {}
+
+  '@mteherandev/colombia-icons-react@0.27.0(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
 
   '@napi-rs/nice-android-arm-eabi@1.1.1':
     optional: true

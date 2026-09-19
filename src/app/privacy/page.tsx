@@ -1,3 +1,5 @@
+import { FlechaIzquierda } from "@mteherandev/colombia-icons-react";
+import { BrandLink } from "../../components/brand-link";
 import { messages } from "../../lib/i18n";
 import { privacyPolicy } from "../../lib/privacy-policy";
 import { getRequestLocale } from "../../server/request-locale";
@@ -9,12 +11,7 @@ export default async function PrivacyPage() {
 
   return (
     <main className="legal-shell">
-      <a className="brand" href="/">
-        <span className="brand-mark" aria-hidden="true">
-          ✓
-        </span>
-        {copy.brand}
-      </a>
+      <BrandLink label={copy.brand} />
       <p className="kicker">{copy.privacy}</p>
       <h1>{copy.privacyTitle}</h1>
       <p className="legal-effective">{policy.effectiveDate}</p>
@@ -30,7 +27,8 @@ export default async function PrivacyPage() {
         ))}
       </div>
       <a className="legal-back" href="/">
-        ← {copy.backHome}
+        <FlechaIzquierda size={18} aria-hidden="true" />
+        {copy.backHome}
       </a>
     </main>
   );

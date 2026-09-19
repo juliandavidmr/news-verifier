@@ -7,3 +7,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Icons — Colombia Icons
+
+This project uses `@mteherandev/colombia-icons-react` for interface icons.
+Prefer it over Unicode symbols, inline SVGs, or other icon packs. Components use
+Spanish PascalCase names, inherit `currentColor`, and should be decorative with
+`aria-hidden="true"` when adjacent text already supplies the accessible label.
+Browse available names at <https://colombia-icons.com>; do not invent exports.
