@@ -1,0 +1,3 @@
+# Usar un Índice de respaldo ponderado y transparente
+
+El Índice de respaldo empleará pesos fijos por importancia —principal 5, relevante 2 y secundaria 1— y aportes por veredicto —respaldada 100 %, engañosa 50 % y contradicha 0 %—. Los veredictos en disputa, sin evidencia suficiente y no verificable no entrarán en el índice y reducirán la Cobertura de evidencia; el informe será inconcluso con cobertura ponderada inferior al 60 % o cuando alguna afirmación principal no tenga una conclusión. El informe mostrará la fórmula, los pesos y los aportes para que el cálculo sea auditable y futuros cambios no reinterpreten silenciosamente los resultados.

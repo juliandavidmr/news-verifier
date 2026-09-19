@@ -1,0 +1,3 @@
+# Mostrar Fuerza de evidencia y no confianza del modelo
+
+Cada veredicto mostrará una Fuerza de evidencia cualitativa —alta, media o baja— calculada mediante reglas visibles sobre calidad, independencia, compatibilidad temporal y geográfica, y conflicto entre fuentes. La fuerza será alta ante un registro primario concluyente o dos fuentes fiables e independientes compatibles, media ante una fuente directa fiable o evidencia independiente incompleta, y baja ante evidencia indirecta o incierta; una fuerza baja no podrá producir un veredicto respaldado o contradicho. El producto no mostrará probabilidades ni porcentajes de confianza producidos por el modelo, porque aparentarían una calibración no demostrada y confundirían seguridad del modelo con calidad de la evidencia.

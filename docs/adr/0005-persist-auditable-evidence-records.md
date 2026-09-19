@@ -1,0 +1,3 @@
+# Persistir registros de evidencia auditables
+
+Cada conclusión conservará la URL y los metadatos de su fuente, el fragmento exacto utilizado, sus idiomas original y traducido, su nivel en la Jerarquía de evidencia, la fecha de consulta y una huella criptográfica del contenido. Toda fuente deberá haber sido recuperada por el servidor y cada cita deberá existir literalmente en su contenido normalizado; el modelo solo podrá referirse a registros ya validados y una conclusión sin evidencia válida se degradará a sin evidencia suficiente. No se almacenarán copias completas de páginas de terceros: el fragmento mínimo permite auditar el veredicto aun si el enlace cambia, a la vez que reduce almacenamiento y exposición de contenido ajeno.

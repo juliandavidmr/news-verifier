@@ -1,0 +1,3 @@
+# Usar una pipeline de investigación explícita y durable
+
+El MVP implementará una pipeline propia con Vercel Workflow SDK y AI SDK Core, proveedores intercambiables de inferencia, búsqueda y OCR, y reglas deterministas para cobertura e índice. Eve no será dependencia porque su runtime de agentes beta aporta autonomía innecesaria a un proceso cerrado; JEV tampoco será el motor porque no busca, procesa imágenes, cita ni redacta y carece de un free tier recurrente documentado. Workers AI y Exa serán los proveedores iniciales, encapsulados para poder sustituirlos sin cambiar el dominio ni el formato permanente de los informes.
