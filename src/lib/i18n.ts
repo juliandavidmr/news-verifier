@@ -7,36 +7,44 @@ export const messages = {
   en: {
     brand: "News Verifier",
     eyebrow: "Evidence, not vibes.",
-    heroTitle: "Check what a post actually claims.",
+    heroTitle: "See which claims hold up—and why.",
     heroBody:
-      "Paste a public link or upload a screenshot. We extract its claims and contrast them with traceable evidence.",
+      "Paste a public link or upload a screenshot. We analyze its main claims and show the evidence, the sources and what cannot be concluded.",
     linkMode: "Link",
     imageMode: "Upload screenshot",
     inputType: "Input type",
     linkLabel: "Public page URL",
     linkPlaceholder: "https://example.com/article",
-    imageLabel: "PNG, JPG/JPEG or WebP",
+    imageLabel: "PNG, JPG or WebP",
     imageHelp: "Maximum 4 MB · clear, readable text",
-    submit: "Verify this source",
+    chooseImage: "Choose screenshot",
+    removeImage: "Remove screenshot",
+    submit: "Analyze the claims",
     submitting: "Creating report…",
     readingImage: "Reading screenshot…",
     privacy: "Privacy policy",
     methodology: "Methodology",
     language: "Language",
-    productPrinciples: "Product principles",
+    trustAutomated: "Automated, dated report",
+    trustSources: "Sources you can open",
+    trustTiming: "The investigation may take several minutes",
+    imagePrivacyNotice:
+      "The screenshot is used to recognize the text and is not stored after reading it.",
     listingNotice:
-      "Completed link reports may appear publicly on this page and in search engines.",
+      "Reports created from links may be published on this page and appear in search engines.",
+    reportDetails: "See what the report includes",
     recentReportsTitle: "Recent reports",
-    recentReportsDescription: "Recently completed automated investigations.",
+    recentReportsDescription: "Explore completed automated investigations.",
     requestRemoval: "Request removal",
     removalEmailSubject: "Removal request for report",
     removalEmailBody:
       "Please review the removal of this report from public listings and search engines:",
     reportSearchDescription:
       "Automated, dated evidence report with traceable sources and explicit uncertainty.",
-    principleEvidence: "Traceable evidence",
-    principleClaims: "Claim by claim",
-    principleUncertainty: "Honest uncertainty",
+    finalCtaTitle: "Have a claim you want to examine?",
+    finalCtaBody:
+      "Submit a public link or screenshot and get a report you can inspect claim by claim.",
+    finalCtaAction: "Analyze a publication",
     genericError: "We could not start the investigation. Please try again.",
     invalidUrl: "Enter a valid public HTTP or HTTPS URL.",
     visitorQuotaReached:
@@ -44,7 +52,7 @@ export const messages = {
     globalQuotaReached:
       "Today’s shared verification capacity has been reached. Try again tomorrow.",
     imageTooLarge: "The screenshot must be 4 MB or smaller.",
-    invalidImage: "Choose a valid PNG, JPG/JPEG or WebP screenshot.",
+    invalidImage: "Choose a valid PNG, JPG or WebP screenshot.",
     ocrQualityInsufficient:
       "We could not read enough reliable text from this screenshot. Try a clearer image.",
     ocrTimeout:
@@ -100,37 +108,45 @@ export const messages = {
   es: {
     brand: "Verificador de noticias",
     eyebrow: "Evidencia, no intuiciones.",
-    heroTitle: "Comprueba qué afirma realmente una publicación.",
+    heroTitle: "Descubre qué afirmaciones tienen respaldo.",
     heroBody:
-      "Pega un enlace público o sube una captura. Extraemos sus afirmaciones y las contrastamos con evidencia rastreable.",
+      "Pega un enlace público o sube una captura. Analizamos sus afirmaciones principales y te mostramos la evidencia, las fuentes y lo que no se puede concluir.",
     linkMode: "Enlace",
     imageMode: "Subir captura",
     inputType: "Tipo de entrada",
     linkLabel: "URL de la página pública",
     linkPlaceholder: "https://ejemplo.com/articulo",
-    imageLabel: "PNG, JPG/JPEG o WebP",
+    imageLabel: "PNG, JPG o WebP",
     imageHelp: "Máximo 4 MB · texto claro y legible",
-    submit: "Verificar esta fuente",
+    chooseImage: "Elegir captura",
+    removeImage: "Quitar captura",
+    submit: "Analizar las afirmaciones",
     submitting: "Creando informe…",
     readingImage: "Leyendo captura…",
     privacy: "Política de privacidad",
     methodology: "Metodología",
     language: "Idioma",
-    productPrinciples: "Principios del producto",
+    trustAutomated: "Informe automatizado y fechado",
+    trustSources: "Fuentes que puedes abrir",
+    trustTiming: "La investigación puede tardar varios minutos",
+    imagePrivacyNotice:
+      "La captura se usa para reconocer el texto y no se almacena después de leerla.",
     listingNotice:
-      "Los informes de enlaces completados pueden aparecer públicamente aquí y en buscadores.",
+      "Los informes creados desde enlaces pueden publicarse en esta página y aparecer en buscadores.",
+    reportDetails: "Ver qué incluye el informe",
     recentReportsTitle: "Informes recientes",
     recentReportsDescription:
-      "Investigaciones automatizadas completadas recientemente.",
+      "Explora investigaciones automatizadas terminadas.",
     requestRemoval: "Solicitar retiro",
     removalEmailSubject: "Solicitud de retiro del informe",
     removalEmailBody:
       "Por favor, revisa el retiro de este informe de los listados públicos y buscadores:",
     reportSearchDescription:
       "Informe automatizado y fechado de evidencia con fuentes rastreables e incertidumbre explícita.",
-    principleEvidence: "Evidencia rastreable",
-    principleClaims: "Afirmación por afirmación",
-    principleUncertainty: "Incertidumbre honesta",
+    finalCtaTitle: "¿Tienes una afirmación que quieres revisar?",
+    finalCtaBody:
+      "Envía un enlace público o una captura y recibe un informe que puedes revisar afirmación por afirmación.",
+    finalCtaAction: "Analizar una publicación",
     genericError: "No pudimos iniciar la investigación. Inténtalo de nuevo.",
     invalidUrl: "Ingresa una URL pública HTTP o HTTPS válida.",
     visitorQuotaReached:
@@ -138,7 +154,7 @@ export const messages = {
     globalQuotaReached:
       "Se alcanzó la capacidad compartida de verificaciones de hoy. Inténtalo mañana.",
     imageTooLarge: "La captura debe pesar 4 MB o menos.",
-    invalidImage: "Elige una captura PNG, JPG/JPEG o WebP válida.",
+    invalidImage: "Elige una captura PNG, JPG o WebP válida.",
     ocrQualityInsufficient:
       "No pudimos leer suficiente texto fiable en esta captura. Prueba con una imagen más clara.",
     ocrTimeout:
@@ -196,36 +212,44 @@ export const messages = {
   fr: {
     brand: "Vérificateur d’actualités",
     eyebrow: "Des preuves, pas des impressions.",
-    heroTitle: "Vérifiez ce qu’une publication affirme vraiment.",
+    heroTitle: "Découvrez quelles affirmations sont étayées.",
     heroBody:
-      "Collez un lien public ou importez une capture. Nous extrayons ses affirmations et les confrontons à des preuves traçables.",
+      "Collez un lien public ou importez une capture. Nous analysons les principales affirmations et montrons les preuves, les sources et ce qui ne peut pas être conclu.",
     linkMode: "Lien",
     imageMode: "Importer une capture",
     inputType: "Type d’entrée",
     linkLabel: "URL de la page publique",
     linkPlaceholder: "https://exemple.com/article",
-    imageLabel: "PNG, JPG/JPEG ou WebP",
+    imageLabel: "PNG, JPG ou WebP",
     imageHelp: "4 Mo maximum · texte clair et lisible",
-    submit: "Vérifier cette source",
+    chooseImage: "Choisir une capture",
+    removeImage: "Retirer la capture",
+    submit: "Analyser les affirmations",
     submitting: "Création du rapport…",
     readingImage: "Lecture de la capture…",
     privacy: "Politique de confidentialité",
     methodology: "Méthodologie",
     language: "Langue",
-    productPrinciples: "Principes du produit",
+    trustAutomated: "Rapport automatisé et daté",
+    trustSources: "Sources que vous pouvez ouvrir",
+    trustTiming: "L’enquête peut prendre plusieurs minutes",
+    imagePrivacyNotice:
+      "La capture sert à reconnaître le texte et n’est pas conservée après sa lecture.",
     listingNotice:
-      "Les rapports de liens terminés peuvent apparaître publiquement ici et dans les moteurs de recherche.",
+      "Les rapports créés à partir de liens peuvent être publiés ici et apparaître dans les moteurs de recherche.",
+    reportDetails: "Voir ce que contient le rapport",
     recentReportsTitle: "Rapports récents",
-    recentReportsDescription: "Enquêtes automatisées récemment terminées.",
+    recentReportsDescription: "Explorez des enquêtes automatisées terminées.",
     requestRemoval: "Demander le retrait",
     removalEmailSubject: "Demande de retrait du rapport",
     removalEmailBody:
       "Veuillez examiner le retrait de ce rapport des listes publiques et des moteurs de recherche :",
     reportSearchDescription:
       "Rapport de preuves automatisé et daté, avec sources traçables et incertitude explicite.",
-    principleEvidence: "Preuves traçables",
-    principleClaims: "Affirmation par affirmation",
-    principleUncertainty: "Incertitude assumée",
+    finalCtaTitle: "Une affirmation mérite d’être examinée ?",
+    finalCtaBody:
+      "Envoyez un lien public ou une capture et obtenez un rapport consultable affirmation par affirmation.",
+    finalCtaAction: "Analyser une publication",
     genericError: "Impossible de lancer l’enquête. Veuillez réessayer.",
     invalidUrl: "Saisissez une URL publique HTTP ou HTTPS valide.",
     visitorQuotaReached:
@@ -233,7 +257,7 @@ export const messages = {
     globalQuotaReached:
       "La capacité partagée de vérification du jour est atteinte. Réessayez demain.",
     imageTooLarge: "La capture doit peser 4 Mo ou moins.",
-    invalidImage: "Choisissez une capture PNG, JPG/JPEG ou WebP valide.",
+    invalidImage: "Choisissez une capture PNG, JPG ou WebP valide.",
     ocrQualityInsufficient:
       "Nous n’avons pas pu lire assez de texte fiable sur cette capture. Essayez une image plus nette.",
     ocrTimeout:
@@ -292,37 +316,44 @@ export const messages = {
   pt: {
     brand: "Verificador de notícias",
     eyebrow: "Evidências, não palpites.",
-    heroTitle: "Confira o que uma publicação realmente afirma.",
+    heroTitle: "Descubra quais afirmações têm respaldo.",
     heroBody:
-      "Cole um link público ou envie uma captura. Extraímos suas afirmações e as comparamos com evidências rastreáveis.",
+      "Cole um link público ou envie uma captura. Analisamos as principais afirmações e mostramos as evidências, as fontes e o que não pode ser concluído.",
     linkMode: "Link",
     imageMode: "Enviar captura",
     inputType: "Tipo de entrada",
     linkLabel: "URL da página pública",
     linkPlaceholder: "https://exemplo.com/artigo",
-    imageLabel: "PNG, JPG/JPEG ou WebP",
+    imageLabel: "PNG, JPG ou WebP",
     imageHelp: "Máximo de 4 MB · texto claro e legível",
-    submit: "Verificar esta fonte",
+    chooseImage: "Escolher captura",
+    removeImage: "Remover captura",
+    submit: "Analisar as afirmações",
     submitting: "Criando relatório…",
     readingImage: "Lendo captura…",
     privacy: "Política de privacidade",
     methodology: "Metodologia",
     language: "Idioma",
-    productPrinciples: "Princípios do produto",
+    trustAutomated: "Relatório automatizado e datado",
+    trustSources: "Fontes que você pode abrir",
+    trustTiming: "A investigação pode levar alguns minutos",
+    imagePrivacyNotice:
+      "A captura é usada para reconhecer o texto e não é armazenada depois da leitura.",
     listingNotice:
-      "Relatórios de links concluídos podem aparecer publicamente aqui e nos mecanismos de busca.",
+      "Relatórios criados a partir de links podem ser publicados aqui e aparecer nos mecanismos de busca.",
+    reportDetails: "Ver o que o relatório inclui",
     recentReportsTitle: "Relatórios recentes",
-    recentReportsDescription:
-      "Investigações automatizadas concluídas recentemente.",
+    recentReportsDescription: "Explore investigações automatizadas concluídas.",
     requestRemoval: "Solicitar retirada",
     removalEmailSubject: "Solicitação de retirada do relatório",
     removalEmailBody:
       "Analise a retirada deste relatório das listagens públicas e dos mecanismos de busca:",
     reportSearchDescription:
       "Relatório automatizado e datado de evidências com fontes rastreáveis e incerteza explícita.",
-    principleEvidence: "Evidências rastreáveis",
-    principleClaims: "Afirmação por afirmação",
-    principleUncertainty: "Incerteza honesta",
+    finalCtaTitle: "Tem uma afirmação que quer analisar?",
+    finalCtaBody:
+      "Envie um link público ou uma captura e receba um relatório que pode revisar afirmação por afirmação.",
+    finalCtaAction: "Analisar uma publicação",
     genericError: "Não foi possível iniciar a investigação. Tente novamente.",
     invalidUrl: "Insira uma URL pública HTTP ou HTTPS válida.",
     visitorQuotaReached:
@@ -330,7 +361,7 @@ export const messages = {
     globalQuotaReached:
       "A capacidade compartilhada de verificações de hoje foi atingida. Tente novamente amanhã.",
     imageTooLarge: "A captura deve ter no máximo 4 MB.",
-    invalidImage: "Escolha uma captura PNG, JPG/JPEG ou WebP válida.",
+    invalidImage: "Escolha uma captura PNG, JPG ou WebP válida.",
     ocrQualityInsufficient:
       "Não foi possível ler texto confiável suficiente nesta captura. Tente uma imagem mais nítida.",
     ocrTimeout:

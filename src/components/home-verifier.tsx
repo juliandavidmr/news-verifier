@@ -72,6 +72,7 @@ export function HomeVerifier({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
+  const imageInput = useRef<HTMLInputElement>(null);
   const copy = messages[locale];
   const seo = seoContent[locale];
   const SubmitIcon = submitting ? Sincronizar : FlechaDerecha;
@@ -161,7 +162,9 @@ export function HomeVerifier({
     <main className="site-shell">
       <header className="topbar">
         <BrandLink label={copy.brand} href={localizedPath(locale)} />
-        <span className="topbar-note">{copy.eyebrow}</span>
+        <a className="topbar-link" href={localizedPath(locale, "/methodology")}>
+          {copy.methodology}
+        </a>
       </header>
 
       <section className="hero-grid">
@@ -169,9 +172,18 @@ export function HomeVerifier({
           <p className="kicker">{copy.eyebrow}</p>
           <h1>{copy.heroTitle}</h1>
           <p className="hero-body">{copy.heroBody}</p>
+          <ul className="hero-trust">
+            <li>{copy.trustAutomated}</li>
+            <li>{copy.trustSources}</li>
+            <li>{copy.trustTiming}</li>
+          </ul>
+          <a className="hero-details-link" href="#how-it-works">
+            {copy.reportDetails}
+            <FlechaDerecha size={18} aria-hidden="true" />
+          </a>
         </div>
 
-        <form className="verify-card" onSubmit={submit}>
+        <form className="verify-card" id="verify" onSubmit={submit}>
           <fieldset className="mode-switch" aria-label={copy.inputType}>
             <button
               className={
@@ -220,9 +232,10 @@ export function HomeVerifier({
               <span className="upload-icon" aria-hidden="true">
                 <Subir size={26} />
               </span>
-              <strong>{copy.imageMode}</strong>
+              <strong>{image ? image.name : copy.chooseImage}</strong>
               <span>{copy.imageLabel}</span>
               <input
+                ref={imageInput}
                 type="file"
                 accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
                 required
@@ -231,19 +244,34 @@ export function HomeVerifier({
                   idempotencyKey.current = crypto.randomUUID();
                 }}
               />
-              {image ? (
-                <small>{image.name}</small>
-              ) : (
-                <small>{copy.imageHelp}</small>
-              )}
+              <small>{copy.imageHelp}</small>
             </label>
           )}
+
+          {mode === "image" && image ? (
+            <button
+              className="remove-image"
+              type="button"
+              disabled={submitting}
+              onClick={() => {
+                setImage(null);
+                if (imageInput.current) imageInput.current.value = "";
+                idempotencyKey.current = crypto.randomUUID();
+              }}
+            >
+              {copy.removeImage}
+            </button>
+          ) : null}
 
           {error ? (
             <p className="form-error" role="alert">
               {error}
             </p>
           ) : null}
+
+          <p className="submission-notice">
+            {mode === "image" ? copy.imagePrivacyNotice : copy.listingNotice}
+          </p>
 
           <button
             className="submit-button"
@@ -262,28 +290,10 @@ export function HomeVerifier({
               <SubmitIcon size={20} />
             </span>
           </button>
-          {mode === "url" ? (
-            <p className="listing-notice">{copy.listingNotice}</p>
-          ) : null}
         </form>
       </section>
 
       {recentReportsSection}
-
-      <section className="principles" aria-label={copy.productPrinciples}>
-        <article>
-          <span>01</span>
-          <strong>{copy.principleEvidence}</strong>
-        </article>
-        <article>
-          <span>02</span>
-          <strong>{copy.principleClaims}</strong>
-        </article>
-        <article>
-          <span>03</span>
-          <strong>{copy.principleUncertainty}</strong>
-        </article>
-      </section>
 
       <section className="seo-section" aria-labelledby="how-it-works">
         <div className="section-heading">
@@ -303,24 +313,6 @@ export function HomeVerifier({
       </section>
 
       <section
-        className="seo-section seo-section-accent"
-        aria-labelledby="report-includes"
-      >
-        <div className="section-heading">
-          <h2 id="report-includes">{seo.coverageTitle}</h2>
-          <p>{seo.coverageIntro}</p>
-        </div>
-        <div className="coverage-grid">
-          {seo.coverage.map((item) => (
-            <article key={item.title}>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
         className="seo-section faq-section"
         aria-labelledby="frequent-questions"
       >
@@ -335,6 +327,17 @@ export function HomeVerifier({
             </details>
           ))}
         </div>
+      </section>
+
+      <section className="final-cta" aria-labelledby="final-cta-title">
+        <div>
+          <h2 id="final-cta-title">{copy.finalCtaTitle}</h2>
+          <p>{copy.finalCtaBody}</p>
+        </div>
+        <a href="#verify">
+          {copy.finalCtaAction}
+          <FlechaDerecha size={20} aria-hidden="true" />
+        </a>
       </section>
 
       <footer className="footer">

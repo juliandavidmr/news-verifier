@@ -6,9 +6,6 @@ type SeoContent = {
   howTitle: string;
   howIntro: string;
   steps: readonly { title: string; body: string }[];
-  coverageTitle: string;
-  coverageIntro: string;
-  coverage: readonly { title: string; body: string }[];
   faqTitle: string;
   faq: readonly { question: string; answer: string }[];
   methodologyDescription: string;
@@ -21,52 +18,35 @@ type SeoContent = {
 
 export const seoContent: Record<SupportedLocale, SeoContent> = {
   en: {
-    homeTitle: "Fact-check news, links and screenshots",
+    homeTitle: "Analyze claims in news, links and screenshots",
     homeDescription:
-      "Check factual claims in a public article, social post or screenshot against traceable evidence. Get a dated, claim-by-claim verification report.",
-    howTitle: "How the fact-check works",
+      "Analyze the main claims in a public article, post or screenshot. Get an automated, dated report with sources you can open and limits you can see.",
+    howTitle: "From publication to evidence report",
     howIntro:
-      "News Verifier turns a public link or readable screenshot into an auditable evidence report. It evaluates specific factual claims instead of rating a publisher or author.",
+      "The verifier examines concrete claims, not the reputation of the publisher or author. The result is an automated, dated report you can inspect.",
     steps: [
       {
-        title: "Submit the source",
-        body: "Paste a public HTTP or HTTPS page, or upload a clear PNG, JPEG or WebP screenshot.",
+        title: "Add the publication",
+        body: "Paste the link to a public page or upload a clear PNG, JPG or WebP screenshot.",
       },
       {
-        title: "Identify the claims",
-        body: "The verifier extracts the main content, separates verifiable statements and preserves the context needed to understand them.",
+        title: "Separate and compare claims",
+        body: "The verifier identifies the main checkable statements and compares them with independent sources it can validate.",
       },
       {
-        title: "Compare evidence",
-        body: "Each prioritized claim is checked against retrieved sources, with citations, limitations and uncertainty shown in the report.",
-      },
-    ],
-    coverageTitle: "What the report tells you",
-    coverageIntro:
-      "The result is a dated snapshot of the evidence found during the investigation, not a claim of permanent or absolute truth.",
-    coverage: [
-      {
-        title: "Claim-by-claim verdicts",
-        body: "See whether available evidence supports, contradicts or complicates each factual statement.",
-      },
-      {
-        title: "Traceable sources",
-        body: "Open the sources behind each conclusion and read the exact evidence fragment used.",
-      },
-      {
-        title: "Visible uncertainty",
-        body: "Missing, conflicting or insufficient evidence stays visible instead of being converted into a confident answer.",
+        title: "Review the report",
+        body: "See what supports, contradicts or complicates each claim, open the sources and identify what the evidence cannot establish.",
       },
     ],
     faqTitle: "Frequently asked questions",
     faq: [
       {
-        question: "Can I verify a social media screenshot?",
+        question: "Can I analyze a social media screenshot?",
         answer:
           "Yes. Upload a clear screenshot with readable text. The image is processed for text recognition and is not stored after OCR finishes.",
       },
       {
-        question: "Does a low score mean the whole article is false?",
+        question: "Does a low support index mean the whole article is false?",
         answer:
           "No. The verifier evaluates individual factual claims and reports evidence coverage. It does not judge every sentence, the author’s intent or a publisher’s reputation.",
       },
@@ -120,54 +100,38 @@ export const seoContent: Record<SupportedLocale, SeoContent> = {
       "Read how News Verifier processes links, screenshots, anonymous usage signals and unlisted evidence reports.",
   },
   es: {
-    homeTitle: "Verifica noticias, enlaces y capturas",
+    homeTitle: "Analiza afirmaciones en noticias, enlaces y capturas",
     homeDescription:
-      "Comprueba afirmaciones de una noticia, publicación o captura con evidencia rastreable. Obtén un informe fechado, afirmación por afirmación.",
-    howTitle: "Cómo funciona la verificación",
+      "Analiza las afirmaciones principales de una noticia, publicación o captura. Recibe un informe automatizado y fechado con fuentes que puedes abrir y límites visibles.",
+    howTitle: "De la publicación al informe de evidencia",
     howIntro:
-      "Verificador de noticias convierte un enlace público o una captura legible en un informe auditable de evidencia. Evalúa afirmaciones concretas en lugar de calificar al medio o al autor.",
+      "El verificador examina afirmaciones concretas, no la reputación del medio o del autor. El resultado es un informe automatizado y fechado que puedes revisar.",
     steps: [
       {
-        title: "Envía la fuente",
-        body: "Pega una página pública HTTP o HTTPS, o sube una captura clara en PNG, JPEG o WebP.",
+        title: "Añade la publicación",
+        body: "Pega el enlace de una página pública o sube una captura clara en PNG, JPG o WebP.",
       },
       {
-        title: "Identifica las afirmaciones",
-        body: "El verificador extrae el contenido principal, separa los hechos comprobables y conserva el contexto necesario.",
+        title: "Separa y contrasta las afirmaciones",
+        body: "El verificador identifica los hechos principales que se pueden comprobar y los compara con fuentes independientes que puede validar.",
       },
       {
-        title: "Contrasta la evidencia",
-        body: "Cada afirmación priorizada se compara con fuentes recuperadas y el informe muestra citas, límites e incertidumbre.",
-      },
-    ],
-    coverageTitle: "Qué te dice el informe",
-    coverageIntro:
-      "El resultado es una instantánea fechada de la evidencia encontrada, no una declaración de verdad permanente o absoluta.",
-    coverage: [
-      {
-        title: "Veredictos por afirmación",
-        body: "Comprueba si la evidencia disponible respalda, contradice o matiza cada afirmación factual.",
-      },
-      {
-        title: "Fuentes rastreables",
-        body: "Abre las fuentes de cada conclusión y consulta el fragmento exacto de evidencia utilizado.",
-      },
-      {
-        title: "Incertidumbre visible",
-        body: "La evidencia ausente, conflictiva o insuficiente permanece visible y no se transforma en una respuesta segura.",
+        title: "Revisa el informe",
+        body: "Descubre qué respalda, contradice o matiza cada afirmación, abre las fuentes y reconoce lo que la evidencia no permite concluir.",
       },
     ],
     faqTitle: "Preguntas frecuentes",
     faq: [
       {
-        question: "¿Puedo verificar una captura de redes sociales?",
+        question: "¿Puedo analizar una captura de redes sociales?",
         answer:
-          "Sí. Sube una captura clara con texto legible. La imagen se procesa para reconocer el texto y no se almacena después de terminar el OCR.",
+          "Sí. Sube una captura clara con texto legible. La imagen se usa para reconocer el texto y no se almacena después de leerla.",
       },
       {
-        question: "¿Un índice bajo significa que todo el artículo es falso?",
+        question:
+          "¿Un índice de respaldo bajo significa que toda la publicación es falsa?",
         answer:
-          "No. El verificador evalúa afirmaciones factuales individuales y la cobertura de evidencia; no juzga cada frase, la intención del autor ni la reputación del medio.",
+          "No. El índice resume cuánto respaldo encontró el informe entre las afirmaciones evaluadas. No juzga cada frase, la intención del autor ni la reputación del medio.",
       },
       {
         question: "¿El verificador garantiza que una afirmación es verdadera?",
@@ -219,55 +183,38 @@ export const seoContent: Record<SupportedLocale, SeoContent> = {
       "Consulta cómo el Verificador de noticias procesa enlaces, capturas, señales anónimas de uso e informes de evidencia no listados.",
   },
   fr: {
-    homeTitle: "Vérifiez des actualités, liens et captures",
+    homeTitle: "Analysez les affirmations d’actualités, liens et captures",
     homeDescription:
-      "Vérifiez les affirmations d’un article, d’une publication ou d’une capture avec des preuves traçables et un rapport daté, affirmation par affirmation.",
-    howTitle: "Comment fonctionne la vérification",
+      "Analysez les principales affirmations d’un article, d’une publication ou d’une capture. Obtenez un rapport automatisé et daté avec des sources consultables et des limites visibles.",
+    howTitle: "De la publication au rapport de preuves",
     howIntro:
-      "Le Vérificateur d’actualités transforme un lien public ou une capture lisible en rapport de preuves auditable. Il évalue des faits précis plutôt que la réputation d’un média.",
+      "Le vérificateur examine des affirmations précises, pas la réputation du média ou de l’auteur. Le résultat est un rapport automatisé et daté que vous pouvez consulter.",
     steps: [
       {
-        title: "Soumettez la source",
-        body: "Collez une page HTTP ou HTTPS publique, ou importez une capture PNG, JPEG ou WebP lisible.",
+        title: "Ajoutez la publication",
+        body: "Collez le lien d’une page publique ou importez une capture PNG, JPG ou WebP lisible.",
       },
       {
-        title: "Identifiez les affirmations",
-        body: "Le vérificateur extrait le contenu principal, sépare les faits vérifiables et conserve le contexte utile.",
+        title: "Isolez et comparez les affirmations",
+        body: "Le vérificateur repère les principaux faits vérifiables et les compare à des sources indépendantes qu’il peut valider.",
       },
       {
-        title: "Comparez les preuves",
-        body: "Chaque affirmation prioritaire est comparée à des sources récupérées, avec citations, limites et incertitudes.",
-      },
-    ],
-    coverageTitle: "Ce que le rapport vous apprend",
-    coverageIntro:
-      "Le résultat est un instantané daté des preuves trouvées, et non une déclaration de vérité absolue ou permanente.",
-    coverage: [
-      {
-        title: "Verdicts par affirmation",
-        body: "Voyez si les preuves disponibles soutiennent, contredisent ou nuancent chaque affirmation factuelle.",
-      },
-      {
-        title: "Sources traçables",
-        body: "Ouvrez les sources de chaque conclusion et consultez le fragment exact utilisé.",
-      },
-      {
-        title: "Incertitude visible",
-        body: "Les preuves absentes, contradictoires ou insuffisantes restent visibles au lieu de devenir une réponse certaine.",
+        title: "Consultez le rapport",
+        body: "Voyez ce qui étaye, contredit ou nuance chaque affirmation, ouvrez les sources et repérez ce que les preuves ne permettent pas de conclure.",
       },
     ],
     faqTitle: "Questions fréquentes",
     faq: [
       {
-        question: "Puis-je vérifier une capture de réseau social ?",
+        question: "Puis-je analyser une capture de réseau social ?",
         answer:
-          "Oui. Importez une capture nette au texte lisible. L’image sert à reconnaître le texte et n’est pas conservée après l’OCR.",
+          "Oui. Importez une capture nette au texte lisible. L’image sert à reconnaître le texte et n’est pas conservée après sa lecture.",
       },
       {
         question:
-          "Un indice faible signifie-t-il que tout l’article est faux ?",
+          "Un indice de soutien faible signifie-t-il que toute la publication est fausse ?",
         answer:
-          "Non. Le vérificateur évalue des faits individuels et la couverture des preuves, pas chaque phrase, l’intention de l’auteur ou la réputation du média.",
+          "Non. L’indice résume le soutien trouvé parmi les affirmations évaluées. Il ne juge pas chaque phrase, l’intention de l’auteur ou la réputation du média.",
       },
       {
         question:
@@ -320,54 +267,38 @@ export const seoContent: Record<SupportedLocale, SeoContent> = {
       "Découvrez comment le Vérificateur d’actualités traite les liens, captures, signaux anonymes et rapports de preuves non répertoriés.",
   },
   pt: {
-    homeTitle: "Verifique notícias, links e capturas",
+    homeTitle: "Analise afirmações em notícias, links e capturas",
     homeDescription:
-      "Confira afirmações de notícias, publicações e capturas com evidências rastreáveis e receba um relatório datado, afirmação por afirmação.",
-    howTitle: "Como funciona a verificação",
+      "Analise as principais afirmações de notícias, publicações e capturas. Receba um relatório automatizado e datado com fontes que você pode abrir e limites visíveis.",
+    howTitle: "Da publicação ao relatório de evidências",
     howIntro:
-      "O Verificador de notícias transforma um link público ou captura legível em um relatório auditável. Ele avalia fatos específicos, não a reputação da fonte.",
+      "O verificador examina afirmações concretas, não a reputação do veículo ou do autor. O resultado é um relatório automatizado e datado que você pode revisar.",
     steps: [
       {
-        title: "Envie a fonte",
-        body: "Cole uma página HTTP ou HTTPS pública, ou envie uma captura nítida em PNG, JPEG ou WebP.",
+        title: "Adicione a publicação",
+        body: "Cole o link de uma página pública ou envie uma captura nítida em PNG, JPG ou WebP.",
       },
       {
-        title: "Identifique as afirmações",
-        body: "O verificador extrai o conteúdo principal, separa fatos verificáveis e preserva o contexto necessário.",
+        title: "Separe e compare as afirmações",
+        body: "O verificador identifica os principais fatos verificáveis e os compara com fontes independentes que consegue validar.",
       },
       {
-        title: "Compare as evidências",
-        body: "Cada afirmação prioritária é comparada a fontes recuperadas, com citações, limites e incerteza no relatório.",
-      },
-    ],
-    coverageTitle: "O que o relatório mostra",
-    coverageIntro:
-      "O resultado é um retrato datado das evidências encontradas, não uma declaração de verdade absoluta ou permanente.",
-    coverage: [
-      {
-        title: "Vereditos por afirmação",
-        body: "Veja se as evidências disponíveis apoiam, contradizem ou contextualizam cada afirmação factual.",
-      },
-      {
-        title: "Fontes rastreáveis",
-        body: "Abra as fontes de cada conclusão e confira o trecho exato usado como evidência.",
-      },
-      {
-        title: "Incerteza visível",
-        body: "Evidências ausentes, conflitantes ou insuficientes continuam visíveis em vez de virarem uma resposta confiante.",
+        title: "Revise o relatório",
+        body: "Veja o que apoia, contradiz ou contextualiza cada afirmação, abra as fontes e reconheça o que as evidências não permitem concluir.",
       },
     ],
     faqTitle: "Perguntas frequentes",
     faq: [
       {
-        question: "Posso verificar uma captura de rede social?",
+        question: "Posso analisar uma captura de rede social?",
         answer:
-          "Sim. Envie uma captura nítida com texto legível. A imagem é processada para reconhecer o texto e não é armazenada após o OCR.",
+          "Sim. Envie uma captura nítida com texto legível. A imagem é usada para reconhecer o texto e não é armazenada depois da leitura.",
       },
       {
-        question: "Um índice baixo significa que todo o artigo é falso?",
+        question:
+          "Um índice de respaldo baixo significa que toda a publicação é falsa?",
         answer:
-          "Não. O verificador avalia fatos individuais e a cobertura das evidências; não julga cada frase, a intenção do autor nem a reputação do veículo.",
+          "Não. O índice resume o respaldo encontrado entre as afirmações avaliadas. Ele não julga cada frase, a intenção do autor nem a reputação do veículo.",
       },
       {
         question: "O verificador garante que uma afirmação é verdadeira?",
