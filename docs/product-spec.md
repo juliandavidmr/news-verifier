@@ -221,7 +221,8 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - Subir una captura inicia su procesamiento inmediatamente, sin advertencia, confirmación adicional ni detección preventiva de datos sensibles.
 - La página correspondiente es la **Política de privacidad**, disponible desde el footer en los cuatro idiomas soportados; no se crea una página legal separada únicamente para retención.
 - La Política de privacidad contiene una sección explícita “Retención de datos” que distingue el blob temporal de la captura, el Extracto analizado persistido, los fragmentos de evidencia, el identificador firmado del navegador y la señal de red seudonimizada.
-- La política explica finalidad, destinatarios o proveedores, periodo o criterio de conservación, procesamiento automatizado y datos que quedan visibles para quien posea la URL.
+- La política explica finalidad, destinatarios o proveedores, periodo o criterio de conservación, procesamiento automatizado y qué informes quedan visibles mediante la portada, los buscadores o únicamente para quien posea la URL.
+- La política distingue el retiro manual de listados e indexación —que conserva el acceso mediante URL— de la retirada administrativa total por motivos legales, de privacidad o abuso.
 - La captura original y sus metadatos se descartan al terminar el OCR; el Extracto analizado y el informe no tienen caducidad automática mientras el servicio permanezca operativo.
 - Antes del lanzamiento deben definirse en esa política la identidad y el contacto del responsable, la base jurídica y los derechos aplicables según las jurisdicciones donde opere el servicio.
 

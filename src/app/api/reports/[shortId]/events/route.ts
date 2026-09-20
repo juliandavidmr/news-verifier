@@ -34,7 +34,10 @@ export async function GET(
     ["completed", "partial"].includes(report.status)
       ? new ReportReaderRepository().findDetails(report.id)
       : Promise.resolve(null),
-    new ReportPublicationRepository().isIndexable(report.id),
+    new ReportPublicationRepository().isIndexable(report.id).catch(() => {
+      console.info("public_report_indexability_unavailable");
+      return false;
+    }),
   ]);
   return Response.json(
     {

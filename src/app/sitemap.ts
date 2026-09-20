@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
     ];
   } catch {
-    console.error("public_report_sitemap_unavailable");
+    console.info("public_report_sitemap_unavailable");
     return publicPages;
   }
 }

@@ -20,7 +20,7 @@ const reportPageData = cache(async (shortId: string) => {
       report.id,
     );
   } catch {
-    console.error("public_report_indexability_unavailable");
+    console.info("public_report_indexability_unavailable");
   }
   return { report, isPubliclyListed };
 });

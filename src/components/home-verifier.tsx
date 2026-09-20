@@ -8,8 +8,7 @@ import {
   Subir,
 } from "@mteherandev/colombia-icons-react";
 import { useRouter } from "next/navigation";
-import { type SubmitEvent, useRef, useState } from "react";
-import type { PublicReportListing } from "../domain/public-report-listing";
+import { type ReactNode, type SubmitEvent, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import { imageUploadMime } from "../lib/image-mime";
@@ -17,7 +16,6 @@ import { seoContent } from "../lib/seo-content";
 import { localizedPath } from "../lib/site";
 import { BrandLink } from "./brand-link";
 import { type ImageOcrPoll, imageOcrOutcome } from "./image-ocr-state";
-import { RecentReports } from "./recent-reports";
 
 type InputMode = "url" | "image";
 
@@ -61,10 +59,10 @@ async function waitForImageOcr(shortId: string) {
 
 export function HomeVerifier({
   initialLocale,
-  recentReports,
+  recentReportsSection,
 }: {
   initialLocale: SupportedLocale;
-  recentReports: PublicReportListing[];
+  recentReportsSection: ReactNode;
 }) {
   const router = useRouter();
   const [locale, setLocale] = useState(initialLocale);
@@ -270,7 +268,7 @@ export function HomeVerifier({
         </form>
       </section>
 
-      <RecentReports locale={locale} reports={recentReports} />
+      {recentReportsSection}
 
       <section className="principles" aria-label={copy.productPrinciples}>
         <article>

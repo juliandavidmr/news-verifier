@@ -1,5 +1,5 @@
 import { FlechaIzquierda } from "@mteherandev/colombia-icons-react";
-import type { PublicReportListing } from "../domain/public-report-listing";
+import { Suspense } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import { privacyPolicy } from "../lib/privacy-policy";
@@ -8,6 +8,7 @@ import { localizedPath, siteName, siteUrl } from "../lib/site";
 import { ReportPublicationRepository } from "../server/reports/publication-repository";
 import { BrandLink } from "./brand-link";
 import { HomeVerifier } from "./home-verifier";
+import { RecentReports } from "./recent-reports";
 
 function JsonLd({ value }: { value: object }) {
   return (
@@ -21,15 +22,19 @@ function JsonLd({ value }: { value: object }) {
   );
 }
 
-export async function PublicHomePage({ locale }: { locale: SupportedLocale }) {
+async function RecentReportsSection({ locale }: { locale: SupportedLocale }) {
+  try {
+    const reports = await new ReportPublicationRepository().listRecent(8);
+    return <RecentReports locale={locale} reports={reports} />;
+  } catch {
+    console.info("public_report_listing_unavailable");
+    return null;
+  }
+}
+
+export function PublicHomePage({ locale }: { locale: SupportedLocale }) {
   const seo = seoContent[locale];
   const url = new URL(localizedPath(locale), siteUrl).toString();
-  let recentReports: PublicReportListing[] = [];
-  try {
-    recentReports = await new ReportPublicationRepository().listRecent(8);
-  } catch {
-    console.error("public_report_listing_unavailable");
-  }
 
   return (
     <>
@@ -49,7 +54,14 @@ export async function PublicHomePage({ locale }: { locale: SupportedLocale }) {
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }}
       />
-      <HomeVerifier initialLocale={locale} recentReports={recentReports} />
+      <HomeVerifier
+        initialLocale={locale}
+        recentReportsSection={
+          <Suspense fallback={null}>
+            <RecentReportsSection locale={locale} />
+          </Suspense>
+        }
+      />
     </>
   );
 }
