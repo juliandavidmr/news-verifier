@@ -4,6 +4,8 @@ import { PublicHomePage } from "../../components/public-pages";
 import { isSupportedLocale } from "../../domain/reports";
 import { publicPageMetadata } from "../../lib/page-metadata";
 
+export const dynamic = "force-dynamic";
+
 async function localeFrom(params: PageProps<"/[locale]">["params"]) {
   const { locale } = await params;
   if (locale === "en" || !isSupportedLocale(locale)) notFound();

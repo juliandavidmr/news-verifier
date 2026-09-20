@@ -21,3 +21,13 @@ The repository owner confirmed the Vercel project name, production URL and Git i
 - Do not commit Vercel tokens, project IDs, organization IDs or environment-variable values.
 - Inspect the current Vercel project or deployment state before changing external settings; this document records topology, not live deployment health.
 - Use non-production branches and Vercel Preview Deployments when deployment-based validation is needed before production.
+
+## Manual report unlisting
+
+After approving a removal request, remove the report from the homepage, sitemap and search indexing without invalidating its direct URL:
+
+```sh
+npm run report:unlist -- <short-id> "reason for removal"
+```
+
+The command requires the database variables from `.env`, records the reason and is idempotent: it fails without modifying an already unlisted or ineligible report. Full administrative withdrawal remains a separate exceptional operation.

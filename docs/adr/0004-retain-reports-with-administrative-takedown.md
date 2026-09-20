@@ -1,3 +1,5 @@
 # Conservar informes sin caducidad y permitir retirada administrativa
 
+**Estado:** parcialmente reemplazado por ADR-0011, que añade una solicitud de retiro del listado mediante correo y conserva separada la retirada administrativa total.
+
 Los informes no caducarán y el MVP no ofrecerá eliminación iniciada por el usuario, de modo que sus URLs compartibles permanezcan estables. Se conservarán internamente el informe, el Extracto analizado y la evidencia necesaria para auditarlo, pero el informe público mostrará solamente las afirmaciones y sus Pasajes de contexto mínimos, sin republicar el contenido completo. Los archivos de imagen originales y sus metadatos se eliminarán después del procesamiento. El MVP tampoco ofrecerá un botón o flujo para reportar contenido; el operador conservará la capacidad administrativa de ocultar o eliminar un informe por razones legales, de privacidad o abuso. La retención se explicará en una sección específica de la Política de privacidad enlazada desde el footer.

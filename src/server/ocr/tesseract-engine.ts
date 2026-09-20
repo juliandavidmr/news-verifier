@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createWorker, OEM, type Worker } from "tesseract.js";
 import type { ExtractedContent } from "../../domain/reports";
 import { OcrProcessingError } from "./ocr-errors";
-import { assessOcrQuality } from "./ocr-quality";
+import { assessOcrQuality, parseTsvWordSignals } from "./ocr-quality";
 
 export { OcrProcessingError } from "./ocr-errors";
 
@@ -71,7 +71,11 @@ export class TesseractOcrEngine {
     const work = (async () => {
       worker = await workerPromise;
       if (timedOut) throw new OcrProcessingError("ocr_timeout");
-      return worker.recognize(Buffer.from(bytes));
+      return worker.recognize(
+        Buffer.from(bytes),
+        {},
+        { text: true, tsv: true },
+      );
     })();
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<never>((_resolve, reject) => {
@@ -86,6 +90,7 @@ export class TesseractOcrEngine {
       const limited = assessOcrQuality(
         result.data.text,
         result.data.confidence,
+        parseTsvWordSignals(result.data.tsv),
       );
       return {
         canonicalUrl: "",

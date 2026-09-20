@@ -9,8 +9,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import type { ReportEvent, SupportedLocale } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
+import { reportRemovalMailto } from "../lib/contact";
 import { messages } from "../lib/i18n";
-import { localizedPath } from "../lib/site";
+import { localizedPath, siteUrl } from "../lib/site";
 import type { PublicReportDetails } from "../server/reports/report-reader";
 import type { PublicReport } from "../server/reports/repository";
 import { BrandLink } from "./brand-link";
@@ -41,9 +42,11 @@ type ShareState = "idle" | "shared" | "copied" | "error";
 export function ReportLiveView({
   initialReport,
   initialDetails,
+  initialPubliclyListed,
 }: {
   initialReport: PublicReport;
   initialDetails: PublicReportDetails | null;
+  initialPubliclyListed: boolean;
 }) {
   const [report, setReport] = useState(initialReport);
   const [details, setDetails] = useState(initialDetails);
@@ -54,6 +57,9 @@ export function ReportLiveView({
   const [notificationState, setNotificationState] =
     useState<NotificationState>("idle");
   const [shareState, setShareState] = useState<ShareState>("idle");
+  const [isPubliclyListed, setIsPubliclyListed] = useState(
+    initialPubliclyListed,
+  );
   const reportRef = useRef(initialReport);
   const sequenceRef = useRef(0);
   const notificationArmedRef = useRef(false);
@@ -123,6 +129,7 @@ export function ReportLiveView({
           report: PublicReport;
           events: ReportEvent[];
           details: PublicReportDetails | null;
+          isPubliclyListed: boolean;
         };
         sequenceRef.current = advanceEventCursor(
           sequenceRef.current,
@@ -133,6 +140,7 @@ export function ReportLiveView({
         reportRef.current = result.report;
         setReport(result.report);
         if (result.details) setDetails(result.details);
+        setIsPubliclyListed(result.isPubliclyListed);
       } catch {
         failures += 1;
         if (!cancelled) setConnectionInterrupted(true);
@@ -231,6 +239,12 @@ export function ReportLiveView({
   };
 
   const ready = report.status === "partial" || report.status === "completed";
+  const removalHref = reportRemovalMailto({
+    shortId: report.shortId,
+    reportUrl: new URL(`/r/${report.shortId}`, siteUrl).toString(),
+    subject: copy.removalEmailSubject,
+    body: copy.removalEmailBody,
+  });
 
   return (
     <main className="report-shell">
@@ -324,6 +338,12 @@ export function ReportLiveView({
       </section>
 
       <p className="report-limit">{copy.automatedLimit}</p>
+
+      {isPubliclyListed ? (
+        <p className="report-removal">
+          <a href={removalHref}>{copy.requestRemoval}</a>
+        </p>
+      ) : null}
 
       <footer className="footer report-footer">
         <nav>

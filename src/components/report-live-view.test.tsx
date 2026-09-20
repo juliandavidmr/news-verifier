@@ -34,7 +34,11 @@ describe("report navigation locale", () => {
     "keeps %s in every internal destination",
     (locale, homePath, privacyPath, methodologyPath) => {
       const html = renderToStaticMarkup(
-        <ReportLiveView initialReport={report(locale)} initialDetails={null} />,
+        <ReportLiveView
+          initialReport={report(locale)}
+          initialDetails={null}
+          initialPubliclyListed={false}
+        />,
       );
 
       expect(html).toContain(`class="brand" href="${homePath}"`);

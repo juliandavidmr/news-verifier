@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import type { SupportedLocale } from "../domain/reports";
 import { localizedPath, siteUrl } from "../lib/site";
+import { ReportPublicationRepository } from "../server/reports/publication-repository";
+
+export const dynamic = "force-dynamic";
 
 const locales: SupportedLocale[] = ["en", "es", "fr", "pt"];
 const pages = [
@@ -17,10 +20,10 @@ const pages = [
   },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date("2026-09-20T00:00:00.000Z");
 
-  return pages.flatMap((page) => {
+  const publicPages = pages.flatMap((page) => {
     const languages = Object.fromEntries(
       locales.map((locale) => [
         locale,
@@ -41,4 +44,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     }));
   });
+
+  try {
+    const reports = await new ReportPublicationRepository().listIndexable();
+    return [
+      ...publicPages,
+      ...reports.map((report) => ({
+        url: new URL(`/r/${report.shortId}`, siteUrl).toString(),
+        lastModified: new Date(report.completedAt),
+        changeFrequency: "never" as const,
+        priority: 0.6,
+      })),
+    ];
+  } catch {
+    console.error("public_report_sitemap_unavailable");
+    return publicPages;
+  }
 }

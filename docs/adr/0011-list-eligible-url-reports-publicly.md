@@ -1,0 +1,7 @@
+# Listar e indexar automáticamente informes elegibles originados por URL
+
+**Estado:** accepted
+
+Los informes creados después de activar esta función a partir de una URL serán públicos e indexables automáticamente cuando terminen como completados, alcancen al menos 60 % de Cobertura de evidencia, no dejen afirmaciones principales sin conclusión y conserven un título utilizable. No se requiere consentimiento y el MVP no aplica moderación previa; un aviso discreto pero legible junto al formulario explica la exposición. Los informes anteriores, parciales, inconclusos, sin título y originados por capturas permanecen no listados. Esta decisión reemplaza para ese subconjunto el modelo exclusivamente no listado de ADR-0003 y acepta mayor descubribilidad a cambio de demostrar resultados reales del producto.
+
+La portada muestra entre tres y ocho informes elegibles recientes después del formulario, conserva solo el más reciente por URL canónica y comparte la misma selección en todos los idiomas. Las tarjetas presentan título original, dominio y fecha, sin Índice de respaldo ni Cobertura de evidencia. Todos los informes elegibles permanecen en el sitemap y con indexación habilitada aunque salgan de la portada. Cada uno ofrece una Solicitud de retiro por correo a `news-verifier.securely376@silomails.com`; el operador retira manualmente el informe de listados y buscadores sin invalidar su URL. La retirada administrativa total sigue reservada para razones legales, de privacidad o abuso.

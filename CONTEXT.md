@@ -105,7 +105,7 @@ Informe permanente accesible para cualquier persona que posea su URL, pero ausen
 _Avoid_: Informe privado, informe público, informe secreto
 
 **Informe publicable**:
-Informe futuro originado por URL que se hace elegible automáticamente para directorios públicos e índices de buscadores cuando termina como completado, alcanza al menos 60 % de Cobertura de evidencia y no deja afirmaciones principales sin conclusión. Permanece indexable aunque deje de estar entre los informes recientes, hasta que el operador lo retire. No requiere consentimiento ni implica revisión humana o evaluación de idoneidad editorial; excluye informes existentes, Informes parciales y contenidos originados por capturas, y su Índice de respaldo no determina si puede listarse.
+Informe futuro originado por URL que se hace elegible automáticamente para directorios públicos e índices de buscadores cuando termina como completado, alcanza al menos 60 % de Cobertura de evidencia, no deja afirmaciones principales sin conclusión y conserva un título extraído utilizable. Permanece indexable aunque deje de estar entre los informes recientes, hasta que el operador lo retire. No requiere consentimiento ni implica revisión humana o evaluación de idoneidad editorial; excluye informes existentes, Informes parciales y contenidos originados por capturas, y su Índice de respaldo no determina si puede listarse.
 _Avoid_: Informe revisado, informe aprobado, informe verificado por una persona
 
 **Aviso de listado**:
@@ -113,11 +113,11 @@ Texto informativo, legible y de baja jerarquía visual situado junto a la acció
 _Avoid_: Consentimiento, advertencia oculta, casilla de publicación
 
 **Solicitud de retiro**:
-Petición enviada al operador desde un Informe publicable para que evalúe ocultarlo de los directorios públicos. No elimina el Informe automáticamente ni garantiza su retirada.
+Petición enviada por correo al operador desde un Informe publicable para que evalúe retirarlo manualmente de los directorios públicos y los índices de buscadores. No ejecuta acciones administrativas ni elimina el Informe; cuando se aprueba, este continúa accesible para quien conserve su URL.
 _Avoid_: Eliminación, despublicación automática, denuncia resuelta
 
 **Listado público de informes**:
-Directorio global de la página principal compuesto por entre tres y ocho de los Informes publicables más recientes, ordenados por fecha de finalización. Se oculta por completo mientras existan menos de tres; las distintas versiones lingüísticas comparten los mismos informes y traducen únicamente su interfaz. No es un ranking por Índice de respaldo.
+Directorio global de la página principal compuesto por entre tres y ocho de los Informes publicables más recientes, ordenados por fecha de finalización y limitado al informe más reciente de cada URL canónica. Se oculta por completo mientras existan menos de tres; las distintas versiones lingüísticas comparten los mismos informes y traducen únicamente su interfaz. No es un ranking por Índice de respaldo.
 _Avoid_: Mejores informes, informes más verdaderos, ranking de respaldo
 
 **Visitante anónimo**:

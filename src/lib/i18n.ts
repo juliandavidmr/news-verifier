@@ -24,6 +24,16 @@ export const messages = {
     methodology: "Methodology",
     language: "Language",
     productPrinciples: "Product principles",
+    listingNotice:
+      "Completed link reports may appear publicly on this page and in search engines.",
+    recentReportsTitle: "Recent reports",
+    recentReportsDescription: "Recently completed automated investigations.",
+    requestRemoval: "Request removal",
+    removalEmailSubject: "Removal request for report",
+    removalEmailBody:
+      "Please review the removal of this report from public listings and search engines:",
+    reportSearchDescription:
+      "Automated, dated evidence report with traceable sources and explicit uncertainty.",
     principleEvidence: "Traceable evidence",
     principleClaims: "Claim by claim",
     principleUncertainty: "Honest uncertainty",
@@ -82,7 +92,7 @@ export const messages = {
     backHome: "Back to verifier",
     privacyTitle: "Privacy policy",
     privacyIntro:
-      "We process the submitted page to create an evidence report. Screenshot files are not stored; report data remains available through its unlisted URL.",
+      "We process submitted pages to create evidence reports. Eligible link reports are public and searchable; screenshot reports remain unlisted and screenshot files are not stored.",
     methodologyTitle: "Verification methodology",
     methodologyIntro:
       "Claims are evaluated against retrieved, traceable evidence. Missing evidence is never treated as proof that a claim is false.",
@@ -107,6 +117,17 @@ export const messages = {
     methodology: "Metodología",
     language: "Idioma",
     productPrinciples: "Principios del producto",
+    listingNotice:
+      "Los informes de enlaces completados pueden aparecer públicamente aquí y en buscadores.",
+    recentReportsTitle: "Informes recientes",
+    recentReportsDescription:
+      "Investigaciones automatizadas completadas recientemente.",
+    requestRemoval: "Solicitar retiro",
+    removalEmailSubject: "Solicitud de retiro del informe",
+    removalEmailBody:
+      "Por favor, revisa el retiro de este informe de los listados públicos y buscadores:",
+    reportSearchDescription:
+      "Informe automatizado y fechado de evidencia con fuentes rastreables e incertidumbre explícita.",
     principleEvidence: "Evidencia rastreable",
     principleClaims: "Afirmación por afirmación",
     principleUncertainty: "Incertidumbre honesta",
@@ -167,7 +188,7 @@ export const messages = {
     backHome: "Volver al verificador",
     privacyTitle: "Política de privacidad",
     privacyIntro:
-      "Procesamos la página enviada para crear un informe de evidencia. Las capturas no se almacenan; los datos del informe permanecen disponibles mediante su URL no listada.",
+      "Procesamos las páginas enviadas para crear informes de evidencia. Los informes elegibles de enlaces son públicos y aparecen en buscadores; los de capturas permanecen no listados y sus archivos no se almacenan.",
     methodologyTitle: "Metodología de verificación",
     methodologyIntro:
       "Las afirmaciones se evalúan mediante evidencia recuperada y rastreable. La ausencia de evidencia nunca se trata como prueba de falsedad.",
@@ -192,6 +213,16 @@ export const messages = {
     methodology: "Méthodologie",
     language: "Langue",
     productPrinciples: "Principes du produit",
+    listingNotice:
+      "Les rapports de liens terminés peuvent apparaître publiquement ici et dans les moteurs de recherche.",
+    recentReportsTitle: "Rapports récents",
+    recentReportsDescription: "Enquêtes automatisées récemment terminées.",
+    requestRemoval: "Demander le retrait",
+    removalEmailSubject: "Demande de retrait du rapport",
+    removalEmailBody:
+      "Veuillez examiner le retrait de ce rapport des listes publiques et des moteurs de recherche :",
+    reportSearchDescription:
+      "Rapport de preuves automatisé et daté, avec sources traçables et incertitude explicite.",
     principleEvidence: "Preuves traçables",
     principleClaims: "Affirmation par affirmation",
     principleUncertainty: "Incertitude assumée",
@@ -253,7 +284,7 @@ export const messages = {
     backHome: "Retour au vérificateur",
     privacyTitle: "Politique de confidentialité",
     privacyIntro:
-      "Nous traitons la page envoyée pour créer un rapport de preuves. Les captures ne sont pas stockées ; les données du rapport restent accessibles via son URL non répertoriée.",
+      "Nous traitons les pages envoyées pour créer des rapports de preuves. Les rapports admissibles issus de liens sont publics et indexables ; ceux issus de captures restent non répertoriés et les fichiers ne sont pas stockés.",
     methodologyTitle: "Méthodologie de vérification",
     methodologyIntro:
       "Les affirmations sont évaluées à partir de preuves récupérées et traçables. L’absence de preuve n’est jamais considérée comme une preuve de fausseté.",
@@ -278,6 +309,17 @@ export const messages = {
     methodology: "Metodologia",
     language: "Idioma",
     productPrinciples: "Princípios do produto",
+    listingNotice:
+      "Relatórios de links concluídos podem aparecer publicamente aqui e nos mecanismos de busca.",
+    recentReportsTitle: "Relatórios recentes",
+    recentReportsDescription:
+      "Investigações automatizadas concluídas recentemente.",
+    requestRemoval: "Solicitar retirada",
+    removalEmailSubject: "Solicitação de retirada do relatório",
+    removalEmailBody:
+      "Analise a retirada deste relatório das listagens públicas e dos mecanismos de busca:",
+    reportSearchDescription:
+      "Relatório automatizado e datado de evidências com fontes rastreáveis e incerteza explícita.",
     principleEvidence: "Evidências rastreáveis",
     principleClaims: "Afirmação por afirmação",
     principleUncertainty: "Incerteza honesta",
@@ -339,7 +381,7 @@ export const messages = {
     backHome: "Voltar ao verificador",
     privacyTitle: "Política de privacidade",
     privacyIntro:
-      "Processamos a página enviada para criar um relatório de evidências. As capturas não são armazenadas; os dados do relatório permanecem disponíveis por sua URL não listada.",
+      "Processamos páginas enviadas para criar relatórios de evidências. Relatórios elegíveis de links são públicos e pesquisáveis; relatórios de capturas permanecem não listados e seus arquivos não são armazenados.",
     methodologyTitle: "Metodologia de verificação",
     methodologyIntro:
       "As afirmações são avaliadas com evidências recuperadas e rastreáveis. A ausência de evidência nunca é tratada como prova de falsidade.",

@@ -19,19 +19,14 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/r/:path*",
-        headers: [
-          {
-            key: "X-Robots-Tag",
-            value: "noindex, nofollow, noarchive",
-          },
-          { key: "Referrer-Policy", value: "no-referrer" },
-        ],
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
     ];
   },
   output: process.env.VERCEL ? undefined : "standalone",
   serverExternalPackages: ["tesseract.js", "tesseract.js-core"],
   outputFileTracingIncludes: {
+    "/*": ["./public/brand/contraste-light.png"],
     "/api/reports": [
       "./.generated/tesseract/tesseract-core-relaxedsimd-lstm.wasm",
       "./.generated/tesseract/tesseract-core-relaxedsimd-lstm.js",

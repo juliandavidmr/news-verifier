@@ -1,4 +1,5 @@
 import type { SupportedLocale } from "../domain/reports";
+import { REPORT_REMOVAL_EMAIL } from "./contact";
 
 type PolicySection = { title: string; paragraphs: readonly string[] };
 
@@ -10,15 +11,15 @@ type Policy = {
 
 export const privacyPolicy: Record<SupportedLocale, Policy> = {
   en: {
-    effectiveDate: "Effective September 19, 2026",
+    effectiveDate: "Effective September 20, 2026",
     summary:
-      "News Verifier is an anonymous, experimental service operated by Julian David. It processes a submitted link or screenshot to produce an automated evidence report at an unlisted URL.",
+      "News Verifier is an anonymous, experimental service operated by Julian David. It processes a submitted link or screenshot to produce an automated evidence report. Eligible reports created from links are listed publicly and indexed by search engines; screenshot reports remain unlisted.",
     sections: [
       {
         title: "Data we process",
         paragraphs: [
           "For a link, the server downloads the public page and extracts its main text. For a screenshot, the image blob and its technical metadata are held only while Tesseract OCR runs; the original image is not stored and is discarded when OCR ends, whether it succeeds or fails.",
-          "We persist the analyzed extract (up to 2,000 words), minimal claim context, claims, verdicts, evidence fragments, source links, timestamps and technical audit records. Anyone who has the unlisted report URL can see the public report, but never the full analyzed extract.",
+          "We persist the analyzed extract (up to 2,000 words), minimal claim context, claims, verdicts, evidence fragments, source links, timestamps and technical audit records. Reports created from links after public listing was enabled are automatically listed and indexed when they finish conclusively with at least 60% evidence coverage and a usable title. Older reports and screenshot reports remain accessible only to people who have their URL. The full analyzed extract is never public.",
           "A signed anonymous browser identifier supports a one-year cookie. The server stores a pseudonymous derivative for daily limits. A date-bound pseudonymous network signal also limits abuse; it is not used to identify a person or follow them across sites.",
         ],
       },
@@ -40,7 +41,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
         title: "Data retention",
         paragraphs: [
           "Screenshot blobs and their original metadata are discarded at the end of OCR. They are never part of the report record.",
-          "The analyzed extract, report, claims, evidence records, model audit data and the pseudonymous usage records have no automatic expiry while the service remains operational. Reports are immutable snapshots and their unlisted URLs are intended to remain stable.",
+          "The analyzed extract, report, claims, evidence records, model audit data and the pseudonymous usage records have no automatic expiry while the service remains operational. Reports are immutable snapshots and their URLs are intended to remain stable. An eligible link report remains indexed after it leaves the recent-reports section unless the operator removes it from public listings.",
           "The browser cookie expires after one year. The network signal changes every calendar day, although operational and audit records containing pseudonymous derivatives may be retained with the related investigation. The operator can withdraw a report for legal, privacy or abuse reasons without exposing an administrative control publicly.",
         ],
       },
@@ -54,22 +55,22 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Your choices and contact",
         paragraphs: [
-          "Depending on your jurisdiction, you may have rights to access, correct, object to, restrict or request deletion of personal data. There is no self-service deletion in this MVP. Send the report URL and your request to news-verifier.securely376@silomails.com. Do not include additional sensitive data.",
+          `Depending on your jurisdiction, you may have rights to access, correct, object to, restrict or request deletion of personal data. There is no self-service deletion in this MVP. Use the removal link on an indexed report or send its URL to ${REPORT_REMOVAL_EMAIL}. An approved listing removal is performed manually and leaves the report accessible to people who retain its URL; complete withdrawal remains available for legal, privacy or abuse cases. Do not include additional sensitive data.`,
           "The operator is Julian David. This policy may change as the experimental service evolves; material changes will be reflected here with a new effective date.",
         ],
       },
     ],
   },
   es: {
-    effectiveDate: "Vigente desde el 19 de septiembre de 2026",
+    effectiveDate: "Vigente desde el 20 de septiembre de 2026",
     summary:
-      "Verificador de noticias es un servicio experimental y anónimo operado por Julian David. Procesa un enlace o una captura enviados para producir un informe automatizado de evidencia en una URL no listada.",
+      "Verificador de noticias es un servicio experimental y anónimo operado por Julian David. Procesa un enlace o una captura para producir un informe automatizado de evidencia. Los informes elegibles originados por enlaces se listan públicamente y aparecen en buscadores; los informes de capturas permanecen no listados.",
     sections: [
       {
         title: "Datos que procesamos",
         paragraphs: [
           "Para un enlace, el servidor descarga la página pública y extrae su texto principal. Para una captura, el blob de imagen y sus metadatos técnicos se mantienen solo mientras Tesseract ejecuta el OCR; la imagen original no se almacena y se descarta al terminar el OCR, tanto si funciona como si falla.",
-          "Persistimos el Extracto analizado (hasta 2.000 palabras), el contexto mínimo de las afirmaciones, las afirmaciones, los veredictos, los fragmentos de evidencia, los enlaces fuente, las fechas y los registros técnicos de auditoría. Cualquiera con la URL no listada puede ver el informe público, pero nunca el Extracto analizado completo.",
+          "Persistimos el Extracto analizado (hasta 2.000 palabras), el contexto mínimo de las afirmaciones, las afirmaciones, los veredictos, los fragmentos de evidencia, los enlaces fuente, las fechas y los registros técnicos de auditoría. Los informes creados desde enlaces después de activar el listado público se listan e indexan automáticamente cuando terminan de forma concluyente, alcanzan al menos 60 % de Cobertura de evidencia y tienen un título utilizable. Los informes anteriores y los originados por capturas solo son accesibles para quien conserve su URL. El Extracto analizado completo nunca es público.",
           "Un identificador anónimo firmado del navegador mantiene una cookie durante un año. El servidor guarda un derivado seudónimo para los límites diarios. Una señal de red seudonimizada y ligada a la fecha también limita abusos; no se usa para identificar a una persona ni seguirla entre sitios.",
         ],
       },
@@ -91,7 +92,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
         title: "Retención de datos",
         paragraphs: [
           "Los blobs de capturas y sus metadatos originales se descartan al terminar el OCR. Nunca forman parte del registro del informe.",
-          "El Extracto analizado, el informe, las afirmaciones, los Registros de evidencia, la auditoría de modelos y los registros seudónimos de uso no caducan automáticamente mientras el servicio siga operativo. Los informes son instantáneas inmutables y sus URL no listadas buscan permanecer estables.",
+          "El Extracto analizado, el informe, las afirmaciones, los Registros de evidencia, la auditoría de modelos y los registros seudónimos de uso no caducan automáticamente mientras el servicio siga operativo. Los informes son instantáneas inmutables y sus URL buscan permanecer estables. Un informe elegible originado por enlace continúa indexado después de salir de la sección de informes recientes, salvo que el operador lo retire de los listados públicos.",
           "La cookie del navegador vence después de un año. La señal de red cambia cada día calendario, aunque los registros operativos y de auditoría con derivados seudónimos pueden conservarse con la investigación relacionada. El operador puede retirar un informe por motivos legales, de privacidad o abuso sin exponer un control administrativo público.",
         ],
       },
@@ -105,22 +106,22 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Tus opciones y contacto",
         paragraphs: [
-          "Según tu jurisdicción, puedes tener derechos de acceso, corrección, oposición, limitación o eliminación de datos personales. Este MVP no tiene eliminación autoservicio. Envía la URL del informe y tu solicitud a news-verifier.securely376@silomails.com. No incluyas datos sensibles adicionales.",
+          `Según tu jurisdicción, puedes tener derechos de acceso, corrección, oposición, limitación o eliminación de datos personales. Este MVP no tiene eliminación autoservicio. Usa el enlace de retiro de un informe indexado o envía su URL a ${REPORT_REMOVAL_EMAIL}. El retiro aprobado se ejecuta manualmente y conserva el informe accesible para quien tenga su URL; la retirada completa sigue disponible para casos legales, de privacidad o abuso. No incluyas datos sensibles adicionales.`,
           "El responsable es Julian David. Esta política puede cambiar al evolucionar el servicio experimental; los cambios materiales aparecerán aquí con una nueva fecha de vigencia.",
         ],
       },
     ],
   },
   fr: {
-    effectiveDate: "En vigueur depuis le 19 septembre 2026",
+    effectiveDate: "En vigueur depuis le 20 septembre 2026",
     summary:
-      "Vérificateur d’actualités est un service expérimental et anonyme exploité par Julian David. Il traite un lien ou une capture afin de produire un rapport automatisé de preuves à une URL non répertoriée.",
+      "Vérificateur d’actualités est un service expérimental et anonyme exploité par Julian David. Il traite un lien ou une capture afin de produire un rapport automatisé de preuves. Les rapports admissibles issus de liens sont répertoriés publiquement et indexés par les moteurs de recherche ; les rapports issus de captures restent non répertoriés.",
     sections: [
       {
         title: "Données traitées",
         paragraphs: [
           "Pour un lien, le serveur télécharge la page publique et en extrait le texte principal. Pour une capture, le blob et ses métadonnées techniques ne sont conservés que pendant l’OCR Tesseract ; l’image originale n’est pas stockée et est supprimée à la fin de l’OCR, qu’il réussisse ou non.",
-          "Nous conservons l’extrait analysé (2 000 mots maximum), le contexte minimal, les affirmations, verdicts, fragments de preuves, liens sources, dates et journaux techniques d’audit. Toute personne possédant l’URL non répertoriée peut voir le rapport public, mais jamais l’extrait analysé complet.",
+          "Nous conservons l’extrait analysé (2 000 mots maximum), le contexte minimal, les affirmations, verdicts, fragments de preuves, liens sources, dates et journaux techniques d’audit. Les rapports créés à partir de liens après l’activation de la liste publique sont automatiquement répertoriés et indexés lorsqu’ils se terminent de manière concluante, atteignent au moins 60 % de couverture des preuves et possèdent un titre utilisable. Les rapports antérieurs et ceux issus de captures restent accessibles uniquement aux personnes qui conservent leur URL. L’extrait analysé complet n’est jamais public.",
           "Un identifiant anonyme signé utilise un cookie d’un an. Le serveur conserve un dérivé pseudonyme pour les limites quotidiennes. Un signal réseau pseudonymisé lié à la date limite aussi les abus ; il ne sert ni à identifier une personne ni à la suivre entre sites.",
         ],
       },
@@ -142,7 +143,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
         title: "Conservation des données",
         paragraphs: [
           "Les blobs des captures et leurs métadonnées d’origine sont supprimés à la fin de l’OCR et ne font jamais partie du rapport.",
-          "L’extrait analysé, le rapport, les affirmations, preuves, audits de modèles et enregistrements d’usage pseudonymes n’expirent pas automatiquement tant que le service reste opérationnel. Les rapports sont des instantanés immuables et leurs URL doivent rester stables.",
+          "L’extrait analysé, le rapport, les affirmations, preuves, audits de modèles et enregistrements d’usage pseudonymes n’expirent pas automatiquement tant que le service reste opérationnel. Les rapports sont des instantanés immuables et leurs URL doivent rester stables. Un rapport admissible issu d’un lien reste indexé après avoir quitté la section des rapports récents, sauf si l’opérateur le retire des listes publiques.",
           "Le cookie expire après un an. Le signal réseau change chaque jour, bien que les journaux opérationnels et d’audit contenant des dérivés pseudonymes puissent rester liés à l’enquête. L’opérateur peut retirer un rapport pour des raisons juridiques, de confidentialité ou d’abus sans exposer de commande publique.",
         ],
       },
@@ -156,22 +157,22 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Vos choix et contact",
         paragraphs: [
-          "Selon votre juridiction, vous pouvez disposer de droits d’accès, rectification, opposition, limitation ou effacement. Ce MVP n’offre pas d’effacement en libre-service. Envoyez l’URL du rapport et votre demande à news-verifier.securely376@silomails.com, sans données sensibles supplémentaires.",
+          `Selon votre juridiction, vous pouvez disposer de droits d’accès, rectification, opposition, limitation ou effacement. Ce MVP n’offre pas d’effacement en libre-service. Utilisez le lien de retrait d’un rapport indexé ou envoyez son URL à ${REPORT_REMOVAL_EMAIL}. Un retrait approuvé est effectué manuellement et le rapport reste accessible aux personnes qui conservent son URL ; le retrait complet reste possible pour des raisons juridiques, de confidentialité ou d’abus. N’ajoutez pas de données sensibles.`,
           "L’opérateur est Julian David. Cette politique peut évoluer avec le service expérimental ; les changements importants apparaîtront ici avec une nouvelle date d’entrée en vigueur.",
         ],
       },
     ],
   },
   pt: {
-    effectiveDate: "Em vigor desde 19 de setembro de 2026",
+    effectiveDate: "Em vigor desde 20 de setembro de 2026",
     summary:
-      "O Verificador de notícias é um serviço experimental e anônimo operado por Julian David. Ele processa um link ou captura enviados para produzir um relatório automatizado de evidências em uma URL não listada.",
+      "O Verificador de notícias é um serviço experimental e anônimo operado por Julian David. Ele processa um link ou captura para produzir um relatório automatizado de evidências. Relatórios elegíveis originados por links são listados publicamente e indexados por mecanismos de busca; relatórios de capturas permanecem não listados.",
     sections: [
       {
         title: "Dados processados",
         paragraphs: [
           "Para um link, o servidor baixa a página pública e extrai o texto principal. Para uma captura, o blob e seus metadados técnicos são mantidos apenas durante o OCR do Tesseract; a imagem original não é armazenada e é descartada ao final do OCR, com sucesso ou falha.",
-          "Mantemos o trecho analisado (até 2.000 palavras), o contexto mínimo, afirmações, veredictos, fragmentos de evidência, links, datas e registros técnicos de auditoria. Qualquer pessoa com a URL não listada pode ver o relatório público, mas nunca o trecho analisado completo.",
+          "Mantemos o trecho analisado (até 2.000 palavras), o contexto mínimo, afirmações, veredictos, fragmentos de evidência, links, datas e registros técnicos de auditoria. Relatórios criados a partir de links depois da ativação da listagem pública são listados e indexados automaticamente quando terminam de forma conclusiva, alcançam pelo menos 60% de cobertura de evidências e têm um título utilizável. Relatórios anteriores e os originados por capturas permanecem acessíveis apenas a quem conservar sua URL. O trecho analisado completo nunca é público.",
           "Um identificador anônimo assinado usa um cookie de um ano. O servidor guarda um derivado pseudônimo para limites diários. Um sinal de rede pseudonimizado e vinculado à data também limita abusos; ele não identifica uma pessoa nem a acompanha entre sites.",
         ],
       },
@@ -193,7 +194,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
         title: "Retenção de dados",
         paragraphs: [
           "Os blobs das capturas e seus metadados originais são descartados ao final do OCR e nunca fazem parte do relatório.",
-          "O trecho analisado, o relatório, afirmações, registros de evidência, auditoria dos modelos e registros pseudônimos de uso não expiram automaticamente enquanto o serviço estiver operacional. Os relatórios são retratos imutáveis e suas URLs devem permanecer estáveis.",
+          "O trecho analisado, o relatório, afirmações, registros de evidência, auditoria dos modelos e registros pseudônimos de uso não expiram automaticamente enquanto o serviço estiver operacional. Os relatórios são retratos imutáveis e suas URLs devem permanecer estáveis. Um relatório elegível originado por link continua indexado depois de sair da seção de relatórios recentes, a menos que o operador o retire das listagens públicas.",
           "O cookie expira após um ano. O sinal de rede muda a cada dia, embora registros operacionais e de auditoria com derivados pseudônimos possam continuar ligados à investigação. O operador pode retirar um relatório por motivos legais, de privacidade ou abuso sem expor um controle administrativo público.",
         ],
       },
@@ -207,7 +208,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Suas opções e contato",
         paragraphs: [
-          "Conforme sua jurisdição, você pode ter direitos de acesso, correção, oposição, limitação ou exclusão. Este MVP não oferece exclusão por autosserviço. Envie a URL do relatório e sua solicitação a news-verifier.securely376@silomails.com, sem dados sensíveis adicionais.",
+          `Conforme sua jurisdição, você pode ter direitos de acesso, correção, oposição, limitação ou exclusão. Este MVP não oferece exclusão por autosserviço. Use o link de retirada em um relatório indexado ou envie sua URL para ${REPORT_REMOVAL_EMAIL}. Uma retirada aprovada é executada manualmente e mantém o relatório acessível a quem conservar sua URL; a retirada completa continua disponível para casos legais, de privacidade ou abuso. Não inclua dados sensíveis adicionais.`,
           "O operador é Julian David. Esta política pode mudar com a evolução do serviço experimental; mudanças importantes aparecerão aqui com nova data de vigência.",
         ],
       },

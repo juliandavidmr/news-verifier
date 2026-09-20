@@ -49,6 +49,20 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - Solo el modo activo se envía al servidor.
 - Al cambiar de modo, el borrador anterior se conserva únicamente en el navegador durante la visita y nunca se envía con el modo nuevo.
 - Cerrar o recargar la página descarta ambos borradores locales.
+- En modo Enlace, un aviso legible y de baja jerarquía visual junto a la acción informa que los informes completados pueden aparecer en la portada y en buscadores; no requiere consentimiento ni una acción adicional.
+- El aviso no aparece en modo Imagen, porque los informes originados por capturas nunca entran al listado público.
+
+## Listado público de informes
+
+- La portada muestra la sección “Informes recientes” inmediatamente después del formulario y la describe como investigaciones automatizadas completadas recientemente.
+- La sección aparece solo cuando existen al menos tres Informes publicables y muestra como máximo ocho.
+- Un Informe publicable debe haberse creado después de activar esta función, originarse por URL, terminar como completado, alcanzar al menos 60 % de Cobertura de evidencia, no dejar afirmaciones principales sin conclusión y conservar un título extraído utilizable.
+- El Índice de respaldo no determina la elegibilidad; los Informes parciales, anteriores a la activación, originados por capturas o sin título permanecen no listados.
+- El MVP no aplica una evaluación automática ni humana de idoneidad editorial antes de publicar.
+- Los informes se ordenan por fecha de finalización descendente y solo aparece el más reciente de cada URL canónica.
+- Las cuatro versiones lingüísticas de la portada comparten la misma selección global. Se traducen los rótulos de interfaz, pero no el título original del contenido.
+- Cada tarjeta muestra título, dominio de origen y fecha de finalización. Toda la tarjeta es un enlace, sin CTA interno; `hover`, `focus-visible` y la reducción de movimiento comunican la interacción de forma accesible.
+- Si existen menos de tres informes elegibles, se oculta la sección completa sin marcadores de posición ni ejemplos ficticios.
 
 ## Evaluación de afirmaciones
 
@@ -185,17 +199,19 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 ## Acceso a informes
 
 - Cada investigación crea inmediatamente una página con un identificador corto y no adivinable.
-- El informe es compartible pero no listado: cualquiera con la URL puede abrirlo.
-- No existe directorio público ni búsqueda de informes y las páginas se marcan `noindex`.
-- La URL es el único medio de recuperación; no existen cuentas ni recuperación de enlaces perdidos.
+- Todos los informes son compartibles: cualquiera con la URL puede abrirlos.
+- Los Informes publicables aparecen en la portada y permanecen indexables mediante el sitemap aunque dejen de estar entre los ocho más recientes.
+- Los informes anteriores a la activación, parciales, inconclusos, sin título u originados por capturas permanecen con `noindex`; para ellos la URL sigue siendo el único medio de recuperación.
+- No existen cuentas ni recuperación de enlaces perdidos.
 - La URL y el informe final no caducan automáticamente.
 - Se conservan el informe, el Extracto analizado y los fragmentos de evidencia necesarios para auditar el resultado.
 - El informe público no reproduce el Extracto analizado completo: muestra únicamente cada afirmación con su Pasaje de contexto mínimo y enlaza la URL original cuando exista.
 - El archivo de imagen original y sus metadatos se eliminan después del procesamiento.
 - En informes originados por una captura, los resaltados se presentan sobre Pasajes de contexto derivados del OCR, no sobre el archivo original ni sobre su transcripción completa.
 - El MVP no permite que el usuario elimine un informe ni proporciona una clave de eliminación.
-- El MVP no incluye un botón ni un flujo para reportar contenido.
-- El operador puede ocultar o eliminar informes por razones legales, de privacidad o abuso.
+- Un Informe publicable ofrece “Solicitar retiro”, que abre un correo prellenado a `news-verifier.securely376@silomails.com` con su identificador y URL; el motivo es opcional.
+- El operador procesa manualmente la solicitud. Un retiro normal elimina el informe de la portada, el sitemap y la indexación, pero conserva el acceso mediante URL.
+- No existe panel administrativo ni retiro automático en el MVP. El operador conserva separadamente la capacidad de ocultar o eliminar por completo un informe por razones legales, de privacidad o abuso.
 - Cada informe muestra la fecha y hora en que fue investigado y permanece como una instantánea inmutable.
 - Un informe nunca se recalcula silenciosamente cuando cambian el contenido, las fuentes o el conocimiento.
 - El MVP no muestra un botón para volver a investigar desde un informe.

@@ -1,9 +1,11 @@
 import { FlechaIzquierda } from "@mteherandev/colombia-icons-react";
+import type { PublicReportListing } from "../domain/public-report-listing";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import { privacyPolicy } from "../lib/privacy-policy";
 import { seoContent } from "../lib/seo-content";
 import { localizedPath, siteName, siteUrl } from "../lib/site";
+import { ReportPublicationRepository } from "../server/reports/publication-repository";
 import { BrandLink } from "./brand-link";
 import { HomeVerifier } from "./home-verifier";
 
@@ -19,9 +21,15 @@ function JsonLd({ value }: { value: object }) {
   );
 }
 
-export function PublicHomePage({ locale }: { locale: SupportedLocale }) {
+export async function PublicHomePage({ locale }: { locale: SupportedLocale }) {
   const seo = seoContent[locale];
   const url = new URL(localizedPath(locale), siteUrl).toString();
+  let recentReports: PublicReportListing[] = [];
+  try {
+    recentReports = await new ReportPublicationRepository().listRecent(8);
+  } catch {
+    console.error("public_report_listing_unavailable");
+  }
 
   return (
     <>
@@ -41,7 +49,7 @@ export function PublicHomePage({ locale }: { locale: SupportedLocale }) {
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }}
       />
-      <HomeVerifier initialLocale={locale} />
+      <HomeVerifier initialLocale={locale} recentReports={recentReports} />
     </>
   );
 }
