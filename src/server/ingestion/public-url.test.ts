@@ -39,13 +39,12 @@ describe("public URL policy", () => {
     expect(isPublicAddress(address)).toBe(false);
   });
 
-  it.each([
-    "8.8.8.8",
-    "1.1.1.1",
-    "2606:4700:4700::1111",
-  ])("classifies %s as public", (address) => {
-    expect(isPublicAddress(address)).toBe(true);
-  });
+  it.each(["8.8.8.8", "1.1.1.1", "2606:4700:4700::1111"])(
+    "classifies %s as public",
+    (address) => {
+      expect(isPublicAddress(address)).toBe(true);
+    },
+  );
 
   it("blocks local hostnames regardless of case", () => {
     expect(isBlockedHostname("ADMIN.Local.")).toBe(true);

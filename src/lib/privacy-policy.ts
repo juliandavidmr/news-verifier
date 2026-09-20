@@ -54,7 +54,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Your choices and contact",
         paragraphs: [
-          "Depending on your jurisdiction, you may have rights to access, correct, object to, restrict or request deletion of personal data. There is no self-service deletion in this MVP. Send the report URL and your request to iamjuliand.retype181@aleeas.com. Do not include additional sensitive data.",
+          "Depending on your jurisdiction, you may have rights to access, correct, object to, restrict or request deletion of personal data. There is no self-service deletion in this MVP. Send the report URL and your request to news-verifier.securely376@silomails.com. Do not include additional sensitive data.",
           "The operator is Julian David. This policy may change as the experimental service evolves; material changes will be reflected here with a new effective date.",
         ],
       },
@@ -105,7 +105,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Tus opciones y contacto",
         paragraphs: [
-          "Según tu jurisdicción, puedes tener derechos de acceso, corrección, oposición, limitación o eliminación de datos personales. Este MVP no tiene eliminación autoservicio. Envía la URL del informe y tu solicitud a iamjuliand.retype181@aleeas.com. No incluyas datos sensibles adicionales.",
+          "Según tu jurisdicción, puedes tener derechos de acceso, corrección, oposición, limitación o eliminación de datos personales. Este MVP no tiene eliminación autoservicio. Envía la URL del informe y tu solicitud a news-verifier.securely376@silomails.com. No incluyas datos sensibles adicionales.",
           "El responsable es Julian David. Esta política puede cambiar al evolucionar el servicio experimental; los cambios materiales aparecerán aquí con una nueva fecha de vigencia.",
         ],
       },
@@ -156,7 +156,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Vos choix et contact",
         paragraphs: [
-          "Selon votre juridiction, vous pouvez disposer de droits d’accès, rectification, opposition, limitation ou effacement. Ce MVP n’offre pas d’effacement en libre-service. Envoyez l’URL du rapport et votre demande à iamjuliand.retype181@aleeas.com, sans données sensibles supplémentaires.",
+          "Selon votre juridiction, vous pouvez disposer de droits d’accès, rectification, opposition, limitation ou effacement. Ce MVP n’offre pas d’effacement en libre-service. Envoyez l’URL du rapport et votre demande à news-verifier.securely376@silomails.com, sans données sensibles supplémentaires.",
           "L’opérateur est Julian David. Cette politique peut évoluer avec le service expérimental ; les changements importants apparaîtront ici avec une nouvelle date d’entrée en vigueur.",
         ],
       },
@@ -207,7 +207,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Suas opções e contato",
         paragraphs: [
-          "Conforme sua jurisdição, você pode ter direitos de acesso, correção, oposição, limitação ou exclusão. Este MVP não oferece exclusão por autosserviço. Envie a URL do relatório e sua solicitação a iamjuliand.retype181@aleeas.com, sem dados sensíveis adicionais.",
+          "Conforme sua jurisdição, você pode ter direitos de acesso, correção, oposição, limitação ou exclusão. Este MVP não oferece exclusão por autosserviço. Envie a URL do relatório e sua solicitação a news-verifier.securely376@silomails.com, sem dados sensíveis adicionais.",
           "O operador é Julian David. Esta política pode mudar com a evolução do serviço experimental; mudanças importantes aparecerão aqui com nova data de vigência.",
         ],
       },

@@ -7,7 +7,9 @@ import type {
 } from "../../domain/reports";
 import { getDatabase } from "../db";
 import type {
+  CompleteImageOcrInput,
   CreateImageReportInput,
+  CreatePendingImageReportInput,
   CreateUrlReportInput,
   ReportsRepository,
 } from "./repository";
@@ -142,6 +144,72 @@ export class NeonReportsRepository implements ReportsRepository {
       replayed: row.decision.replayed,
       report: mapReport(row.decision.report),
     };
+  }
+
+  async createPendingImageReport(input: CreatePendingImageReportInput) {
+    const rows = await getDatabase().query(
+      `SELECT accept_pending_image_investigation(
+         $1, $2, $3, $4, $5, COALESCE($6::date, current_date)
+       ) AS decision`,
+      [
+        input.shortId,
+        input.reportLocale,
+        input.visitorKey,
+        input.networkKey,
+        input.idempotencyKey,
+        input.usageDate ?? null,
+      ],
+    );
+    const row = firstRow<{
+      decision:
+        | { accepted: false; reason: "global" | "visitor" }
+        | { accepted: true; replayed: boolean; report: ReportRow };
+    }>(rows as unknown[]);
+    if (!row) throw new Error("Pending image admission returned no row");
+    if (!row.decision.accepted) return row.decision;
+    return {
+      accepted: true as const,
+      replayed: row.decision.replayed,
+      report: mapReport(row.decision.report),
+    };
+  }
+
+  async completeImageOcr(reportId: string, extracted: CompleteImageOcrInput) {
+    await getDatabase().query(
+      `WITH updated AS (
+        UPDATE reports
+        SET analyzed_excerpt = $2,
+            extracted_word_count = $3,
+            analyzed_word_count = $4,
+            truncated = $5,
+            ocr_confidence = $6,
+            ocr_language_set = $7,
+            status = 'queued',
+            next_event_sequence = next_event_sequence + 1,
+            updated_at = now()
+        WHERE id = $1
+          AND source_kind = 'image'
+          AND status = 'extracting'
+          AND analyzed_excerpt IS NULL
+        RETURNING id, next_event_sequence - 1 AS sequence
+      ), event AS (
+        INSERT INTO report_events (report_id, sequence, stage, public_payload)
+        SELECT id, sequence, 'queued', '{"status":"queued"}'::jsonb
+        FROM updated
+      )
+      INSERT INTO dispatch_outbox (report_id, payload)
+      SELECT id, jsonb_build_object('reportId', id) FROM updated
+      ON CONFLICT DO NOTHING`,
+      [
+        reportId,
+        extracted.text,
+        extracted.extractedWordCount,
+        extracted.analyzedWordCount,
+        extracted.truncated,
+        extracted.confidence,
+        extracted.languageSet,
+      ],
+    );
   }
 
   async markExtracted(reportId: string, content: ExtractedContent) {

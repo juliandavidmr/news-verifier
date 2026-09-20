@@ -1,22 +1,8 @@
-import { FlechaIzquierda } from "@mteherandev/colombia-icons-react";
-import { BrandLink } from "../../components/brand-link";
-import { messages } from "../../lib/i18n";
-import { getRequestLocale } from "../../server/request-locale";
+import { PublicMethodologyPage } from "../../components/public-pages";
+import { publicPageMetadata } from "../../lib/page-metadata";
 
-export default async function MethodologyPage() {
-  const locale = await getRequestLocale();
-  const copy = messages[locale];
+export const metadata = publicPageMetadata("en", "methodology");
 
-  return (
-    <main className="legal-shell">
-      <BrandLink label={copy.brand} />
-      <p className="kicker">{copy.methodology}</p>
-      <h1>{copy.methodologyTitle}</h1>
-      <p>{copy.methodologyIntro}</p>
-      <a className="legal-back" href="/">
-        <FlechaIzquierda size={18} aria-hidden="true" />
-        {copy.backHome}
-      </a>
-    </main>
-  );
+export default function MethodologyPage() {
+  return <PublicMethodologyPage locale="en" />;
 }

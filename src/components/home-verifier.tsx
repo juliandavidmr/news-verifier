@@ -8,13 +8,54 @@ import {
   Subir,
 } from "@mteherandev/colombia-icons-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type SubmitEvent, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import { messages } from "../lib/i18n";
 import { imageUploadMime } from "../lib/image-mime";
+import { seoContent } from "../lib/seo-content";
+import { localizedPath } from "../lib/site";
 import { BrandLink } from "./brand-link";
+import { type ImageOcrPoll, imageOcrOutcome } from "./image-ocr-state";
 
 type InputMode = "url" | "image";
+
+const ocrPollIntervalMs = 500;
+const ocrWaitLimitMs = 65_000;
+
+async function waitForImageOcr(shortId: string) {
+  const deadline = Date.now() + ocrWaitLimitMs;
+  let afterSequence = 0;
+
+  while (Date.now() < deadline) {
+    const response = await fetch(
+      `/api/reports/${shortId}/events?after=${afterSequence}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) {
+      await new Promise((resolve) =>
+        window.setTimeout(resolve, ocrPollIntervalMs),
+      );
+      continue;
+    }
+    const result = (await response.json()) as ImageOcrPoll;
+    for (const event of result.events) {
+      afterSequence = Math.max(afterSequence, event.sequence);
+    }
+    const outcome = imageOcrOutcome(result);
+    if (outcome.state === "ready") return { ready: true } as const;
+    if (outcome.state === "failed") {
+      return {
+        ready: false,
+        code: outcome.code,
+      } as const;
+    }
+    await new Promise((resolve) =>
+      window.setTimeout(resolve, ocrPollIntervalMs),
+    );
+  }
+
+  return { ready: false, code: "ocr_timeout" } as const;
+}
 
 export function HomeVerifier({
   initialLocale,
@@ -30,19 +71,17 @@ export function HomeVerifier({
   const [submitting, setSubmitting] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
   const copy = messages[locale];
+  const seo = seoContent[locale];
   const SubmitIcon = submitting ? Sincronizar : FlechaDerecha;
-
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
 
   function changeLocale(nextLocale: SupportedLocale) {
     setLocale(nextLocale);
     // biome-ignore lint/suspicious/noDocumentCookie: Safari support is required and Cookie Store is not universal.
     document.cookie = `nv_locale=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    router.push(localizedPath(nextLocale));
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
@@ -95,6 +134,19 @@ export function HomeVerifier({
         );
         return;
       }
+      if (mode === "image") {
+        const ocr = await waitForImageOcr(result.shortId);
+        if (!ocr.ready) {
+          setError(
+            ocr.code === "ocr_quality_insufficient"
+              ? copy.ocrQualityInsufficient
+              : ocr.code === "ocr_timeout"
+                ? copy.ocrTimeout
+                : copy.ocrFailed,
+          );
+          return;
+        }
+      }
       router.push(`/r/${result.shortId}`);
     } catch {
       setError(copy.genericError);
@@ -106,7 +158,7 @@ export function HomeVerifier({
   return (
     <main className="site-shell">
       <header className="topbar">
-        <BrandLink label={copy.brand} />
+        <BrandLink label={copy.brand} href={localizedPath(locale)} />
         <span className="topbar-note">{copy.eyebrow}</span>
       </header>
 
@@ -122,6 +174,7 @@ export function HomeVerifier({
             <button
               className={mode === "url" ? "mode-button active" : "mode-button"}
               type="button"
+              disabled={submitting}
               aria-pressed={mode === "url"}
               onClick={() => setMode("url")}
             >
@@ -135,6 +188,7 @@ export function HomeVerifier({
                   : "mode-button image"
               }
               type="button"
+              disabled={submitting}
               aria-pressed={mode === "image"}
               onClick={() => setMode("image")}
             >
@@ -194,7 +248,11 @@ export function HomeVerifier({
             type="submit"
             disabled={submitting || (mode === "image" ? !image : !url)}
           >
-            {submitting ? copy.submitting : copy.submit}
+            {submitting
+              ? mode === "image"
+                ? copy.readingImage
+                : copy.submitting
+              : copy.submit}
             <span
               className={submitting ? "button-icon icon-spin" : "button-icon"}
               aria-hidden="true"
@@ -220,10 +278,62 @@ export function HomeVerifier({
         </article>
       </section>
 
+      <section className="seo-section" aria-labelledby="how-it-works">
+        <div className="section-heading">
+          <p className="kicker">{copy.methodology}</p>
+          <h2 id="how-it-works">{seo.howTitle}</h2>
+          <p>{seo.howIntro}</p>
+        </div>
+        <ol className="explanation-grid">
+          {seo.steps.map((step, index) => (
+            <li key={step.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section
+        className="seo-section seo-section-accent"
+        aria-labelledby="report-includes"
+      >
+        <div className="section-heading">
+          <h2 id="report-includes">{seo.coverageTitle}</h2>
+          <p>{seo.coverageIntro}</p>
+        </div>
+        <div className="coverage-grid">
+          {seo.coverage.map((item) => (
+            <article key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="seo-section faq-section"
+        aria-labelledby="frequent-questions"
+      >
+        <div className="section-heading">
+          <h2 id="frequent-questions">{seo.faqTitle}</h2>
+        </div>
+        <div className="faq-list">
+          {seo.faq.map((item) => (
+            <details key={item.question}>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <footer className="footer">
         <nav>
-          <a href="/privacy">{copy.privacy}</a>
-          <a href="/methodology">{copy.methodology}</a>
+          <a href={localizedPath(locale, "/privacy")}>{copy.privacy}</a>
+          <a href={localizedPath(locale, "/methodology")}>{copy.methodology}</a>
         </nav>
         <label className="locale-control">
           <span>{copy.language}</span>

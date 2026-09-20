@@ -19,6 +19,7 @@ export const messages = {
     imageHelp: "Maximum 4 MB · clear, readable text",
     submit: "Verify this source",
     submitting: "Creating report…",
+    readingImage: "Reading screenshot…",
     privacy: "Privacy policy",
     methodology: "Methodology",
     language: "Language",
@@ -38,6 +39,7 @@ export const messages = {
       "We could not read enough reliable text from this screenshot. Try a clearer image.",
     ocrTimeout:
       "Reading this screenshot took too long. Try a smaller or clearer image.",
+    ocrFailed: "We could not read this screenshot. Try another image.",
     reportTitle: "Investigation report",
     reportQueued: "Waiting for capacity",
     reportExtracting: "Extracting the main content",
@@ -100,6 +102,7 @@ export const messages = {
     imageHelp: "Máximo 4 MB · texto claro y legible",
     submit: "Verificar esta fuente",
     submitting: "Creando informe…",
+    readingImage: "Leyendo captura…",
     privacy: "Política de privacidad",
     methodology: "Metodología",
     language: "Idioma",
@@ -119,6 +122,7 @@ export const messages = {
       "No pudimos leer suficiente texto fiable en esta captura. Prueba con una imagen más clara.",
     ocrTimeout:
       "La lectura de esta captura tardó demasiado. Prueba con una imagen más pequeña o clara.",
+    ocrFailed: "No pudimos leer esta captura. Prueba con otra imagen.",
     reportTitle: "Informe de investigación",
     reportQueued: "Esperando capacidad",
     reportExtracting: "Extrayendo el contenido principal",
@@ -183,6 +187,7 @@ export const messages = {
     imageHelp: "4 Mo maximum · texte clair et lisible",
     submit: "Vérifier cette source",
     submitting: "Création du rapport…",
+    readingImage: "Lecture de la capture…",
     privacy: "Politique de confidentialité",
     methodology: "Méthodologie",
     language: "Langue",
@@ -202,6 +207,8 @@ export const messages = {
       "Nous n’avons pas pu lire assez de texte fiable sur cette capture. Essayez une image plus nette.",
     ocrTimeout:
       "La lecture de cette capture a pris trop de temps. Essayez une image plus petite ou plus nette.",
+    ocrFailed:
+      "Nous n’avons pas pu lire cette capture. Essayez une autre image.",
     reportTitle: "Rapport d’enquête",
     reportQueued: "En attente de capacité",
     reportExtracting: "Extraction du contenu principal",
@@ -266,6 +273,7 @@ export const messages = {
     imageHelp: "Máximo de 4 MB · texto claro e legível",
     submit: "Verificar esta fonte",
     submitting: "Criando relatório…",
+    readingImage: "Lendo captura…",
     privacy: "Política de privacidade",
     methodology: "Metodologia",
     language: "Idioma",
@@ -285,6 +293,7 @@ export const messages = {
       "Não foi possível ler texto confiável suficiente nesta captura. Tente uma imagem mais nítida.",
     ocrTimeout:
       "A leitura desta captura demorou demais. Tente uma imagem menor ou mais nítida.",
+    ocrFailed: "Não foi possível ler esta captura. Tente outra imagem.",
     reportTitle: "Relatório da investigação",
     reportQueued: "Aguardando capacidade",
     reportExtracting: "Extraindo o conteúdo principal",

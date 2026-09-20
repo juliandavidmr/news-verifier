@@ -214,7 +214,9 @@ a {
 }
 
 .upload-dropzone input {
+  justify-self: center;
   width: min(100%, 260px);
+  text-align: center;
 }
 
 .upload-icon {
@@ -283,6 +285,116 @@ a {
 .principles span {
   color: var(--accent);
   font-weight: 950;
+}
+
+.seo-section {
+  padding: clamp(72px, 10vw, 130px) 0;
+}
+
+.section-heading {
+  max-width: 760px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 4.7rem);
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+}
+
+.section-heading > p:not(.kicker) {
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.explanation-grid,
+.coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 48px 0 0;
+  padding: 0;
+}
+
+.explanation-grid {
+  list-style: none;
+  counter-reset: seo-step;
+}
+
+.explanation-grid li,
+.coverage-grid article {
+  padding: 26px;
+  border: var(--border);
+  background: var(--paper-light);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.explanation-grid span {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.explanation-grid h3,
+.coverage-grid h3 {
+  margin: 28px 0 12px;
+  font-size: 1.35rem;
+  letter-spacing: -0.025em;
+}
+
+.coverage-grid h3 {
+  margin-top: 0;
+}
+
+.explanation-grid p,
+.coverage-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.seo-section-accent {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding-inline: max(16px, calc((100vw - 1180px) / 2));
+  border-block: var(--border);
+  background: var(--mint);
+}
+
+.seo-section-accent .coverage-grid article {
+  box-shadow: none;
+}
+
+.faq-section {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(40px, 8vw, 110px);
+  align-items: start;
+}
+
+.faq-list {
+  border-top: var(--border);
+}
+
+.faq-list details {
+  border-bottom: var(--border);
+}
+
+.faq-list summary {
+  padding: 22px 42px 22px 0;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.faq-list p {
+  margin: -5px 0 24px;
+  color: var(--muted);
+  line-height: 1.65;
 }
 
 .footer {
@@ -993,7 +1105,10 @@ a {
 @media (max-width: 800px) {
   .hero-grid,
   .result-grid,
-  .report-reader-grid {
+  .report-reader-grid,
+  .explanation-grid,
+  .coverage-grid,
+  .faq-section {
     grid-template-columns: 1fr;
   }
 
@@ -1011,6 +1126,10 @@ a {
 
   .principles {
     grid-template-columns: 1fr;
+  }
+
+  .faq-section {
+    gap: 36px;
   }
 
   .footer {

@@ -15,20 +15,21 @@ const extracted = {
 };
 
 describe("image investigation admission", () => {
-  it("creates an image report and dispatches it exactly once", async () => {
+  it("responds after admission and defers image processing exactly once", async () => {
     const reports = new InMemoryReportsRepository();
     const tasks: Array<() => Promise<void>> = [];
-    const dispatch = vi.fn(async () => undefined);
+    const process = vi.fn(async (reportId: string) => {
+      await reports.completeImageOcr(reportId, extracted);
+    });
     const dependencies = {
       reports,
       backgroundTasks: {
         defer: (task: () => Promise<void>) => tasks.push(task),
       },
-      dispatch,
+      process,
       createShortId: () => "imageScenario1",
     };
     const input = {
-      extracted,
       reportLocale: "en" as const,
       visitorKey: "visitor",
       networkKey: "network",
@@ -38,14 +39,54 @@ describe("image investigation admission", () => {
     const first = await startImageInvestigation(dependencies, input);
     const replay = await startImageInvestigation(dependencies, input);
 
-    expect(first).toMatchObject({
+    expect(first.report).toMatchObject({
       sourceKind: "image",
       sourceUrl: null,
-      analyzedExcerpt: extracted.text,
+      status: "extracting",
+      analyzedExcerpt: null,
     });
-    expect(replay.id).toBe(first.id);
+    expect(first.processingScheduled).toBe(true);
+    expect(replay.report.id).toBe(first.report.id);
+    expect(replay.processingScheduled).toBe(false);
+    expect(process).not.toHaveBeenCalled();
     expect(tasks).toHaveLength(1);
     await tasks[0]?.();
-    expect(dispatch).toHaveBeenCalledExactlyOnceWith(first.id);
+    expect(process).toHaveBeenCalledExactlyOnceWith(first.report.id);
+    expect(reports.reports.get(first.report.id)).toMatchObject({
+      status: "queued",
+      analyzedExcerpt: extracted.text,
+    });
+    expect(reports.events.get(first.report.id)?.at(-1)).toMatchObject({
+      stage: "queued",
+      payload: { status: "queued" },
+    });
+  });
+
+  it("does not await deferred image processing", async () => {
+    const reports = new InMemoryReportsRepository();
+    let task: (() => Promise<void>) | undefined;
+    const neverFinishes = new Promise<void>(() => undefined);
+
+    const result = await startImageInvestigation(
+      {
+        reports,
+        backgroundTasks: {
+          defer: (deferredTask) => {
+            task = deferredTask;
+          },
+        },
+        process: () => neverFinishes,
+        createShortId: () => "fastImageResponse",
+      },
+      {
+        reportLocale: "es",
+        visitorKey: "visitor-fast",
+        networkKey: "network-fast",
+        idempotencyKey: "image-fast-response",
+      },
+    );
+
+    expect(result.processingScheduled).toBe(true);
+    expect(task).toBeTypeOf("function");
   });
 });

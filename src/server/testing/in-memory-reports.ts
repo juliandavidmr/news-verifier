@@ -4,7 +4,9 @@ import type {
   ReportEvent,
 } from "../../domain/reports";
 import type {
+  CompleteImageOcrInput,
   CreateImageReportInput,
+  CreatePendingImageReportInput,
   CreateUrlReportInput,
   ReportsRepository,
 } from "../reports/repository";
@@ -108,6 +110,67 @@ export class InMemoryReportsRepository implements ReportsRepository {
       replayed: false,
       report: structuredClone(report),
     };
+  }
+
+  async createPendingImageReport(input: CreatePendingImageReportInput) {
+    const existingId = this.idempotency.get(input.idempotencyKey);
+    if (existingId) {
+      const existing = this.reports.get(existingId);
+      if (!existing) throw new Error("Missing idempotent report");
+      return {
+        accepted: true as const,
+        replayed: true,
+        report: structuredClone(existing),
+      };
+    }
+    const timestamp = this.now().toISOString();
+    const report: Report = {
+      id: crypto.randomUUID(),
+      shortId: input.shortId,
+      sourceKind: "image",
+      sourceUrl: null,
+      reportLocale: input.reportLocale,
+      status: "extracting",
+      extractedTitle: null,
+      extractedAuthor: null,
+      analyzedExcerpt: null,
+      extractedWordCount: null,
+      analyzedWordCount: null,
+      truncated: false,
+      errorCode: null,
+      errorMessage: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    this.reports.set(report.id, report);
+    this.idempotency.set(input.idempotencyKey, report.id);
+    this.events.set(report.id, [
+      {
+        sequence: 1,
+        stage: "extracting",
+        payload: { status: "extracting" },
+        createdAt: timestamp,
+      },
+    ]);
+    return {
+      accepted: true as const,
+      replayed: false,
+      report: structuredClone(report),
+    };
+  }
+
+  async completeImageOcr(reportId: string, extracted: CompleteImageOcrInput) {
+    const report = this.reports.get(reportId);
+    if (report?.sourceKind !== "image" || report.analyzedExcerpt) return;
+    Object.assign(report, {
+      status: "queued",
+      analyzedExcerpt: extracted.text,
+      extractedWordCount: extracted.extractedWordCount,
+      analyzedWordCount: extracted.analyzedWordCount,
+      truncated: extracted.truncated,
+      updatedAt: this.now().toISOString(),
+    });
+    this.appendEvent(reportId, "queued", { status: "queued" });
   }
 
   async markExtracted(reportId: string, content: ExtractedContent) {

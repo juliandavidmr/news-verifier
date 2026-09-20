@@ -1,5 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { isSupportedLocale } from "../../../domain/reports";
+import { messages } from "../../../lib/i18n";
 import { startImageInvestigation } from "../../../server/application/start-image-investigation";
 import {
   QuotaExceededError,
@@ -86,11 +87,12 @@ export async function POST(request: Request) {
       return json({ code: "image_too_large" }, { status: 413 });
     }
     let bytes: Uint8Array | undefined;
+    let processingScheduled = false;
     try {
       bytes = await readImageBody(request);
       validateImageUpload(bytes, contentType);
-      const extracted = await new TesseractOcrEngine().recognize(bytes);
       if (process.env.OCR_ARTIFACT_TEST_ONLY === "1") {
+        const extracted = await new TesseractOcrEngine().recognize(bytes);
         return json(
           {
             status: "ocr_ready",
@@ -101,25 +103,51 @@ export async function POST(request: Request) {
           { status: 200 },
         );
       }
-      const report = await startImageInvestigation(
+      const imageBytes = bytes;
+      const admission = await startImageInvestigation(
         {
           reports: new NeonReportsRepository(),
           backgroundTasks: { defer: (task) => after(task) },
-          dispatch: async (reportId) => {
-            await dispatchPendingInvestigations(1, reportId);
+          process: async (reportId) => {
+            const reports = new NeonReportsRepository();
+            try {
+              const extracted = await new TesseractOcrEngine().recognize(
+                imageBytes,
+              );
+              await reports.completeImageOcr(reportId, extracted);
+              await dispatchPendingInvestigations(1, reportId);
+            } catch (error) {
+              const code =
+                error instanceof OcrProcessingError ? error.code : "ocr_failed";
+              const publicMessage =
+                code === "ocr_quality_insufficient"
+                  ? messages[reportLocale].ocrQualityInsufficient
+                  : code === "ocr_timeout"
+                    ? messages[reportLocale].ocrTimeout
+                    : messages[reportLocale].ocrFailed;
+              await reports.markFailed(reportId, { code, publicMessage });
+            } finally {
+              imageBytes.fill(0);
+            }
           },
         },
         {
-          extracted,
           reportLocale,
           visitorKey: identity.visitorKey,
           networkKey: identity.networkKey,
           idempotencyKey,
         },
       );
+      processingScheduled = admission.processingScheduled;
       return json(
-        { shortId: report.shortId, status: report.status },
-        { status: 202, headers: { location: `/r/${report.shortId}` } },
+        {
+          shortId: admission.report.shortId,
+          status: admission.report.status,
+        },
+        {
+          status: 202,
+          headers: { location: `/r/${admission.report.shortId}` },
+        },
       );
     } catch (error) {
       if (error instanceof ImageValidationError) {
@@ -139,7 +167,7 @@ export async function POST(request: Request) {
       }
       return json({ code: "internal_error" }, { status: 500 });
     } finally {
-      bytes?.fill(0);
+      if (!processingScheduled) bytes?.fill(0);
     }
   }
 

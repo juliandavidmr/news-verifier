@@ -20,6 +20,16 @@ export type CreateImageReportInput = Omit<CreateUrlReportInput, "sourceUrl"> & {
   extracted: ExtractedContent & { confidence: number };
 };
 
+export type CreatePendingImageReportInput = Omit<
+  CreateUrlReportInput,
+  "sourceUrl"
+>;
+
+export type CompleteImageOcrInput = ExtractedContent & {
+  confidence: number;
+  languageSet: string;
+};
+
 export type CreateUrlReportResult =
   | { accepted: true; report: Report; replayed: boolean }
   | { accepted: false; reason: "global" | "visitor" };
@@ -29,6 +39,13 @@ export interface ReportsRepository {
   createImageReport(
     input: CreateImageReportInput,
   ): Promise<CreateUrlReportResult>;
+  createPendingImageReport(
+    input: CreatePendingImageReportInput,
+  ): Promise<CreateUrlReportResult>;
+  completeImageOcr(
+    reportId: string,
+    extracted: CompleteImageOcrInput,
+  ): Promise<void>;
   markExtracted(reportId: string, content: ExtractedContent): Promise<void>;
   markFailed(
     reportId: string,
