@@ -10,8 +10,8 @@ import {
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
-import { imageUploadMime } from "../lib/image-mime";
 import { messages } from "../lib/i18n";
+import { imageUploadMime } from "../lib/image-mime";
 import { BrandLink } from "./brand-link";
 
 type InputMode = "url" | "image";
@@ -202,7 +202,6 @@ export function HomeVerifier({
               <SubmitIcon size={20} />
             </span>
           </button>
-          <p className="input-note">{copy.inputNote}</p>
         </form>
       </section>
 

@@ -263,13 +263,6 @@ a {
   font-weight: 800;
 }
 
-.input-note {
-  margin: -8px 0 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  text-align: center;
-}
-
 .principles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
