@@ -62,6 +62,67 @@ describe("claim prioritization", () => {
     });
   }
 
+  it("anchors a claim when OCR inserts punctuation inside its verbatim quote", () => {
+    const text =
+      "Las cifras entregadas por el | gobierno anterior son correctas.";
+    const quote =
+      "Las cifras entregadas por el gobierno anterior son correctas.";
+
+    const result = prioritizeClaims(
+      text,
+      [
+        {
+          statement: "Las cifras del gobierno anterior son correctas.",
+          quote,
+          importance: 5,
+          referencePeriod: "gobierno anterior",
+          referenceScope: "Colombia",
+          equivalenceKey: "cifras-gobierno-anterior-correctas",
+        },
+      ],
+      15,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      sourceStart: 0,
+      sourceEnd: text.length,
+      contextPassage: text,
+      selectionStatus: "selected",
+    });
+  });
+
+  it("anchors a claim when OCR inserts isolated one-letter noise", () => {
+    const text =
+      "Las cifras entregadas por el | gobierno anterior son correctas y no hay q evidencia de manipulación.";
+    const quote =
+      "Las cifras entregadas por el gobierno anterior son correctas y no hay evidencia de manipulación.";
+
+    const result = prioritizeClaims(
+      text,
+      [
+        {
+          statement:
+            "Las cifras del gobierno anterior son correctas y no presentan evidencia de manipulación.",
+          quote,
+          importance: 5,
+          referencePeriod: "gobierno anterior",
+          referenceScope: "Colombia",
+          equivalenceKey: "cifras-sin-manipulacion",
+        },
+      ],
+      15,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      sourceStart: 0,
+      sourceEnd: text.length,
+      contextPassage: text,
+      selectionStatus: "selected",
+    });
+  });
+
   it("groups genuine repetitions and persists claims beyond the limit", () => {
     const quotes = Array.from(
       { length: 17 },

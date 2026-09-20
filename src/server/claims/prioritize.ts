@@ -43,6 +43,62 @@ function passageAround(text: string, start: number, end: number) {
   return text.slice(passageStart, passageEnd).trim();
 }
 
+function anchorTokens(value: string) {
+  return [...value.matchAll(/[\p{L}\p{N}]+/gu)].map((match) => ({
+    value: match[0]
+      .toLocaleLowerCase()
+      .normalize("NFKD")
+      .replaceAll(/\p{M}/gu, ""),
+    start: match.index,
+    end: match.index + match[0].length,
+  }));
+}
+
+function locateQuote(text: string, quote: string, from: number) {
+  const exactStart = text.indexOf(quote, from);
+  if (exactStart >= 0) {
+    return { start: exactStart, end: exactStart + quote.length };
+  }
+
+  const quoteTokens = anchorTokens(quote);
+  if (quoteTokens.length < 4) return null;
+  const textTokens = anchorTokens(text);
+  const firstCandidate = textTokens.findIndex((token) => token.start >= from);
+  if (firstCandidate < 0) return null;
+  for (let index = firstCandidate; index < textTokens.length; index += 1) {
+    let textIndex = index;
+    let quoteIndex = 0;
+    let skippedNoise = 0;
+    let lastMatchedTextIndex = -1;
+    while (quoteIndex < quoteTokens.length && textIndex < textTokens.length) {
+      if (quoteTokens[quoteIndex].value === textTokens[textIndex].value) {
+        lastMatchedTextIndex = textIndex;
+        quoteIndex += 1;
+        textIndex += 1;
+        continue;
+      }
+      if (textTokens[textIndex].value.length === 1 && skippedNoise < 2) {
+        skippedNoise += 1;
+        textIndex += 1;
+        continue;
+      }
+      break;
+    }
+    if (quoteIndex === quoteTokens.length && lastMatchedTextIndex >= index) {
+      const start = textTokens[index].start;
+      const lastTextToken = textTokens[lastMatchedTextIndex];
+      const lastQuoteToken = quoteTokens.at(-1);
+      let end = lastTextToken.end;
+      const suffix = lastQuoteToken
+        ? quote.slice(lastQuoteToken.end).trim()
+        : "";
+      if (suffix && text.startsWith(suffix, end)) end += suffix.length;
+      return { start, end };
+    }
+  }
+  return null;
+}
+
 export function prioritizeClaims(
   text: string,
   detected: DetectedClaim[],
@@ -51,15 +107,15 @@ export function prioritizeClaims(
   const occurrences = new Map<string, number>();
   const located = detected.flatMap((claim) => {
     const from = occurrences.get(claim.quote) ?? 0;
-    let start = text.indexOf(claim.quote, from);
-    if (start < 0) start = text.indexOf(claim.quote);
-    if (start < 0 || claim.quote.trim().length < 4) return [];
-    occurrences.set(claim.quote, start + claim.quote.length);
+    const location =
+      locateQuote(text, claim.quote, from) ?? locateQuote(text, claim.quote, 0);
+    if (!location || claim.quote.trim().length < 4) return [];
+    occurrences.set(claim.quote, location.end);
     return [
       {
         ...claim,
-        sourceStart: start,
-        sourceEnd: start + claim.quote.length,
+        sourceStart: location.start,
+        sourceEnd: location.end,
         canonicalKey: canonicalKey(claim),
       },
     ];
