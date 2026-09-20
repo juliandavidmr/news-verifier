@@ -104,6 +104,22 @@ _Avoid_: Sin evidencia suficiente, no verificable, omitida
 Informe permanente accesible para cualquier persona que posea su URL, pero ausente de directorios, búsquedas internas e índices de buscadores. Sin una cuenta, la URL es el único medio de recuperación.
 _Avoid_: Informe privado, informe público, informe secreto
 
+**Informe publicable**:
+Informe futuro originado por URL que se hace elegible automáticamente para directorios públicos e índices de buscadores cuando termina como completado, alcanza al menos 60 % de Cobertura de evidencia y no deja afirmaciones principales sin conclusión. Permanece indexable aunque deje de estar entre los informes recientes, hasta que el operador lo retire. No requiere consentimiento ni implica revisión humana o evaluación de idoneidad editorial; excluye informes existentes, Informes parciales y contenidos originados por capturas, y su Índice de respaldo no determina si puede listarse.
+_Avoid_: Informe revisado, informe aprobado, informe verificado por una persona
+
+**Aviso de listado**:
+Texto informativo, legible y de baja jerarquía visual situado junto a la acción que inicia una Investigación por URL. Advierte que un Informe publicable puede aparecer automáticamente en directorios públicos, sin requerir aceptación ni una acción adicional.
+_Avoid_: Consentimiento, advertencia oculta, casilla de publicación
+
+**Solicitud de retiro**:
+Petición enviada al operador desde un Informe publicable para que evalúe ocultarlo de los directorios públicos. No elimina el Informe automáticamente ni garantiza su retirada.
+_Avoid_: Eliminación, despublicación automática, denuncia resuelta
+
+**Listado público de informes**:
+Directorio global de la página principal compuesto por entre tres y ocho de los Informes publicables más recientes, ordenados por fecha de finalización. Se oculta por completo mientras existan menos de tres; las distintas versiones lingüísticas comparten los mismos informes y traducen únicamente su interfaz. No es un ranking por Índice de respaldo.
+_Avoid_: Mejores informes, informes más verdaderos, ranking de respaldo
+
 **Visitante anónimo**:
 Instalación de navegador reconocida mediante un identificador firmado para aplicar límites de uso razonable; no representa una identidad personal ni una cuenta recuperable.
 _Avoid_: Usuario, cuenta, persona

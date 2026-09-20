@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReportEvent, SupportedLocale } from "../domain/reports";
 import { isTerminalStatus } from "../domain/reports";
 import { messages } from "../lib/i18n";
+import { localizedPath } from "../lib/site";
 import type { PublicReportDetails } from "../server/reports/report-reader";
 import type { PublicReport } from "../server/reports/repository";
 import { BrandLink } from "./brand-link";
@@ -234,7 +235,7 @@ export function ReportLiveView({
   return (
     <main className="report-shell">
       <header className="topbar report-topbar">
-        <BrandLink label={copy.brand} />
+        <BrandLink label={copy.brand} href={localizedPath(interfaceLocale)} />
         <span className={`status-chip ${report.status}`}>
           {statusLabel(report, interfaceLocale)}
         </span>
@@ -326,8 +327,12 @@ export function ReportLiveView({
 
       <footer className="footer report-footer">
         <nav>
-          <a href="/privacy">{copy.privacy}</a>
-          <a href="/methodology">{copy.methodology}</a>
+          <a href={localizedPath(interfaceLocale, "/privacy")}>
+            {copy.privacy}
+          </a>
+          <a href={localizedPath(interfaceLocale, "/methodology")}>
+            {copy.methodology}
+          </a>
         </nav>
         <label className="locale-control">
           <span>{copy.language}</span>

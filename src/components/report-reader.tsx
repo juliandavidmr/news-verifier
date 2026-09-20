@@ -48,12 +48,23 @@ const readerCopy = {
     period: "Reference period",
     scope: "Reference scope",
     formula: "Inspect the calculation",
-    formulaBody:
-      "Coverage is the concluded claim weight divided by total claim weight. The support index is Σ(weight × contribution) divided by included weight. Supported contributes 100%, misleading 50%, and contradicted 0%.",
+    concludedWeight: "Concluded claim weight",
+    totalWeight: "Total claim weight",
+    weightedContribution: "Σ (weight × contribution)",
+    includedWeight: "Included claim weight",
+    contributionScale:
+      "Contributions: supported 100% · misleading 50% · contradicted 0%",
     weight: "Weight",
     contribution: "Contribution",
     included: "Included",
     excluded: "Excluded",
+    excludedReasons: {
+      disputed: "Excluded because the evidence remains disputed",
+      insufficient_evidence: "Excluded because evidence is insufficient",
+      not_verifiable: "Excluded because it is not verifiable",
+      pending: "Excluded because it was not investigated",
+      other: "Excluded because it has no conclusive verdict",
+    },
     showMoreClaims: "Show {count} more uninvestigated claims",
     showFewerClaims: "Hide additional uninvestigated claims",
     lowCoverage:
@@ -120,12 +131,23 @@ const readerCopy = {
     period: "Periodo de referencia",
     scope: "Ámbito de referencia",
     formula: "Inspeccionar el cálculo",
-    formulaBody:
-      "La cobertura es el peso de las afirmaciones concluidas dividido por el peso total. El índice es Σ(peso × aporte) dividido por el peso incluido. Respaldada aporta 100 %, engañosa 50 % y contradicha 0 %.",
+    concludedWeight: "Peso de afirmaciones concluidas",
+    totalWeight: "Peso total de afirmaciones",
+    weightedContribution: "Σ (peso × aporte)",
+    includedWeight: "Peso de afirmaciones incluidas",
+    contributionScale:
+      "Aportes: respaldada 100 % · engañosa 50 % · contradicha 0 %",
     weight: "Peso",
     contribution: "Aporte",
     included: "Incluida",
     excluded: "Excluida",
+    excludedReasons: {
+      disputed: "Excluida porque la evidencia permanece en disputa",
+      insufficient_evidence: "Excluida porque no hay evidencia suficiente",
+      not_verifiable: "Excluida porque no es verificable",
+      pending: "Excluida porque no fue investigada",
+      other: "Excluida porque no tiene un veredicto concluyente",
+    },
     showMoreClaims: "Mostrar {count} afirmaciones no investigadas más",
     showFewerClaims: "Ocultar afirmaciones no investigadas adicionales",
     lowCoverage:
@@ -192,12 +214,23 @@ const readerCopy = {
     period: "Période de référence",
     scope: "Champ de référence",
     formula: "Inspecter le calcul",
-    formulaBody:
-      "La couverture est le poids des affirmations conclues divisé par le poids total. L’indice est Σ(poids × contribution) divisé par le poids inclus. Soutenue contribue 100 %, trompeuse 50 % et contredite 0 %.",
+    concludedWeight: "Poids des affirmations conclues",
+    totalWeight: "Poids total des affirmations",
+    weightedContribution: "Σ (poids × contribution)",
+    includedWeight: "Poids des affirmations incluses",
+    contributionScale:
+      "Contributions : soutenue 100 % · trompeuse 50 % · contredite 0 %",
     weight: "Poids",
     contribution: "Contribution",
     included: "Incluse",
     excluded: "Exclue",
+    excludedReasons: {
+      disputed: "Exclue car les preuves restent contestées",
+      insufficient_evidence: "Exclue car les preuves sont insuffisantes",
+      not_verifiable: "Exclue car elle n’est pas vérifiable",
+      pending: "Exclue car elle n’a pas été étudiée",
+      other: "Exclue faute de verdict concluant",
+    },
     showMoreClaims: "Afficher {count} affirmations non étudiées de plus",
     showFewerClaims: "Masquer les affirmations non étudiées supplémentaires",
     lowCoverage:
@@ -265,12 +298,23 @@ const readerCopy = {
     period: "Período de referência",
     scope: "Âmbito de referência",
     formula: "Inspecionar o cálculo",
-    formulaBody:
-      "A cobertura é o peso das afirmações concluídas dividido pelo peso total. O índice é Σ(peso × contribuição) dividido pelo peso incluído. Respaldada contribui 100%, enganosa 50% e contradita 0%.",
+    concludedWeight: "Peso das afirmações concluídas",
+    totalWeight: "Peso total das afirmações",
+    weightedContribution: "Σ (peso × contribuição)",
+    includedWeight: "Peso das afirmações incluídas",
+    contributionScale:
+      "Contribuições: respaldada 100% · enganosa 50% · contradita 0%",
     weight: "Peso",
     contribution: "Contribuição",
     included: "Incluída",
     excluded: "Excluída",
+    excludedReasons: {
+      disputed: "Excluída porque as evidências seguem em disputa",
+      insufficient_evidence: "Excluída porque as evidências são insuficientes",
+      not_verifiable: "Excluída porque não é verificável",
+      pending: "Excluída porque não foi investigada",
+      other: "Excluída porque não há veredito conclusivo",
+    },
     showMoreClaims: "Mostrar mais {count} afirmações não investigadas",
     showFewerClaims: "Ocultar afirmações não investigadas adicionais",
     lowCoverage:
@@ -331,6 +375,16 @@ function VerdictIcon({ verdict }: { verdict: keyof typeof verdictIcons }) {
 
 function claimVerdict(claim: PublicReportClaim) {
   return claim.verdict ?? "pending";
+}
+
+function claimAnchorId(claim: PublicReportClaim) {
+  return `claim-${claim.id}`;
+}
+
+function claimPreview(statement: string, maximumLength = 120) {
+  const normalized = statement.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maximumLength) return normalized;
+  return `${normalized.slice(0, maximumLength - 1).trimEnd()}…`;
 }
 
 export function orderClaimsForDisplay(claims: PublicReportClaim[]) {
@@ -427,7 +481,7 @@ export function ReportReader({
   const renderClaim = (claim: PublicReportClaim) => {
     const verdict = claimVerdict(claim);
     return (
-      <li key={claim.id}>
+      <li id={claimAnchorId(claim)} key={claim.id}>
         <button
           type="button"
           className={`claim-passage verdict-${verdict} ${selected?.id === claim.id ? "selected" : ""}`}
@@ -613,24 +667,66 @@ export function ReportReader({
 
       <details className="score-formula">
         <summary>{copy.formula}</summary>
-        <p>{copy.formulaBody}</p>
+        <div className="formula-explanation">
+          <div className="formula-definition">
+            <span>{copy.coverage}</span>
+            <p className="formula-expression">
+              <span>{copy.concludedWeight}</span>
+              <span aria-hidden="true" className="formula-divider" />
+              <span>{copy.totalWeight}</span>
+            </p>
+          </div>
+          <div className="formula-definition">
+            <span>{copy.supportIndex}</span>
+            <p className="formula-expression">
+              <span>{copy.weightedContribution}</span>
+              <span aria-hidden="true" className="formula-divider" />
+              <span>{copy.includedWeight}</span>
+            </p>
+          </div>
+          <p className="contribution-scale">{copy.contributionScale}</p>
+        </div>
         <table className="formula-table">
           <tbody>
-            {details.claims.map((claim) => (
-              <tr key={claim.id}>
-                <td>
-                  {copy.claim} {claim.ordinal}
-                </td>
-                <td>
-                  {copy.weight}: {claim.weight}
-                </td>
-                <td>
-                  {claim.includedInIndex
-                    ? `${copy.included} · ${copy.contribution}: ${claim.contribution ?? 0}%`
-                    : copy.excluded}
-                </td>
-              </tr>
-            ))}
+            {details.claims.map((claim) => {
+              const verdict = claimVerdict(claim);
+              const exclusionReason =
+                verdict === "disputed" ||
+                verdict === "insufficient_evidence" ||
+                verdict === "not_verifiable" ||
+                verdict === "pending"
+                  ? copy.excludedReasons[verdict]
+                  : copy.excludedReasons.other;
+              const preview = claimPreview(claim.statement);
+              return (
+                <tr key={claim.id}>
+                  <td>
+                    <a
+                      aria-label={`${copy.claim} ${claim.ordinal}: ${preview}`}
+                      className="formula-claim-link"
+                      data-tooltip={preview}
+                      href={`#${claimAnchorId(claim)}`}
+                      onClick={() => {
+                        setSelectedId(claim.id);
+                        if (uninvestigatedClaims.indexOf(claim) >= 3) {
+                          setShowAllUninvestigated(true);
+                        }
+                      }}
+                    >
+                      {copy.claim} {claim.ordinal}
+                    </a>
+                  </td>
+                  <td>
+                    {copy.weight}: {claim.weight}
+                  </td>
+                  <td>
+                    {claim.includedInIndex
+                      ? `${copy.included} · ${copy.contribution}: ${claim.contribution ?? 0}%`
+                      : exclusionReason}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </details>

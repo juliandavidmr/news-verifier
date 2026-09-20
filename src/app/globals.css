@@ -636,11 +636,31 @@ a {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
 }
 
-.claim-passage.selected {
+.claim-passage:hover {
+  background: color-mix(in srgb, var(--paper-light) 86%, var(--yellow));
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.claim-passage:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.claim-passage.selected,
+.claim-passage.selected:hover {
   box-shadow: 5px 5px 0 var(--ink);
   transform: translate(-2px, -2px);
+}
+
+.claim-passage-list > li {
+  scroll-margin-top: 24px;
 }
 
 .claim-passage p {
@@ -855,10 +875,66 @@ a {
   cursor: pointer;
 }
 
-.score-formula > p {
-  max-width: 780px;
+.formula-explanation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 880px;
+  margin: 16px 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  background: color-mix(in srgb, var(--paper-light) 74%, transparent);
+}
+
+.formula-definition {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px 18px;
+}
+
+.formula-definition + .formula-definition {
+  border-left: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.formula-definition > span {
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.formula-expression {
+  display: inline-grid;
+  width: fit-content;
+  min-width: min(100%, 260px);
+  margin: 0;
+  color: var(--ink);
+  font-family:
+    ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.formula-divider {
+  width: 100%;
+  margin: 6px 0;
+  border-top: 1px solid currentColor;
+}
+
+.contribution-scale {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 11px 18px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
   color: var(--muted);
-  line-height: 1.55;
+  font-family:
+    ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
 }
 
 .formula-table {
@@ -869,10 +945,54 @@ a {
 
 .formula-table td {
   padding: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .formula-table tr + tr {
   border-top: 1px solid var(--ink);
+}
+
+.formula-claim-link {
+  position: relative;
+  display: inline-flex;
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.formula-claim-link::after {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 40px));
+  padding: 9px 11px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  box-shadow: 3px 3px 0 var(--accent);
+  color: var(--paper-light);
+  content: attr(data-tooltip);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  text-decoration: none;
+  transform: translateY(4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.formula-claim-link:hover::after,
+.formula-claim-link:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }
 
 .progress-card,
@@ -1204,6 +1324,15 @@ a {
 
   .claim-metadata {
     grid-template-columns: 1fr;
+  }
+
+  .formula-explanation {
+    grid-template-columns: 1fr;
+  }
+
+  .formula-definition + .formula-definition {
+    border-top: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+    border-left: 0;
   }
 
   .formula-table tr + tr {
