@@ -60,13 +60,16 @@ describe("image upload validation", () => {
     });
   });
 
-  it("accepts the image/jpg MIME alias and normalizes it to JPEG", () => {
-    expect(validateImageUpload(jpeg(1200, 800), "image/jpg")).toMatchObject({
-      mime: "image/jpeg",
-      width: 1200,
-      height: 800,
-    });
-  });
+  it.each(["image/jpg", "image/pjpeg"])(
+    "accepts the %s MIME alias and normalizes it to JPEG",
+    (mime) => {
+      expect(validateImageUpload(jpeg(1200, 800), mime)).toMatchObject({
+        mime: "image/jpeg",
+        width: 1200,
+        height: 800,
+      });
+    },
+  );
 
   it("rejects a declared MIME that differs from the binary signature", () => {
     expect(() => validateImageUpload(png(100, 100), "image/jpeg")).toThrowError(

@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
+import { imageUploadMime } from "../lib/image-mime";
 import { messages } from "../lib/i18n";
 import { BrandLink } from "./brand-link";
 
@@ -52,7 +53,7 @@ export function HomeVerifier({
           ? await fetch("/api/reports", {
               method: "POST",
               headers: {
-                "content-type": image.type,
+                "content-type": imageUploadMime(image),
                 "x-report-locale": locale,
                 "x-idempotency-key": idempotencyKey.current,
               },
