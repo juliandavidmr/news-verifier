@@ -172,18 +172,14 @@ export function HomeVerifier({
           <p className="kicker">{copy.eyebrow}</p>
           <h1>{copy.heroTitle}</h1>
           <p className="hero-body">{copy.heroBody}</p>
-          <ul className="hero-trust">
-            <li>{copy.trustAutomated}</li>
-            <li>{copy.trustSources}</li>
-            <li>{copy.trustTiming}</li>
-          </ul>
-          <a className="hero-details-link" href="#how-it-works">
-            {copy.reportDetails}
-            <FlechaDerecha size={18} aria-hidden="true" />
-          </a>
         </div>
 
         <form className="verify-card" id="verify" onSubmit={submit}>
+          <div className="verify-heading">
+            <h2>{copy.verifierTitle}</h2>
+            <p>{copy.verifierIntro}</p>
+          </div>
+
           <fieldset className="mode-switch" aria-label={copy.inputType}>
             <button
               className={
@@ -269,9 +265,9 @@ export function HomeVerifier({
             </p>
           ) : null}
 
-          <p className="submission-notice">
-            {mode === "image" ? copy.imagePrivacyNotice : copy.listingNotice}
-          </p>
+          {mode === "url" ? (
+            <p className="submission-notice">{copy.listingNotice}</p>
+          ) : null}
 
           <button
             className="submit-button"

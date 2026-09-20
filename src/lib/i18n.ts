@@ -7,9 +7,11 @@ export const messages = {
   en: {
     brand: "News Verifier",
     eyebrow: "Evidence, not vibes.",
-    heroTitle: "See which claims hold up—and why.",
+    heroTitle: "Check before you share.",
     heroBody:
-      "Paste a public link or upload a screenshot. We analyze its main claims and show the evidence, the sources and what cannot be concluded.",
+      "See what the evidence supports, contradicts, or cannot establish.",
+    verifierTitle: "Add the content",
+    verifierIntro: "Upload a screenshot or paste a public link.",
     linkMode: "Link",
     imageMode: "Upload screenshot",
     inputType: "Input type",
@@ -25,14 +27,8 @@ export const messages = {
     privacy: "Privacy policy",
     methodology: "Methodology",
     language: "Language",
-    trustAutomated: "Automated, dated report",
-    trustSources: "Sources you can open",
-    trustTiming: "The investigation may take several minutes",
-    imagePrivacyNotice:
-      "The screenshot is used to recognize the text and is not stored after reading it.",
     listingNotice:
       "Reports created from links may be published on this page and appear in search engines.",
-    reportDetails: "See what the report includes",
     recentReportsTitle: "Recent reports",
     recentReportsDescription: "Explore completed automated investigations.",
     requestRemoval: "Request removal",
@@ -108,9 +104,11 @@ export const messages = {
   es: {
     brand: "Verificador de noticias",
     eyebrow: "Evidencia, no intuiciones.",
-    heroTitle: "Descubre qué afirmaciones tienen respaldo.",
+    heroTitle: "Verifica antes de compartir.",
     heroBody:
-      "Pega un enlace público o sube una captura. Analizamos sus afirmaciones principales y te mostramos la evidencia, las fuentes y lo que no se puede concluir.",
+      "Descubre qué respalda la evidencia, qué contradice y qué no permite concluir.",
+    verifierTitle: "Añade el contenido",
+    verifierIntro: "Sube una captura o pega un enlace público.",
     linkMode: "Enlace",
     imageMode: "Subir captura",
     inputType: "Tipo de entrada",
@@ -126,14 +124,8 @@ export const messages = {
     privacy: "Política de privacidad",
     methodology: "Metodología",
     language: "Idioma",
-    trustAutomated: "Informe automatizado y fechado",
-    trustSources: "Fuentes que puedes abrir",
-    trustTiming: "La investigación puede tardar varios minutos",
-    imagePrivacyNotice:
-      "La captura se usa para reconocer el texto y no se almacena después de leerla.",
     listingNotice:
       "Los informes creados desde enlaces pueden publicarse en esta página y aparecer en buscadores.",
-    reportDetails: "Ver qué incluye el informe",
     recentReportsTitle: "Informes recientes",
     recentReportsDescription:
       "Explora investigaciones automatizadas terminadas.",
@@ -212,9 +204,11 @@ export const messages = {
   fr: {
     brand: "Vérificateur d’actualités",
     eyebrow: "Des preuves, pas des impressions.",
-    heroTitle: "Découvrez quelles affirmations sont étayées.",
+    heroTitle: "Vérifiez avant de partager.",
     heroBody:
-      "Collez un lien public ou importez une capture. Nous analysons les principales affirmations et montrons les preuves, les sources et ce qui ne peut pas être conclu.",
+      "Voyez ce que les preuves confirment, contredisent ou ne permettent pas de conclure.",
+    verifierTitle: "Ajoutez le contenu",
+    verifierIntro: "Importez une capture ou collez un lien public.",
     linkMode: "Lien",
     imageMode: "Importer une capture",
     inputType: "Type d’entrée",
@@ -230,14 +224,8 @@ export const messages = {
     privacy: "Politique de confidentialité",
     methodology: "Méthodologie",
     language: "Langue",
-    trustAutomated: "Rapport automatisé et daté",
-    trustSources: "Sources que vous pouvez ouvrir",
-    trustTiming: "L’enquête peut prendre plusieurs minutes",
-    imagePrivacyNotice:
-      "La capture sert à reconnaître le texte et n’est pas conservée après sa lecture.",
     listingNotice:
       "Les rapports créés à partir de liens peuvent être publiés ici et apparaître dans les moteurs de recherche.",
-    reportDetails: "Voir ce que contient le rapport",
     recentReportsTitle: "Rapports récents",
     recentReportsDescription: "Explorez des enquêtes automatisées terminées.",
     requestRemoval: "Demander le retrait",
@@ -316,9 +304,11 @@ export const messages = {
   pt: {
     brand: "Verificador de notícias",
     eyebrow: "Evidências, não palpites.",
-    heroTitle: "Descubra quais afirmações têm respaldo.",
+    heroTitle: "Verifique antes de compartilhar.",
     heroBody:
-      "Cole um link público ou envie uma captura. Analisamos as principais afirmações e mostramos as evidências, as fontes e o que não pode ser concluído.",
+      "Veja o que as evidências sustentam, contradizem ou não permitem concluir.",
+    verifierTitle: "Adicione o conteúdo",
+    verifierIntro: "Envie uma captura ou cole um link público.",
     linkMode: "Link",
     imageMode: "Enviar captura",
     inputType: "Tipo de entrada",
@@ -334,14 +324,8 @@ export const messages = {
     privacy: "Política de privacidade",
     methodology: "Metodologia",
     language: "Idioma",
-    trustAutomated: "Relatório automatizado e datado",
-    trustSources: "Fontes que você pode abrir",
-    trustTiming: "A investigação pode levar alguns minutos",
-    imagePrivacyNotice:
-      "A captura é usada para reconhecer o texto e não é armazenada depois da leitura.",
     listingNotice:
       "Relatórios criados a partir de links podem ser publicados aqui e aparecer nos mecanismos de busca.",
-    reportDetails: "Ver o que o relatório inclui",
     recentReportsTitle: "Relatórios recentes",
     recentReportsDescription: "Explore investigações automatizadas concluídas.",
     requestRemoval: "Solicitar retirada",

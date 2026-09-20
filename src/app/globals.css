@@ -115,11 +115,11 @@ a {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(390px, 0.8fr);
-  gap: clamp(40px, 8vw, 110px);
+  grid-template-columns: minmax(280px, 0.72fr) minmax(500px, 1.28fr);
+  gap: clamp(40px, 6vw, 76px);
   align-items: center;
-  min-height: 650px;
-  padding: 70px 0;
+  min-height: 620px;
+  padding: clamp(52px, 7vw, 82px) 0;
 }
 
 .kicker {
@@ -140,49 +140,45 @@ a {
   line-height: 0.95;
 }
 
+.hero-copy h1 {
+  max-width: 8ch;
+  font-size: clamp(3.2rem, 5.8vw, 4.9rem);
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
 .hero-body {
-  max-width: 650px;
-  margin: 30px 0 0;
+  max-width: 36ch;
+  margin: 24px 0 0;
   color: var(--muted);
-  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-size: clamp(1rem, 1.7vw, 1.2rem);
   line-height: 1.5;
   text-wrap: pretty;
-}
-
-.hero-trust {
-  display: grid;
-  gap: 10px;
-  margin: 28px 0 0;
-  padding-left: 20px;
-  color: var(--muted);
-  font-size: 0.92rem;
-  font-weight: 800;
-  line-height: 1.4;
-}
-
-.hero-trust li::marker {
-  color: var(--accent);
-}
-
-.hero-details-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 22px;
-  font-size: 0.92rem;
-  font-weight: 900;
-  text-underline-offset: 4px;
 }
 
 .verify-card {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 24px;
+  gap: 20px;
+  padding: clamp(24px, 3vw, 34px);
   border: var(--border);
   background: var(--paper-light);
   box-shadow: var(--shadow);
   scroll-margin-top: 24px;
+}
+
+.verify-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.verify-heading p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .mode-switch {
@@ -190,7 +186,9 @@ a {
   grid-template-columns: 1fr 1fr;
   margin: 0;
   padding: 0;
-  border: var(--border);
+  border: 0;
+  background: var(--surface-muted);
+  gap: 2px;
 }
 
 .mode-button {
@@ -200,23 +198,15 @@ a {
   justify-content: center;
   gap: 9px;
   border: 0;
-  background: transparent;
+  background: var(--surface-muted);
   color: var(--ink);
   font-weight: 900;
   cursor: pointer;
 }
 
-.mode-button + .mode-button {
-  border-left: var(--border);
-}
-
 .mode-button.active {
   background: var(--yellow);
   color: var(--on-color);
-}
-
-.mode-button.image:not(.active) {
-  background: var(--surface-muted);
 }
 
 .field-label {
@@ -240,7 +230,7 @@ a {
 .upload-dropzone {
   position: relative;
   display: grid;
-  min-height: 190px;
+  min-height: 220px;
   place-items: center;
   align-content: center;
   gap: 8px;
@@ -272,12 +262,9 @@ a {
 
 .upload-icon {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border: var(--border);
-  background: var(--field);
-  box-shadow: 3px 3px 0 var(--ink);
   font-size: 1.7rem;
 }
 
@@ -337,8 +324,7 @@ a {
 
 .submission-notice {
   margin: 0;
-  padding: 12px 14px;
-  background: var(--surface-muted);
+  padding: 0;
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
@@ -1440,7 +1426,8 @@ a {
   }
 
   .hero-copy h1 {
-    font-size: clamp(3.2rem, 15vw, 5.5rem);
+    max-width: 10ch;
+    font-size: clamp(2.9rem, 13vw, 4.2rem);
   }
 
   .faq-section {
