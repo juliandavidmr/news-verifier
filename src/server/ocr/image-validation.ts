@@ -75,27 +75,30 @@ function jpegOrientation(bytes: Uint8Array, marker: number, length: number) {
   const exif = marker + 4;
   if (length < 14 || ascii(bytes, exif, 6) !== "Exif\0\0") return 1;
   const tiff = exif + 6;
+  const segmentEnd = marker + 2 + length;
   const endian = ascii(bytes, tiff, 2);
-  if (endian !== "II" && endian !== "MM") {
-    throw new ImageValidationError("invalid_image");
-  }
+  if (endian !== "II" && endian !== "MM") return 1;
   const little = endian === "II";
-  if (u16(bytes, tiff + 2, little) !== 42) {
-    throw new ImageValidationError("invalid_image");
-  }
+  if (u16(bytes, tiff + 2, little) !== 42) return 1;
   const ifd = tiff + u32(bytes, tiff + 4, little);
-  if (ifd + 2 > bytes.length) throw new ImageValidationError("invalid_image");
+  if (ifd < tiff || ifd + 2 > segmentEnd) return 1;
   const entries = u16(bytes, ifd, little);
   for (let index = 0; index < entries; index += 1) {
     const entry = ifd + 2 + index * 12;
-    if (entry + 12 > bytes.length)
-      throw new ImageValidationError("invalid_image");
+    if (entry + 12 > segmentEnd) return 1;
     if (u16(bytes, entry, little) === 0x0112) {
-      const orientation = u16(bytes, entry + 8, little);
-      if (orientation < 1 || orientation > 8) {
-        throw new ImageValidationError("invalid_image");
+      // Orientation is optional EXIF metadata. Some Android image producers emit
+      // this tag as a LONG (or with the value zero) instead of the required
+      // single SHORT. Ignore that malformed hint rather than rejecting otherwise
+      // valid JPEG pixel data.
+      if (
+        u16(bytes, entry + 2, little) !== 3 ||
+        u32(bytes, entry + 4, little) !== 1
+      ) {
+        return 1;
       }
-      return orientation;
+      const orientation = u16(bytes, entry + 8, little);
+      return orientation >= 1 && orientation <= 8 ? orientation : 1;
     }
   }
   return 1;

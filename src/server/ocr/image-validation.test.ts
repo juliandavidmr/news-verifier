@@ -36,6 +36,44 @@ function jpeg(width: number, height: number) {
   ]);
 }
 
+function jpegWithInvalidAndroidOrientation(width: number, height: number) {
+  return Uint8Array.from([
+    0xff,
+    0xd8,
+    0xff,
+    0xe1,
+    0x00,
+    0x22,
+    ...Buffer.from("Exif\0\0"),
+    ...Buffer.from("MM"),
+    0x00,
+    0x2a,
+    0x00,
+    0x00,
+    0x00,
+    0x08,
+    0x00,
+    0x01,
+    0x01,
+    0x12,
+    0x00,
+    0x04, // Incorrectly encoded as LONG rather than SHORT.
+    0x00,
+    0x00,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x00, // Invalid zero orientation, as in the reported Android image.
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    ...jpeg(width, height).subarray(2),
+  ]);
+}
+
 function webp(width: number, height: number) {
   const bytes = new Uint8Array(30);
   bytes.set(Buffer.from("RIFF"), 0);
@@ -70,6 +108,20 @@ describe("image upload validation", () => {
       });
     },
   );
+
+  it("accepts a JPEG with malformed optional Android orientation metadata", () => {
+    expect(
+      validateImageUpload(
+        jpegWithInvalidAndroidOrientation(1080, 628),
+        "image/jpeg",
+      ),
+    ).toMatchObject({
+      mime: "image/jpeg",
+      width: 1080,
+      height: 628,
+      orientation: 1,
+    });
+  });
 
   it("rejects a declared MIME that differs from the binary signature", () => {
     expect(() => validateImageUpload(png(100, 100), "image/jpeg")).toThrowError(
