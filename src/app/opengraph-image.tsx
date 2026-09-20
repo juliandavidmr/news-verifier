@@ -1,8 +1,16 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const alt = "News Verifier — traceable evidence for factual claims";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+const logoData = await readFile(
+  join(process.cwd(), "public/brand/contraste-light.png"),
+  "base64",
+);
+const logoSrc = `data:image/png;base64,${logoData}`;
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -20,36 +28,8 @@ export default function OpenGraphImage() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "22px" }}>
-        <div
-          style={{
-            width: "72px",
-            height: "72px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "4px solid #17140f",
-            background: "#ff5c35",
-            boxShadow: "8px 8px 0 #17140f",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              gap: "7px",
-            }}
-          >
-            <div
-              style={{ width: "8px", height: "18px", background: "#17140f" }}
-            />
-            <div
-              style={{ width: "8px", height: "30px", background: "#17140f" }}
-            />
-            <div
-              style={{ width: "8px", height: "42px", background: "#17140f" }}
-            />
-          </div>
-        </div>
+        {/* biome-ignore lint/performance/noImgElement: Satori renders local image data in Open Graph output. */}
+        <img src={logoSrc} width={86} height={86} alt="" />
         <div style={{ fontSize: "34px", fontWeight: 900 }}>News Verifier</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>

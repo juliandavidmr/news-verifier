@@ -1,5 +1,3 @@
-import { Verificado } from "@mteherandev/colombia-icons-react";
-
 export function BrandLink({
   label,
   href = "/",
@@ -9,9 +7,7 @@ export function BrandLink({
 }) {
   return (
     <a className="brand" href={href} aria-label={label}>
-      <span className="brand-mark" aria-hidden="true">
-        <Verificado size={20} />
-      </span>
+      <span className="brand-mark" aria-hidden="true" />
       {label}
     </a>
   );

@@ -26,13 +26,38 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      {
+        url: "/brand/icon-light-32.png",
+        media: "(prefers-color-scheme: light)",
+        type: "image/png",
+        sizes: "32x32",
+      },
+      {
+        url: "/brand/icon-dark-32.png",
+        media: "(prefers-color-scheme: dark)",
+        type: "image/png",
+        sizes: "32x32",
+      },
+    ],
+    shortcut: "/favicon.ico",
+    apple: {
+      url: "/brand/apple-touch-icon.png",
+      type: "image/png",
+      sizes: "180x180",
+    },
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f4efdf",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4efdf" },
+    { media: "(prefers-color-scheme: dark)", color: "#17140f" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

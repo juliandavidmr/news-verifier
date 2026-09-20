@@ -71,7 +71,10 @@ export function PublicMethodologyPage({ locale }: { locale: SupportedLocale }) {
           },
         }}
       />
-      <BrandLink label={copy.brand} href={localizedPath(locale)} />
+      <header className="topbar">
+        <BrandLink label={copy.brand} href={localizedPath(locale)} />
+        <span className="topbar-note">{copy.eyebrow}</span>
+      </header>
       <p className="kicker">{copy.methodology}</p>
       <h1>{copy.methodologyTitle}</h1>
       <p className="legal-lede">{copy.methodologyIntro}</p>
@@ -99,7 +102,10 @@ export function PublicPrivacyPage({ locale }: { locale: SupportedLocale }) {
 
   return (
     <main className="legal-shell">
-      <BrandLink label={copy.brand} href={localizedPath(locale)} />
+      <header className="topbar">
+        <BrandLink label={copy.brand} href={localizedPath(locale)} />
+        <span className="topbar-note">{copy.eyebrow}</span>
+      </header>
       <p className="kicker">{copy.privacy}</p>
       <h1>{copy.privacyTitle}</h1>
       <p className="legal-effective">{policy.effectiveDate}</p>
