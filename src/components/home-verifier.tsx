@@ -66,7 +66,7 @@ export function HomeVerifier({
 }) {
   const router = useRouter();
   const [locale, setLocale] = useState(initialLocale);
-  const [mode, setMode] = useState<InputMode>("url");
+  const [mode, setMode] = useState<InputMode>("image");
   const [url, setUrl] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -174,16 +174,6 @@ export function HomeVerifier({
         <form className="verify-card" onSubmit={submit}>
           <fieldset className="mode-switch" aria-label={copy.inputType}>
             <button
-              className={mode === "url" ? "mode-button active" : "mode-button"}
-              type="button"
-              disabled={submitting}
-              aria-pressed={mode === "url"}
-              onClick={() => setMode("url")}
-            >
-              <EnlaceExterno size={20} aria-hidden="true" />
-              {copy.linkMode}
-            </button>
-            <button
               className={
                 mode === "image"
                   ? "mode-button active image"
@@ -196,6 +186,16 @@ export function HomeVerifier({
             >
               <Imagen size={20} aria-hidden="true" />
               {copy.imageMode}
+            </button>
+            <button
+              className={mode === "url" ? "mode-button active" : "mode-button"}
+              type="button"
+              disabled={submitting}
+              aria-pressed={mode === "url"}
+              onClick={() => setMode("url")}
+            >
+              <EnlaceExterno size={20} aria-hidden="true" />
+              {copy.linkMode}
             </button>
           </fieldset>
 
