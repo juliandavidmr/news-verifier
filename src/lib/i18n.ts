@@ -37,10 +37,10 @@ export const messages = {
       "Please review the removal of this report from public listings and search engines:",
     reportSearchDescription:
       "Automated, dated evidence report with traceable sources and explicit uncertainty.",
-    finalCtaTitle: "Have a claim you want to examine?",
+    finalCtaTitle: "Put that claim to the test.",
     finalCtaBody:
-      "Submit a public link or screenshot and get a report you can inspect claim by claim.",
-    finalCtaAction: "Analyze a publication",
+      "Upload a screenshot or paste a public link. See what the evidence supports and what cannot be concluded.",
+    finalCtaAction: "Start the analysis",
     genericError: "We could not start the investigation. Please try again.",
     invalidUrl: "Enter a valid public HTTP or HTTPS URL.",
     visitorQuotaReached:
@@ -135,10 +135,10 @@ export const messages = {
       "Por favor, revisa el retiro de este informe de los listados públicos y buscadores:",
     reportSearchDescription:
       "Informe automatizado y fechado de evidencia con fuentes rastreables e incertidumbre explícita.",
-    finalCtaTitle: "¿Tienes una afirmación que quieres revisar?",
+    finalCtaTitle: "Pon esa afirmación a prueba.",
     finalCtaBody:
-      "Envía un enlace público o una captura y recibe un informe que puedes revisar afirmación por afirmación.",
-    finalCtaAction: "Analizar una publicación",
+      "Sube una captura o pega un enlace público. Descubre qué respalda la evidencia y qué no permite concluir.",
+    finalCtaAction: "Empezar el análisis",
     genericError: "No pudimos iniciar la investigación. Inténtalo de nuevo.",
     invalidUrl: "Ingresa una URL pública HTTP o HTTPS válida.",
     visitorQuotaReached:
@@ -234,10 +234,10 @@ export const messages = {
       "Veuillez examiner le retrait de ce rapport des listes publiques et des moteurs de recherche :",
     reportSearchDescription:
       "Rapport de preuves automatisé et daté, avec sources traçables et incertitude explicite.",
-    finalCtaTitle: "Une affirmation mérite d’être examinée ?",
+    finalCtaTitle: "Mettez cette affirmation à l’épreuve.",
     finalCtaBody:
-      "Envoyez un lien public ou une capture et obtenez un rapport consultable affirmation par affirmation.",
-    finalCtaAction: "Analyser une publication",
+      "Importez une capture ou collez un lien public. Voyez ce que les preuves confirment et ce qu’elles ne permettent pas de conclure.",
+    finalCtaAction: "Lancer l’analyse",
     genericError: "Impossible de lancer l’enquête. Veuillez réessayer.",
     invalidUrl: "Saisissez une URL publique HTTP ou HTTPS valide.",
     visitorQuotaReached:
@@ -334,10 +334,10 @@ export const messages = {
       "Analise a retirada deste relatório das listagens públicas e dos mecanismos de busca:",
     reportSearchDescription:
       "Relatório automatizado e datado de evidências com fontes rastreáveis e incerteza explícita.",
-    finalCtaTitle: "Tem uma afirmação que quer analisar?",
+    finalCtaTitle: "Coloque essa afirmação à prova.",
     finalCtaBody:
-      "Envie um link público ou uma captura e receba um relatório que pode revisar afirmação por afirmação.",
-    finalCtaAction: "Analisar uma publicação",
+      "Envie uma captura ou cole um link público. Veja o que as evidências sustentam e o que não permitem concluir.",
+    finalCtaAction: "Iniciar a análise",
     genericError: "Não foi possível iniciar a investigação. Tente novamente.",
     invalidUrl: "Insira uma URL pública HTTP ou HTTPS válida.",
     visitorQuotaReached:

@@ -329,11 +329,11 @@ export function HomeVerifier({
         <div>
           <h2 id="final-cta-title">{copy.finalCtaTitle}</h2>
           <p>{copy.finalCtaBody}</p>
+          <a className="final-cta-action" href="#verify">
+            {copy.finalCtaAction}
+            <FlechaDerecha size={20} aria-hidden="true" />
+          </a>
         </div>
-        <a href="#verify">
-          {copy.finalCtaAction}
-          <FlechaDerecha size={20} aria-hidden="true" />
-        </a>
       </section>
 
       <footer className="footer">
