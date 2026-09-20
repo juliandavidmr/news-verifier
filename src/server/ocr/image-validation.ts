@@ -1,3 +1,5 @@
+import { normalizeImageMime } from "../../lib/image-mime";
+
 export const imageUploadLimits = {
   maxBytes: 4 * 1024 * 1024,
   maxPixels: 20_000_000,
@@ -7,6 +9,7 @@ export type AcceptedImageMime =
   | "image/png"
   | "image/jpeg"
   | "image/jpg"
+  | "image/pjpeg"
   | "image/webp";
 
 export class ImageValidationError extends Error {
@@ -179,8 +182,7 @@ export function validateImageUpload(bytes: Uint8Array, declaredMime: string) {
   if (bytes.byteLength > imageUploadLimits.maxBytes) {
     throw new ImageValidationError("image_too_large");
   }
-  const normalizedMime =
-    declaredMime === "image/jpg" ? "image/jpeg" : declaredMime;
+  const normalizedMime = normalizeImageMime(declaredMime);
   if (
     !(["image/png", "image/jpeg", "image/webp"] as string[]).includes(
       normalizedMime,
