@@ -104,7 +104,7 @@ Un veredicto concluyente requiere Registros de evidencia validados. Si una cita 
 
 - A los 4 minutos y 30 segundos no se inician nuevas búsquedas; los últimos 30 segundos se reservan para cerrar y persistir.
 - El Informe se construye solo desde Afirmaciones y Registros de evidencia persistidos.
-- Se registran proveedor y modelo exactos por cada operación de inferencia, además de la versión de metodología y la configuración efectiva de límites; un Informe puede registrar varios modelos si se aplicó fallback entre modelos gratuitos aprobados.
+- Se registran proveedor y modelo exactos por cada operación de inferencia, además de la versión de metodología y la configuración efectiva de límites; AI Gateway etiqueta las llamadas como gratuitas o fallback pago y un Informe puede registrar varios modelos si se aplicó fallback.
 - El Informe es una instantánea inmutable fechada; cambios posteriores requieren una Investigación nueva iniciada desde el formulario principal.
 - Un Informe parcial distingue trabajo incompleto, falta de evidencia y no verificabilidad.
 - El Informe se identifica explícitamente como análisis automatizado de evidencia y no como verdad absoluta ni asesoría profesional.

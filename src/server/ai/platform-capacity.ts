@@ -1,18 +1,23 @@
 import { APICallError } from "ai";
 import { getDatabase } from "../db";
 
-type GatewayModel = {
+export type GatewayModel = {
   id: string;
   pricing?: { input?: string; output?: string };
   tags?: string[] | null;
   supported_parameters?: string[];
 };
 
+export type GatewayModelCandidate = {
+  id: string;
+  tier: "free" | "paid-fallback";
+};
+
 let gatewayCatalog:
   | { fetchedAt: number; models: Map<string, GatewayModel> }
   | undefined;
 
-export async function freeEligibleGatewayModels(configured: string[]) {
+async function gatewayModels() {
   if (!gatewayCatalog || Date.now() - gatewayCatalog.fetchedAt > 300_000) {
     const response = await fetch("https://ai-gateway.vercel.sh/v1/models", {
       signal: AbortSignal.timeout(5_000),
@@ -24,17 +29,75 @@ export async function freeEligibleGatewayModels(configured: string[]) {
       models: new Map((body.data ?? []).map((model) => [model.id, model])),
     };
   }
-  const models = gatewayCatalog.models;
+  return gatewayCatalog.models;
+}
+
+function supportsRequiredTools(model: GatewayModel | undefined) {
+  return (
+    model?.supported_parameters?.includes("tools") === true &&
+    model.supported_parameters.includes("tool_choice")
+  );
+}
+
+export function eligibleGatewayModelsFromCatalog(
+  configured: string[],
+  models: Map<string, GatewayModel>,
+  tier: GatewayModelCandidate["tier"],
+) {
   return configured.filter((id) => {
     const model = models.get(id);
-    return (
+    if (!supportsRequiredTools(model)) return false;
+    const inputPrice = Number(model?.pricing?.input);
+    const outputPrice = Number(model?.pricing?.output);
+    const isFree =
       model?.pricing?.input === "0" &&
       model.pricing.output === "0" &&
-      model.tags?.includes("free") === true &&
-      model.supported_parameters?.includes("tools") === true &&
-      model.supported_parameters.includes("tool_choice")
-    );
+      model.tags?.includes("free") === true;
+    return tier === "free"
+      ? isFree
+      : !isFree &&
+          Number.isFinite(inputPrice) &&
+          Number.isFinite(outputPrice) &&
+          inputPrice >= 0 &&
+          outputPrice >= 0 &&
+          (inputPrice > 0 || outputPrice > 0);
   });
+}
+
+export async function freeEligibleGatewayModels(configured: string[]) {
+  return eligibleGatewayModelsFromCatalog(
+    configured,
+    await gatewayModels(),
+    "free",
+  );
+}
+
+export async function resolveGatewayModelPool(
+  configuredFree: string[],
+  configuredPaidFallback: string[],
+): Promise<GatewayModelCandidate[]> {
+  return resolveGatewayModelPoolFromCatalog(
+    configuredFree,
+    configuredPaidFallback,
+    await gatewayModels(),
+  );
+}
+
+export function resolveGatewayModelPoolFromCatalog(
+  configuredFree: string[],
+  configuredPaidFallback: string[],
+  models: Map<string, GatewayModel>,
+): GatewayModelCandidate[] {
+  const free = eligibleGatewayModelsFromCatalog(configuredFree, models, "free");
+  const paid = eligibleGatewayModelsFromCatalog(
+    configuredPaidFallback,
+    models,
+    "paid-fallback",
+  ).filter((id) => !free.includes(id));
+  return [
+    ...free.map((id) => ({ id, tier: "free" as const })),
+    ...paid.map((id) => ({ id, tier: "paid-fallback" as const })),
+  ];
 }
 
 export class PlatformCapacityError extends Error {

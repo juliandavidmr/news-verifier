@@ -1,14 +1,11 @@
 import { messages } from "../../lib/i18n";
-import {
-  AiPlatformRepository,
-  PlatformCapacityError,
-} from "../../server/ai/platform-capacity";
+import { PlatformCapacityError } from "../../server/ai/platform-capacity";
 import { GatewayClaimIdentifier } from "../../server/claims/gateway-identifier";
 import { prioritizeClaims } from "../../server/claims/prioritize";
 import { ClaimsRepository } from "../../server/claims/repository";
 import { EvidenceRepository } from "../../server/evidence/repository";
 import { researchEvidence } from "../../server/evidence/research";
-import { ResilientExaSearchAdapter } from "../../server/evidence/search";
+import { DirectExaSearchAdapter } from "../../server/evidence/search";
 import { SafeRemoteDocumentFetcher } from "../../server/ingestion/public-url";
 import { extractReadableContent } from "../../server/ingestion/readable-content";
 import { NeonReportsRepository } from "../../server/reports/neon-repository";
@@ -125,11 +122,7 @@ export async function researchQueuedEvidence(
   }, 20_000);
   try {
     await researchEvidence(input, repository, {
-      search: new ResilientExaSearchAdapter(
-        undefined,
-        undefined,
-        new AiPlatformRepository(),
-      ),
+      search: new DirectExaSearchAdapter(),
       fetcher: new SafeRemoteDocumentFetcher(),
     });
     if (heartbeatError) throw heartbeatError;

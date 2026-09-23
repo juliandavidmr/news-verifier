@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { AiPlatformRepository } from "../ai/platform-capacity";
+import { PlatformCapacityError } from "../ai/platform-capacity";
 import { DirectExaSearchAdapter, ResilientExaSearchAdapter } from "./search";
 import type { EvidenceSearchAdapter } from "./types";
 
@@ -58,5 +60,35 @@ describe("Exa search adapters", () => {
       primaryCalls: 1,
       fallbackCalls: 2,
     });
+  });
+
+  it("isolates Gateway search failures from inference circuits", async () => {
+    const openCircuit = vi.fn(async () => undefined);
+    const platform = {
+      isCircuitOpen: vi.fn(async () => false),
+      openCircuit,
+      recordAttempt: vi.fn(async () => undefined),
+    } as unknown as AiPlatformRepository;
+    const primary: EvidenceSearchAdapter = {
+      search: async () => {
+        throw new PlatformCapacityError("ai_gateway", "search_model_not_free");
+      },
+    };
+    const fallback: EvidenceSearchAdapter = {
+      search: async () => ({ provider: "direct_exa", candidates: [] }),
+    };
+
+    const adapter = new ResilientExaSearchAdapter(primary, fallback, platform);
+    await expect(adapter.search(request)).resolves.toMatchObject({
+      provider: "direct_exa",
+    });
+    expect(openCircuit).toHaveBeenCalledWith(
+      "ai_gateway_search",
+      "search_model_not_free",
+    );
+    expect(openCircuit).not.toHaveBeenCalledWith(
+      "ai_gateway",
+      expect.anything(),
+    );
   });
 });

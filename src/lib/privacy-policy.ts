@@ -11,7 +11,7 @@ type Policy = {
 
 export const privacyPolicy: Record<SupportedLocale, Policy> = {
   en: {
-    effectiveDate: "Effective September 20, 2026",
+    effectiveDate: "Effective September 23, 2026",
     summary:
       "News Verifier is an anonymous, experimental service operated by Julian David. It processes a submitted link or screenshot to produce an automated evidence report. Eligible reports created from links are listed publicly and indexed by search engines; screenshot reports remain unlisted.",
     sections: [
@@ -26,14 +26,14 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Purposes and legal basis",
         paragraphs: [
-          "We process the submitted material to provide the report you request, preserve an auditable snapshot, protect free capacity and prevent abuse. Depending on applicable law, this is necessary to provide the requested service and supports the operator’s legitimate interests in security, reliability and accountability.",
+          "We process the submitted material to provide the report you request, preserve an auditable snapshot, protect service capacity and its operating budget, and prevent abuse. Depending on applicable law, this is necessary to provide the requested service and supports the operator’s legitimate interests in security, reliability and accountability.",
           "Do not submit confidential material or personal data that you are not entitled to process. The service does not proactively detect sensitive data before processing.",
         ],
       },
       {
         title: "Providers and transfers",
         paragraphs: [
-          "The server uses Vercel for hosting, durable workflows and AI Gateway; Neon for Postgres storage; Exa for evidence search when needed; and the selected free model providers routed by AI Gateway. Fetching a link also contacts that source website. These providers may process technical request data under their own terms and in other countries.",
+          "The server uses Vercel for hosting, durable workflows and AI Gateway; Neon for Postgres storage; Exa for evidence search when needed; and selected free or paid-fallback model providers routed by AI Gateway. Fetching a link also contacts that source website. These providers may process technical request data under their own terms and in other countries.",
           "The browser sends the source to our server; model and search requests are made server-side. We do not sell personal data.",
         ],
       },
@@ -62,7 +62,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
     ],
   },
   es: {
-    effectiveDate: "Vigente desde el 20 de septiembre de 2026",
+    effectiveDate: "Vigente desde el 23 de septiembre de 2026",
     summary:
       "Verificador de noticias es un servicio experimental y anónimo operado por Julian David. Procesa un enlace o una captura para producir un informe automatizado de evidencia. Los informes elegibles originados por enlaces se listan públicamente y aparecen en buscadores; los informes de capturas permanecen no listados.",
     sections: [
@@ -77,14 +77,14 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Finalidades y base jurídica",
         paragraphs: [
-          "Procesamos el material enviado para prestar el informe solicitado, conservar una instantánea auditable, proteger la capacidad gratuita y prevenir abusos. Según la ley aplicable, este tratamiento es necesario para prestar el servicio solicitado y respalda el interés legítimo del operador en seguridad, fiabilidad y rendición de cuentas.",
+          "Procesamos el material enviado para prestar el informe solicitado, conservar una instantánea auditable, proteger la capacidad y el presupuesto operativo del servicio y prevenir abusos. Según la ley aplicable, este tratamiento es necesario para prestar el servicio solicitado y respalda el interés legítimo del operador en seguridad, fiabilidad y rendición de cuentas.",
           "No envíes material confidencial ni datos personales que no tengas derecho a procesar. El servicio no detecta de forma preventiva datos sensibles antes de procesarlos.",
         ],
       },
       {
         title: "Proveedores y transferencias",
         paragraphs: [
-          "El servidor usa Vercel para alojamiento, workflows durables y AI Gateway; Neon para Postgres; Exa para buscar evidencia cuando sea necesario; y los proveedores de modelos gratuitos seleccionados mediante AI Gateway. Obtener un enlace también contacta al sitio de origen. Estos proveedores pueden procesar datos técnicos bajo sus propias condiciones y en otros países.",
+          "El servidor usa Vercel para alojamiento, workflows durables y AI Gateway; Neon para Postgres; Exa para buscar evidencia cuando sea necesario; y proveedores seleccionados de modelos gratuitos o de fallback pago mediante AI Gateway. Obtener un enlace también contacta al sitio de origen. Estos proveedores pueden procesar datos técnicos bajo sus propias condiciones y en otros países.",
           "El navegador envía la fuente a nuestro servidor; las solicitudes a modelos y buscadores se hacen desde el servidor. No vendemos datos personales.",
         ],
       },
@@ -113,7 +113,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
     ],
   },
   fr: {
-    effectiveDate: "En vigueur depuis le 20 septembre 2026",
+    effectiveDate: "En vigueur depuis le 23 septembre 2026",
     summary:
       "Vérificateur d’actualités est un service expérimental et anonyme exploité par Julian David. Il traite un lien ou une capture afin de produire un rapport automatisé de preuves. Les rapports admissibles issus de liens sont répertoriés publiquement et indexés par les moteurs de recherche ; les rapports issus de captures restent non répertoriés.",
     sections: [
@@ -128,14 +128,14 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Finalités et base juridique",
         paragraphs: [
-          "Nous traitons les éléments soumis pour fournir le rapport demandé, garder un instantané auditable, protéger la capacité gratuite et prévenir les abus. Selon la loi applicable, ce traitement est nécessaire au service demandé et soutient l’intérêt légitime de l’opérateur en matière de sécurité, fiabilité et responsabilité.",
+          "Nous traitons les éléments soumis pour fournir le rapport demandé, garder un instantané auditable, protéger la capacité et le budget opérationnel du service et prévenir les abus. Selon la loi applicable, ce traitement est nécessaire au service demandé et soutient l’intérêt légitime de l’opérateur en matière de sécurité, fiabilité et responsabilité.",
           "Ne soumettez pas d’informations confidentielles ni de données personnelles que vous n’êtes pas autorisé à traiter. Le service ne détecte pas préventivement les données sensibles.",
         ],
       },
       {
         title: "Prestataires et transferts",
         paragraphs: [
-          "Le serveur utilise Vercel pour l’hébergement, les workflows et AI Gateway ; Neon pour Postgres ; Exa pour rechercher des preuves si nécessaire ; et les fournisseurs de modèles gratuits sélectionnés via AI Gateway. La récupération d’un lien contacte aussi le site source. Ces prestataires peuvent traiter des données techniques selon leurs propres conditions et dans d’autres pays.",
+          "Le serveur utilise Vercel pour l’hébergement, les workflows et AI Gateway ; Neon pour Postgres ; Exa pour rechercher des preuves si nécessaire ; et des fournisseurs sélectionnés de modèles gratuits ou de secours payants via AI Gateway. La récupération d’un lien contacte aussi le site source. Ces prestataires peuvent traiter des données techniques selon leurs propres conditions et dans d’autres pays.",
           "Le navigateur envoie la source à notre serveur ; les requêtes aux modèles et moteurs de recherche sont effectuées côté serveur. Nous ne vendons pas de données personnelles.",
         ],
       },
@@ -164,7 +164,7 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
     ],
   },
   pt: {
-    effectiveDate: "Em vigor desde 20 de setembro de 2026",
+    effectiveDate: "Em vigor desde 23 de setembro de 2026",
     summary:
       "O Verificador de notícias é um serviço experimental e anônimo operado por Julian David. Ele processa um link ou captura para produzir um relatório automatizado de evidências. Relatórios elegíveis originados por links são listados publicamente e indexados por mecanismos de busca; relatórios de capturas permanecem não listados.",
     sections: [
@@ -179,14 +179,14 @@ export const privacyPolicy: Record<SupportedLocale, Policy> = {
       {
         title: "Finalidades e base legal",
         paragraphs: [
-          "Processamos o material enviado para fornecer o relatório solicitado, manter um retrato auditável, proteger a capacidade gratuita e evitar abusos. Conforme a lei aplicável, isso é necessário para o serviço solicitado e sustenta o interesse legítimo do operador em segurança, confiabilidade e prestação de contas.",
+          "Processamos o material enviado para fornecer o relatório solicitado, manter um retrato auditável, proteger a capacidade e o orçamento operacional do serviço e evitar abusos. Conforme a lei aplicável, isso é necessário para o serviço solicitado e sustenta o interesse legítimo do operador em segurança, confiabilidade e prestação de contas.",
           "Não envie material confidencial nem dados pessoais que você não tenha direito de processar. O serviço não detecta preventivamente dados sensíveis.",
         ],
       },
       {
         title: "Provedores e transferências",
         paragraphs: [
-          "O servidor usa Vercel para hospedagem, workflows e AI Gateway; Neon para Postgres; Exa para pesquisar evidências quando necessário; e os provedores de modelos gratuitos selecionados pelo AI Gateway. Buscar um link também contata o site de origem. Esses provedores podem processar dados técnicos sob seus próprios termos e em outros países.",
+          "O servidor usa Vercel para hospedagem, workflows e AI Gateway; Neon para Postgres; Exa para pesquisar evidências quando necessário; e provedores selecionados de modelos gratuitos ou de fallback pago pelo AI Gateway. Buscar um link também contata o site de origem. Esses provedores podem processar dados técnicos sob seus próprios termos e em outros países.",
           "O navegador envia a fonte ao nosso servidor; modelos e buscas são acionados pelo servidor. Não vendemos dados pessoais.",
         ],
       },

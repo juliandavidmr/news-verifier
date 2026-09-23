@@ -88,8 +88,17 @@ env RUN_AI_TESTS=1 node --env-file=.env --env-file=.env.local node_modules/vites
 node scripts/run-ocr-acceptance.mjs https://PREVIEW_URL --protected
 ```
 
-La política se mantiene `free-only`: no hay fallback pago ni recarga
-automática. Los límites y la disponibilidad de Vercel AI Gateway prevalecen
-sobre los cupos internos. JEV no forma parte del runtime actual; la arquitectura
-usa Vercel AI Gateway para inferencia, Exa para descubrimiento con fallback
-directo y reglas deterministas para aceptar o degradar conclusiones.
+La política posterior a esta validación intenta primero el pool gratuito y usa
+`alibaba/qwen3.8-27b` como último fallback pago para identificación y
+evaluación, sin recarga automática. Exa directa es la ruta primaria de
+descubrimiento y sus fallos no abren el circuito de inferencia. Los límites de
+Vercel AI Gateway prevalecen sobre los cupos internos. JEV no forma parte del
+runtime actual y las reglas deterministas siguen aceptando o degradando las
+conclusiones.
+
+Tras cargar créditos, el smoke de herramienta forzada respondió con
+`alibaba/qwen3.8-27b`. Las integraciones reales de identificación y evaluación
+también pasaron al excluir deliberadamente el pool gratuito, confirmando que el
+fallback se alcanza y entrega las estructuras requeridas. Antes de desplegar
+queda fijar el presupuesto del proyecto y ejecutar el corpus multilingüe
+revisado por humanos; estos smokes validan el contrato, no la calidad editorial.

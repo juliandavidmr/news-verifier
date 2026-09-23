@@ -12,7 +12,8 @@ import type {
   EvidenceSearchResult,
 } from "./types";
 
-const defaultSearchModel = "inclusionai/ling-3.0-flash-vl-free";
+const defaultSearchModel = "inclusionai/ling-3.0-flash-fin-free";
+const gatewaySearchCircuit = "ai_gateway_search";
 
 type ExaResult = {
   title?: unknown;
@@ -153,7 +154,7 @@ export class ResilientExaSearchAdapter implements EvidenceSearchAdapter {
   async search(request: EvidenceSearchRequest) {
     if (
       !this.gatewayUnavailable &&
-      (await this.platform?.isCircuitOpen("ai_gateway"))
+      (await this.platform?.isCircuitOpen(gatewaySearchCircuit))
     ) {
       this.gatewayUnavailable = true;
       await this.platform?.recordAttempt({
@@ -180,21 +181,25 @@ export class ResilientExaSearchAdapter implements EvidenceSearchAdapter {
       } catch (error) {
         this.gatewayUnavailable = true;
         const capacity = capacityFailure(error);
+        const errorCode =
+          error instanceof PlatformCapacityError
+            ? error.code
+            : (capacity?.code ?? "gateway_search_error");
         await this.platform?.recordAttempt({
           reportId: request.reportId,
           phase: "evidence_search",
           requestedModel: process.env.AI_SEARCH_MODEL ?? defaultSearchModel,
           outcome: "failed",
-          errorCode: capacity?.code ?? "gateway_search_error",
+          errorCode,
         });
         if (capacity) {
           await this.platform?.openCircuit(
-            "ai_gateway",
+            gatewaySearchCircuit,
             capacity.code,
             capacity.retryAfterSeconds,
           );
         } else if (error instanceof PlatformCapacityError) {
-          await this.platform?.openCircuit(error.provider, error.code);
+          await this.platform?.openCircuit(gatewaySearchCircuit, error.code);
         }
         if (
           APICallError.isInstance(error) &&

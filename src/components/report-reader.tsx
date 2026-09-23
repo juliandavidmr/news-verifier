@@ -82,7 +82,7 @@ const readerCopy = {
       "The index is withheld because a primary claim has no conclusion.",
     timeLimit: "Some claims were not investigated before the time limit.",
     platformLimit:
-      "Some claims were not investigated because free platform capacity ended.",
+      "Some claims were not investigated because external platform capacity was unavailable.",
     strengths: {
       high: "High",
       medium: "Medium",
@@ -174,7 +174,7 @@ const readerCopy = {
     timeLimit:
       "Algunas afirmaciones no se investigaron antes del límite de tiempo.",
     platformLimit:
-      "Algunas afirmaciones no se investigaron porque se agotó la capacidad gratuita.",
+      "Algunas afirmaciones no se investigaron porque la capacidad de la plataforma externa no estaba disponible.",
     strengths: {
       high: "Alta",
       medium: "Media",
@@ -265,7 +265,7 @@ const readerCopy = {
     timeLimit:
       "Certaines affirmations n’ont pas été étudiées avant la limite de temps.",
     platformLimit:
-      "Certaines affirmations n’ont pas été étudiées faute de capacité gratuite.",
+      "Certaines affirmations n’ont pas été étudiées faute de capacité disponible sur la plateforme externe.",
     strengths: {
       high: "Élevée",
       medium: "Moyenne",
@@ -357,7 +357,7 @@ const readerCopy = {
     timeLimit:
       "Algumas afirmações não foram investigadas antes do limite de tempo.",
     platformLimit:
-      "Algumas afirmações não foram investigadas porque a capacidade gratuita acabou.",
+      "Algumas afirmações não foram investigadas porque a capacidade da plataforma externa não estava disponível.",
     strengths: {
       high: "Alta",
       medium: "Média",

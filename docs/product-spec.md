@@ -141,12 +141,12 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - El pool configurado funciona como allowlist; el servidor contrasta periódicamente sus identificadores, elegibilidad Free Tier y precio vigente con el catálogo de AI Gateway, y desactiva cualquier integrante que deje de ser gratuito o disponible.
 - `inclusionai/ling-3.0-flash-vl-free` es el candidato primario inicial; su selección es provisional hasta completar esa evaluación.
 - Ante `429`, indisponibilidad o agotamiento de un modelo, el motor respeta `retry-after` cuando cabe dentro del presupuesto temporal y puede continuar con el siguiente modelo gratuito aprobado.
-- No existe fallback a modelos pagos ni recarga automática. Si todos los modelos gratuitos aprobados están limitados o no disponibles, la investigación termina parcial o fallida antes de generar un cargo.
+- Identificación y evaluación intentan primero todo el pool gratuito aprobado y solo después recurren al fallback pago explícito `alibaba/qwen3.8-27b`. No existe recarga automática; antes del despliegue deben comprarse créditos y configurarse un presupuesto de proyecto en AI Gateway.
 - Cada llamada conserva el proveedor y modelo exactos utilizados; un mismo informe puede registrar más de uno cuando haya fallback.
 - Exa Search es el proveedor inicial de descubrimiento y recuperación de evidencia mediante la herramienta `gateway.tools.exaSearch()` de Vercel AI Gateway.
 - Cada investigación aplica un presupuesto máximo configurable de búsquedas y resultados. No existe recarga automática ni fallback de búsqueda pago fuera de ese presupuesto.
 - Si el crédito o presupuesto de búsqueda se agota, se conserva la evidencia ya validada y la investigación termina parcial o fallida según las reglas de cobertura.
-- La herramienta `gateway.tools.exaSearch()` es la ruta primaria. Si AI Gateway rechaza la operación por verificación de cuenta, cuota o indisponibilidad, el mismo adaptador puede usar `EXA_API_KEY` directamente; ambas rutas comparten el mismo presupuesto duro, contrato de auditoría y validación de páginas. No existe fallback de búsqueda pago ni se aceptan snippets como evidencia.
+- La API directa de Exa es la ruta primaria de descubrimiento. No se usa un modelo de lenguaje únicamente para despachar una búsqueda. El presupuesto duro, contrato de auditoría y validación de páginas se mantienen y los snippets nunca se aceptan como evidencia.
 - OCR se ejecuta en el servidor detrás de un adaptador reemplazable.
 - El Índice de respaldo, la Cobertura de evidencia y las reglas de cierre se calculan en código determinista.
 - Eve y JEV no son dependencias del MVP.
@@ -244,5 +244,5 @@ Este documento reúne únicamente decisiones aprobadas durante la entrevista. Se
 - Una entrada rechazada antes de comenzar no consume cupo.
 - Una investigación iniciada consume cupo aunque concluya sin evidencia o produzca un informe parcial.
 - Un fallo interno o de proveedor devuelve el cupo al Visitante anónimo.
-- Un trabajo que no puede continuar porque todos los modelos gratuitos alcanzaron un Límite de plataforma se trata como fallo de proveedor a efectos de devolución del cupo del Visitante anónimo.
+- Un trabajo que no puede continuar después de agotar tanto los modelos gratuitos como el fallback pago configurado se trata como fallo de proveedor a efectos de devolución del cupo del Visitante anónimo.
 - El consumo real de capacidad global se registra aunque se devuelva el cupo individual.

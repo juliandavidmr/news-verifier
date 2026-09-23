@@ -13,7 +13,12 @@ describe.skipIf(!runAiTests)("AI Gateway claim identification", () => {
       reportId: "gateway-integration-test",
     });
 
-    expect(result.requestedModel).toMatch(/-free$/u);
+    expect([
+      "inclusionai/ling-3.0-flash-vl-free",
+      "inclusionai/ling-3.0-flash-fin-free",
+      "poolside/laguna-s-2.1-free",
+      "alibaba/qwen3.8-27b",
+    ]).toContain(result.requestedModel);
     expect(result.claims.length).toBeGreaterThan(0);
     expect(result.claims.every((claim) => text.includes(claim.quote))).toBe(
       true,

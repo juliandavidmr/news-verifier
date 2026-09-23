@@ -2,8 +2,8 @@ import { APICallError, gateway, generateText, jsonSchema, tool } from "ai";
 import {
   AiPlatformRepository,
   capacityFailure,
-  freeEligibleGatewayModels,
   PlatformCapacityError,
+  resolveGatewayModelPool,
 } from "../ai/platform-capacity";
 import type {
   ProposedVerdict,
@@ -18,6 +18,7 @@ const defaultModels = [
   "inclusionai/ling-3.0-flash-fin-free",
   "poolside/laguna-s-2.1-free",
 ];
+const defaultPaidFallbackModels = ["alibaba/qwen3.8-27b"];
 
 type VerdictBatch = { verdicts: ProposedVerdict[] };
 
@@ -120,11 +121,17 @@ const verdictBatchSchema = jsonSchema<VerdictBatch>(
   },
 );
 
-function configuredModels() {
-  const configured = process.env.AI_VERDICT_MODELS?.split(",")
+function configuredModels(
+  name: "AI_VERDICT_MODELS" | "AI_VERDICT_PAID_FALLBACK_MODELS",
+) {
+  const configured = process.env[name]
+    ?.split(",")
     .map((model) => model.trim())
     .filter(Boolean);
-  return configured?.length ? configured : defaultModels;
+  if (configured?.length) return configured;
+  return name === "AI_VERDICT_MODELS"
+    ? defaultModels
+    : defaultPaidFallbackModels;
 }
 
 export function verdictEvaluationInstructions(input: ReportEvaluationInput) {
@@ -157,37 +164,38 @@ export class GatewayVerdictEvaluator implements VerdictEvaluator {
   constructor(private readonly platform = new AiPlatformRepository()) {}
 
   async evaluate(input: ReportEvaluationInput): Promise<VerdictModelResult> {
-    const configured = configuredModels();
-    if (await this.platform.isCircuitOpen("ai_gateway")) {
-      await this.platform.recordAttempt({
-        reportId: input.reportId,
-        phase: "verdict_evaluation",
-        requestedModel: configured[0] ?? "none",
-        outcome: "circuit_open",
-        errorCode: "circuit_open",
-      });
-      throw new PlatformCapacityError("ai_gateway", "circuit_open");
-    }
-    let models: string[];
+    const configuredFree = configuredModels("AI_VERDICT_MODELS");
+    const configuredPaid = configuredModels("AI_VERDICT_PAID_FALLBACK_MODELS");
+    let models: Awaited<ReturnType<typeof resolveGatewayModelPool>>;
     try {
-      models = await freeEligibleGatewayModels(configured);
+      models = await resolveGatewayModelPool(configuredFree, configuredPaid);
     } catch {
-      await this.platform.openCircuit("ai_gateway", "catalog_unavailable", 60);
       throw new PlatformCapacityError("ai_gateway", "catalog_unavailable");
     }
     if (models.length === 0) {
-      await this.platform.openCircuit("ai_gateway", "no_approved_free_model");
       await this.platform.recordAttempt({
         reportId: input.reportId,
         phase: "verdict_evaluation",
-        requestedModel: configured[0] ?? "none",
+        requestedModel: configuredFree[0] ?? configuredPaid[0] ?? "none",
         outcome: "failed",
-        errorCode: "no_approved_free_model",
+        errorCode: "no_eligible_model",
       });
-      throw new PlatformCapacityError("ai_gateway", "no_approved_free_model");
+      throw new PlatformCapacityError("ai_gateway", "no_eligible_model");
     }
     let lastError: unknown;
-    for (const modelId of models) {
+    for (const candidate of models) {
+      const modelId = candidate.id;
+      const circuit = `ai_gateway_model:${modelId}`;
+      if (await this.platform.isCircuitOpen(circuit)) {
+        await this.platform.recordAttempt({
+          reportId: input.reportId,
+          phase: "verdict_evaluation",
+          requestedModel: modelId,
+          outcome: "circuit_open",
+          errorCode: "circuit_open",
+        });
+        continue;
+      }
       try {
         const result = await generateText({
           model: gateway(modelId),
@@ -203,7 +211,7 @@ export class GatewayVerdictEvaluator implements VerdictEvaluator {
           providerOptions: {
             gateway: {
               user: input.reportId,
-              tags: ["feature:verdict-evaluation", "tier:free-only"],
+              tags: ["feature:verdict-evaluation", `tier:${candidate.tier}`],
             },
           },
           instructions: verdictEvaluationInstructions(input),
@@ -237,13 +245,13 @@ export class GatewayVerdictEvaluator implements VerdictEvaluator {
           outcome: "failed",
           errorCode: capacity?.code ?? "model_error",
         });
-        if (capacity && capacity.code !== "http_503") {
+        if (capacity) {
           await this.platform.openCircuit(
-            "ai_gateway",
+            circuit,
             capacity.code,
             capacity.retryAfterSeconds,
           );
-          throw new PlatformCapacityError("ai_gateway", capacity.code);
+          continue;
         }
         if (
           APICallError.isInstance(error) &&
@@ -253,15 +261,14 @@ export class GatewayVerdictEvaluator implements VerdictEvaluator {
         }
       }
     }
-    await this.platform.openCircuit("ai_gateway", "free_models_unavailable");
     if (capacityFailure(lastError)) {
       throw new PlatformCapacityError(
         "ai_gateway",
-        capacityFailure(lastError)?.code ?? "free_models_unavailable",
+        capacityFailure(lastError)?.code ?? "models_unavailable",
       );
     }
     throw lastError instanceof Error
       ? lastError
-      : new Error("All approved free verdict models failed");
+      : new PlatformCapacityError("ai_gateway", "models_unavailable");
   }
 }

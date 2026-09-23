@@ -6,7 +6,7 @@
 
 ## Conclusión ejecutiva
 
-> **Decisión posterior a esta investigación (actualizada el 19 de septiembre de 2026):** se seleccionó Vercel AI Gateway como puerta de enlace de inferencia, con un pool ordenado de modelos gratuitos previamente aprobados mediante el corpus multilingüe, sin fallback pago ni recarga automática. `inclusionai/ling-3.0-flash-vl-free` es el candidato primario inicial. Los límites externos de elegibilidad, tasa, periodo, crédito y disponibilidad prevalecen sobre los cupos internos. Exa Search se consumirá inicialmente mediante `gateway.tools.exaSearch()` con un presupuesto duro y no mediante su credencial directa. Las referencias posteriores a Workers AI y a la integración directa de Exa se conservan como parte de la comparación investigada, no como la arquitectura aprobada.
+> **Decisión posterior a esta investigación (actualizada el 23 de septiembre de 2026):** se seleccionó Vercel AI Gateway como puerta de enlace de inferencia, con un pool ordenado de modelos gratuitos previamente aprobados mediante el corpus multilingüe y `alibaba/qwen3.8-27b` como último fallback pago, sin recarga automática. Los límites externos de elegibilidad, tasa, periodo, crédito y disponibilidad prevalecen sobre los cupos internos. Exa directa es la ruta primaria de búsqueda con un presupuesto duro y no requiere una llamada de modelo para despachar cada consulta. Las referencias posteriores a Workers AI y al diseño anterior de búsqueda se conservan como parte de la comparación investigada.
 
 JEV y Eve no son alternativas equivalentes:
 
