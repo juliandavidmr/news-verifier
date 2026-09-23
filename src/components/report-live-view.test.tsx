@@ -1,15 +1,18 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { SupportedLocale } from "../domain/reports";
+import type { ReportSourceKind, SupportedLocale } from "../domain/reports";
 import type { PublicReport } from "../server/reports/repository";
 import { ReportLiveView } from "./report-live-view";
 
-function report(reportLocale: SupportedLocale): PublicReport {
+function report(
+  reportLocale: SupportedLocale,
+  sourceKind: ReportSourceKind = "url",
+): PublicReport {
   return {
     id: "report-id",
     shortId: "short-id",
-    sourceKind: "url",
-    sourceUrl: "https://example.com/article",
+    sourceKind,
+    sourceUrl: sourceKind === "url" ? "https://example.com/article" : null,
     reportLocale,
     status: "extracting",
     extractedTitle: "Example report",
@@ -46,4 +49,17 @@ describe("report navigation locale", () => {
       expect(html).toContain(`href="${methodologyPath}"`);
     },
   );
+
+  it("does not render an empty original-page panel for screenshot reports", () => {
+    const html = renderToStaticMarkup(
+      <ReportLiveView
+        initialReport={report("es", "image")}
+        initialDetails={null}
+        initialPubliclyListed={false}
+      />,
+    );
+
+    expect(html).not.toContain('class="source-card"');
+    expect(html).not.toContain("Página original");
+  });
 });

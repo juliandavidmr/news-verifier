@@ -14,6 +14,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import type { SupportedLocale } from "../domain/reports";
 import type {
+  PublicEvidenceRecord,
   PublicReportClaim,
   PublicReportDetails,
 } from "../server/reports/report-reader";
@@ -35,6 +36,14 @@ const readerCopy = {
       "This is a partial result because the investigation ended before every selected claim could be evaluated. The findings below remain auditable, but they do not represent the whole source.",
     resultExplanation: "What this result means",
     passages: "Context passages",
+    reviewedClaims: "Claims reviewed",
+    evaluationDetails: "Evaluation details",
+    why: "Why",
+    sourcesConsulted: "Sources consulted",
+    showOriginal: "Show original excerpt",
+    showTranslation: "Show translation",
+    expandEvidence: "Show source excerpt",
+    collapseEvidence: "Hide source excerpt",
     claim: "Claim",
     verdict: "Verdict",
     strength: "Evidence strength",
@@ -117,6 +126,14 @@ const readerCopy = {
       "Este es un resultado parcial porque la investigación terminó antes de evaluar todas las afirmaciones seleccionadas. Los hallazgos disponibles siguen siendo auditables, pero no representan toda la fuente.",
     resultExplanation: "Qué significa este resultado",
     passages: "Pasajes de contexto",
+    reviewedClaims: "Afirmaciones revisadas",
+    evaluationDetails: "Detalles de la evaluación",
+    why: "Por qué",
+    sourcesConsulted: "Fuentes consultadas",
+    showOriginal: "Mostrar fragmento original",
+    showTranslation: "Mostrar traducción",
+    expandEvidence: "Mostrar fragmento de la fuente",
+    collapseEvidence: "Ocultar fragmento de la fuente",
     claim: "Afirmación",
     verdict: "Veredicto",
     strength: "Fuerza de evidencia",
@@ -201,6 +218,14 @@ const readerCopy = {
       "Ce résultat est partiel car l’enquête s’est terminée avant l’évaluation de toutes les affirmations sélectionnées. Les constats disponibles restent auditables, mais ne représentent pas toute la source.",
     resultExplanation: "Ce que signifie ce résultat",
     passages: "Passages de contexte",
+    reviewedClaims: "Affirmations examinées",
+    evaluationDetails: "Détails de l’évaluation",
+    why: "Pourquoi",
+    sourcesConsulted: "Sources consultées",
+    showOriginal: "Afficher l’extrait original",
+    showTranslation: "Afficher la traduction",
+    expandEvidence: "Afficher l’extrait de la source",
+    collapseEvidence: "Masquer l’extrait de la source",
     claim: "Affirmation",
     verdict: "Verdict",
     strength: "Force des preuves",
@@ -284,6 +309,14 @@ const readerCopy = {
       "Este é um resultado parcial porque a investigação terminou antes de avaliar todas as afirmações selecionadas. Os achados disponíveis continuam auditáveis, mas não representam toda a fonte.",
     resultExplanation: "O que este resultado significa",
     passages: "Trechos de contexto",
+    reviewedClaims: "Afirmações revisadas",
+    evaluationDetails: "Detalhes da avaliação",
+    why: "Por quê",
+    sourcesConsulted: "Fontes consultadas",
+    showOriginal: "Mostrar trecho original",
+    showTranslation: "Mostrar tradução",
+    expandEvidence: "Mostrar trecho da fonte",
+    collapseEvidence: "Ocultar trecho da fonte",
     claim: "Afirmação",
     verdict: "Veredito",
     strength: "Força da evidência",
@@ -387,6 +420,23 @@ function claimPreview(statement: string, maximumLength = 120) {
   return `${normalized.slice(0, maximumLength - 1).trimEnd()}…`;
 }
 
+function normalizedEvidenceText(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+export function evidenceHasUsefulTranslation(
+  evidence: Pick<
+    PublicEvidenceRecord,
+    "originalFragment" | "translatedFragment"
+  >,
+) {
+  return Boolean(
+    evidence.translatedFragment &&
+      normalizedEvidenceText(evidence.translatedFragment) !==
+        normalizedEvidenceText(evidence.originalFragment),
+  );
+}
+
 export function orderClaimsForDisplay(claims: PublicReportClaim[]) {
   return [...claims].sort((left, right) => {
     const leftPending = left.verdict === null ? 1 : 0;
@@ -408,21 +458,6 @@ function LocalDate({
         new Date(value),
       )}
     </time>
-  );
-}
-
-function HighlightedPassage({ claim }: { claim: PublicReportClaim }) {
-  const start = claim.contextPassage
-    .toLocaleLowerCase()
-    .indexOf(claim.statement.toLocaleLowerCase());
-  if (start < 0) return <p>{claim.contextPassage}</p>;
-  const end = start + claim.statement.length;
-  return (
-    <p>
-      {claim.contextPassage.slice(0, start)}
-      <mark>{claim.contextPassage.slice(start, end)}</mark>
-      {claim.contextPassage.slice(end)}
-    </p>
   );
 }
 
@@ -448,15 +483,35 @@ export function ReportReader({
     ...investigatedClaims,
     ...uninvestigatedClaims.slice(0, 3),
   ];
-  const [selectedId, setSelectedId] = useState(initialClaims[0]?.id ?? null);
+  const [expandedClaimIds, setExpandedClaimIds] = useState<Set<string>>(
+    () => new Set(initialClaims[0] ? [initialClaims[0].id] : []),
+  );
+  const [expandedEvidenceIds, setExpandedEvidenceIds] = useState<Set<string>>(
+    () =>
+      new Set(
+        initialClaims[0]?.evidence[0] ? [initialClaims[0].evidence[0].id] : [],
+      ),
+  );
+  const [originalEvidenceIds, setOriginalEvidenceIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [showAllUninvestigated, setShowAllUninvestigated] = useState(false);
   useEffect(() => {
-    if (!orderedClaims.some((claim) => claim.id === selectedId)) {
-      setSelectedId(orderedClaims[0]?.id ?? null);
-    }
-  }, [orderedClaims, selectedId]);
-  const selected =
-    orderedClaims.find((claim) => claim.id === selectedId) ?? orderedClaims[0];
+    const currentClaimIds = new Set(orderedClaims.map((claim) => claim.id));
+    const currentEvidenceIds = new Set(
+      orderedClaims.flatMap((claim) =>
+        claim.evidence.map((evidence) => evidence.id),
+      ),
+    );
+    setExpandedClaimIds(
+      (current) =>
+        new Set([...current].filter((id) => currentClaimIds.has(id))),
+    );
+    setExpandedEvidenceIds(
+      (current) =>
+        new Set([...current].filter((id) => currentEvidenceIds.has(id))),
+    );
+  }, [orderedClaims]);
   const outcome =
     details.outcome === "partial"
       ? copy.partial
@@ -480,23 +535,213 @@ export function ReportReader({
 
   const renderClaim = (claim: PublicReportClaim) => {
     const verdict = claimVerdict(claim);
+    const expanded = expandedClaimIds.has(claim.id);
+    const detailsId = `${claimAnchorId(claim)}-details`;
+    const strength = claim.evidenceStrength
+      ? copy.strengths[claim.evidenceStrength]
+      : copy.strengths.none;
     return (
-      <li id={claimAnchorId(claim)} key={claim.id}>
+      <li
+        className="claim-accordion-item"
+        id={claimAnchorId(claim)}
+        key={claim.id}
+      >
         <button
           type="button"
-          className={`claim-passage verdict-${verdict} ${selected?.id === claim.id ? "selected" : ""}`}
-          aria-pressed={selected?.id === claim.id}
-          onClick={() => setSelectedId(claim.id)}
+          className="claim-summary"
+          aria-expanded={expanded}
+          aria-controls={detailsId}
+          onClick={() => {
+            setExpandedClaimIds((current) => {
+              const next = new Set(current);
+              if (expanded) next.delete(claim.id);
+              else next.add(claim.id);
+              return next;
+            });
+            if (!expanded && claim.evidence[0]) {
+              setExpandedEvidenceIds((current) =>
+                new Set(current).add(claim.evidence[0].id),
+              );
+            }
+          }}
         >
-          <span className="claim-number">
-            {copy.claim} {claim.ordinal}
+          <span className="claim-summary-copy">
+            <span className="claim-number">
+              {copy.claim} {claim.ordinal}
+            </span>
+            <span className="claim-statement">{claim.statement}</span>
+            <span className="claim-summary-result">
+              <span className={`verdict-label verdict-${verdict}`}>
+                <VerdictIcon verdict={verdict} />
+                {copy.verdicts[verdict]}
+              </span>
+              <span className="claim-strength-inline">
+                {copy.strength}: {strength}
+              </span>
+            </span>
           </span>
-          <HighlightedPassage claim={claim} />
-          <span className="verdict-label">
-            <VerdictIcon verdict={verdict} />
-            {copy.verdicts[verdict]}
+          <span className="claim-summary-chevron">
+            <ChevronAbajo
+              className="claim-chevron-icon"
+              aria-hidden="true"
+              size={24}
+            />
           </span>
         </button>
+        {expanded ? (
+          <div className="claim-accordion-detail" id={detailsId}>
+            <section className="claim-evaluation-details">
+              <h3>{copy.evaluationDetails}</h3>
+              <dl className="claim-metadata">
+                <div>
+                  <dt>{copy.strength}</dt>
+                  <dd>{strength}</dd>
+                </div>
+                <div>
+                  <dt>{copy.period}</dt>
+                  <dd>{claim.referencePeriod}</dd>
+                </div>
+                <div>
+                  <dt>{copy.scope}</dt>
+                  <dd>{claim.referenceScope}</dd>
+                </div>
+              </dl>
+            </section>
+            {claim.explanation ? (
+              <section className="claim-explanation">
+                <h3>{copy.why}</h3>
+                <p>{claim.explanation}</p>
+              </section>
+            ) : null}
+            <section className="evidence-section">
+              <h3>{copy.sourcesConsulted}</h3>
+              {claim.evidence.length === 0 ? (
+                <p className="empty-evidence">{copy.noEvidence}</p>
+              ) : (
+                <div className="evidence-list">
+                  {claim.evidence.map((evidence) => {
+                    const evidenceExpanded = expandedEvidenceIds.has(
+                      evidence.id,
+                    );
+                    const hasTranslation =
+                      evidenceHasUsefulTranslation(evidence);
+                    const showingOriginal =
+                      !hasTranslation || originalEvidenceIds.has(evidence.id);
+                    const excerpt = showingOriginal
+                      ? evidence.originalFragment
+                      : evidence.translatedFragment;
+                    const excerptId = `evidence-${evidence.id}-excerpt`;
+                    const sourceName =
+                      evidence.title ?? new URL(evidence.canonicalUrl).hostname;
+                    return (
+                      <article className="evidence-record" key={evidence.id}>
+                        <div className="evidence-record-summary">
+                          <div>
+                            <div className="evidence-heading">
+                              <span>{copy.hierarchy[evidence.hierarchy]}</span>
+                              <span>{copy.relation[evidence.relation]}</span>
+                            </div>
+                            <a
+                              href={evidence.sourceUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
+                              {sourceName}
+                              <EnlaceExterno size={16} aria-hidden="true" />
+                            </a>
+                            <p className="evidence-dates">
+                              {evidence.publishedAt ? (
+                                <>
+                                  {copy.published}:{" "}
+                                  <LocalDate
+                                    value={evidence.publishedAt}
+                                    locale={locale}
+                                  />{" "}
+                                  ·{" "}
+                                </>
+                              ) : null}
+                              {copy.consulted}:{" "}
+                              <LocalDate
+                                value={evidence.consultedAt}
+                                locale={locale}
+                              />
+                            </p>
+                          </div>
+                          <button
+                            className="evidence-record-toggle"
+                            type="button"
+                            aria-expanded={evidenceExpanded}
+                            aria-controls={excerptId}
+                            aria-label={`${evidenceExpanded ? copy.collapseEvidence : copy.expandEvidence}: ${sourceName}`}
+                            onClick={() => {
+                              setExpandedEvidenceIds((current) => {
+                                const next = new Set(current);
+                                if (evidenceExpanded) next.delete(evidence.id);
+                                else next.add(evidence.id);
+                                return next;
+                              });
+                            }}
+                          >
+                            <ChevronAbajo
+                              className="evidence-chevron-icon"
+                              aria-hidden="true"
+                              size={22}
+                            />
+                          </button>
+                        </div>
+                        {evidenceExpanded ? (
+                          <div
+                            className="evidence-record-detail"
+                            id={excerptId}
+                          >
+                            <blockquote
+                              className={showingOriginal ? "" : "translation"}
+                            >
+                              <b>
+                                {showingOriginal
+                                  ? copy.original
+                                  : copy.translation}
+                              </b>
+                              <p
+                                className="evidence-excerpt-text"
+                                lang={
+                                  showingOriginal
+                                    ? evidence.originalLanguage
+                                    : undefined
+                                }
+                              >
+                                {excerpt}
+                              </p>
+                            </blockquote>
+                            {hasTranslation ? (
+                              <button
+                                className="evidence-language-toggle"
+                                type="button"
+                                onClick={() =>
+                                  setOriginalEvidenceIds((current) => {
+                                    const next = new Set(current);
+                                    if (showingOriginal)
+                                      next.delete(evidence.id);
+                                    else next.add(evidence.id);
+                                    return next;
+                                  })
+                                }
+                              >
+                                {showingOriginal
+                                  ? copy.showTranslation
+                                  : copy.showOriginal}
+                              </button>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </div>
+        ) : null}
       </li>
     );
   };
@@ -508,138 +753,53 @@ export function ReportReader({
         <h2>{outcome}</h2>
         <p>{outcomeSummary}</p>
         {details.outcome !== "conclusive" ? (
-          <p className="result-reason">{absenceReason}</p>
+          <section className="outcome-evaluation-details">
+            <h3>{copy.evaluationDetails}</h3>
+            <p className="result-reason">{absenceReason}</p>
+          </section>
         ) : null}
       </section>
 
-      {details.claims.length > 0 && selected ? (
-        <section className="report-reader-grid">
-          <div className="passage-column">
-            <h2>{copy.passages}</h2>
-            <ol className="claim-passage-list">
-              {investigatedClaims.map(renderClaim)}
-              {uninvestigatedClaims.slice(0, 3).map(renderClaim)}
-            </ol>
-            {hiddenUninvestigated > 0 ? (
-              <>
-                <div
-                  className={`pending-claims-overflow ${showAllUninvestigated ? "expanded" : ""}`}
-                  aria-hidden={!showAllUninvestigated}
-                >
-                  <div>
-                    <ol className="claim-passage-list pending-claim-list">
-                      {uninvestigatedClaims.slice(3).map(renderClaim)}
-                    </ol>
-                  </div>
+      {details.claims.length > 0 ? (
+        <section className="report-claims">
+          <h2>
+            {copy.reviewedClaims}{" "}
+            <span className="report-claims-count">
+              ({details.claims.length})
+            </span>
+          </h2>
+          <ol className="claim-accordion-list">
+            {investigatedClaims.map(renderClaim)}
+            {uninvestigatedClaims.slice(0, 3).map(renderClaim)}
+          </ol>
+          {hiddenUninvestigated > 0 ? (
+            <>
+              <div
+                className={`pending-claims-overflow ${showAllUninvestigated ? "expanded" : ""}`}
+                aria-hidden={!showAllUninvestigated}
+              >
+                <div>
+                  <ol className="claim-accordion-list pending-claim-list">
+                    {uninvestigatedClaims.slice(3).map(renderClaim)}
+                  </ol>
                 </div>
-                <button
-                  className="pending-claims-toggle"
-                  type="button"
-                  aria-expanded={showAllUninvestigated}
-                  onClick={() =>
-                    setShowAllUninvestigated((current) => !current)
-                  }
-                >
-                  {showAllUninvestigated
-                    ? copy.showFewerClaims
-                    : copy.showMoreClaims.replace(
-                        "{count}",
-                        String(hiddenUninvestigated),
-                      )}
-                  <ChevronAbajo aria-hidden="true" size={18} />
-                </button>
-              </>
-            ) : null}
-          </div>
-
-          <article className="claim-detail" aria-live="polite">
-            {(() => {
-              const verdict = claimVerdict(selected);
-              return (
-                <>
-                  <p className={`detail-verdict verdict-${verdict}`}>
-                    <VerdictIcon verdict={verdict} />
-                    {copy.verdicts[verdict]}
-                  </p>
-                  <h2>{selected.statement}</h2>
-                </>
-              );
-            })()}
-            <dl className="claim-metadata">
-              <div>
-                <dt>{copy.strength}</dt>
-                <dd>
-                  {selected.evidenceStrength
-                    ? copy.strengths[selected.evidenceStrength]
-                    : copy.strengths.none}
-                </dd>
               </div>
-              <div>
-                <dt>{copy.period}</dt>
-                <dd>{selected.referencePeriod}</dd>
-              </div>
-              <div>
-                <dt>{copy.scope}</dt>
-                <dd>{selected.referenceScope}</dd>
-              </div>
-            </dl>
-            {selected.explanation ? (
-              <section className="claim-explanation">
-                <h3>{copy.explanation}</h3>
-                <p>{selected.explanation}</p>
-              </section>
-            ) : null}
-            <section className="evidence-section">
-              <h3>{copy.evidence}</h3>
-              {selected.evidence.length === 0 ? (
-                <p className="empty-evidence">{copy.noEvidence}</p>
-              ) : (
-                selected.evidence.map((evidence) => (
-                  <article className="evidence-record" key={evidence.id}>
-                    <div className="evidence-heading">
-                      <span>{copy.hierarchy[evidence.hierarchy]}</span>
-                      <span>{copy.relation[evidence.relation]}</span>
-                    </div>
-                    <a
-                      href={evidence.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      {evidence.title ??
-                        new URL(evidence.canonicalUrl).hostname}
-                      <EnlaceExterno size={16} aria-hidden="true" />
-                    </a>
-                    <blockquote>
-                      <b>{copy.original}</b>
-                      <p lang={evidence.originalLanguage}>
-                        {evidence.originalFragment}
-                      </p>
-                    </blockquote>
-                    {evidence.translatedFragment ? (
-                      <blockquote className="translation">
-                        <b>{copy.translation}</b>
-                        <p>{evidence.translatedFragment}</p>
-                      </blockquote>
-                    ) : null}
-                    <p className="evidence-dates">
-                      {evidence.publishedAt ? (
-                        <>
-                          {copy.published}:{" "}
-                          <LocalDate
-                            value={evidence.publishedAt}
-                            locale={locale}
-                          />{" "}
-                          ·{" "}
-                        </>
-                      ) : null}
-                      {copy.consulted}:{" "}
-                      <LocalDate value={evidence.consultedAt} locale={locale} />
-                    </p>
-                  </article>
-                ))
-              )}
-            </section>
-          </article>
+              <button
+                className="pending-claims-toggle"
+                type="button"
+                aria-expanded={showAllUninvestigated}
+                onClick={() => setShowAllUninvestigated((current) => !current)}
+              >
+                {showAllUninvestigated
+                  ? copy.showFewerClaims
+                  : copy.showMoreClaims.replace(
+                      "{count}",
+                      String(hiddenUninvestigated),
+                    )}
+                <ChevronAbajo aria-hidden="true" size={18} />
+              </button>
+            </>
+          ) : null}
         </section>
       ) : null}
 
@@ -707,7 +867,14 @@ export function ReportReader({
                       data-tooltip={preview}
                       href={`#${claimAnchorId(claim)}`}
                       onClick={() => {
-                        setSelectedId(claim.id);
+                        setExpandedClaimIds((current) =>
+                          new Set(current).add(claim.id),
+                        );
+                        if (claim.evidence[0]) {
+                          setExpandedEvidenceIds((current) =>
+                            new Set(current).add(claim.evidence[0].id),
+                          );
+                        }
                         if (uninvestigatedClaims.indexOf(claim) >= 3) {
                           setShowAllUninvestigated(true);
                         }

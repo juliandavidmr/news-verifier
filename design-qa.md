@@ -1,53 +1,68 @@
-# Design QA — Contraste brand rollout
+# Design QA — Report reader accordion refinement
 
 **Source visual truth**
 
-- `/Users/juliancreha/.codex/generated_images/01a0c0b6-f7a9-7021-8521-038fcb6a5f17/exec-bc30c748-456e-4f98-9bfd-30ea2d2799ea.png`
-- Source dimensions: 1536 × 1024 px.
-- Selected target: the large coral-and-ivory overlapping document mark.
+- `/Users/juliancreha/.codex/generated_images/01a0cf2c-0aaf-7180-8cd3-7cfb04b332f6/exec-c1939350-14c3-49af-890a-4cfe91c27266.png`
+- Source dimensions: 853 × 1844 px.
+- Intended CSS viewport: 390 × 844 px; the generated reference uses the same aspect ratio at approximately 2.19× density.
+- Selected target: the second generated option, a compact grouped list with claim details expanding in place.
 
 **Implementation evidence**
 
-- Browser-rendered home, methodology, privacy, and mobile states were inspected during implementation. Temporary visual comparison files were removed after the QA pass because they are not runtime assets.
-- Browser URL: `http://127.0.0.1:3100/`
-- Viewport: 1280 × 720 CSS px; browser device pixel ratio 2; captured output normalized to 1280 × 720 px.
-- State: English home page, URL input mode, system light preference.
+- Browser URL: `http://localhost:3000/r/QDVPDSMlLZoY`
+- Implementation screenshots: inline Codex in-app Browser captures at 390 × 844 and 1375 × 899 CSS px; the browser surface did not expose filesystem paths for the captures.
+- Capture density: 1×.
+- State: Spanish interface, screenshot-sourced report, evaluation details visible without a nested disclosure, claim 1 expanded by default.
+- The source visual and the full mobile implementation capture were emitted together in the same comparison result.
+- Additional interaction evidence: claims 1 and 2 remained expanded simultaneously, as did the first two evidence sources inside claim 1.
 
 ## Findings
 
-No actionable P0, P1, or P2 mismatches remain.
+No actionable P0, P1, or P2 differences remain.
 
-- Fonts and typography: the existing Arial/Helvetica wordmark remains unchanged. Its heavy weight and compact tracking still match the site and balance the wider new symbol.
-- Spacing and layout rhythm: the 46 px mark fits within the existing 84 px header without changing the header height or causing mobile overflow. The desktop and 390 px mobile captures preserve the existing layout.
-- Colors and visual tokens: the light mark uses the selected coral, ivory, and ink palette. The dark variant preserves coral and inverts the outer linework to ivory against `#17140f`. Theme-color metadata follows the same light/dark backgrounds.
-- Image quality and asset fidelity: the production mark is a transparent 512 px generated asset derived from the selected visual, not a CSS or inline-SVG approximation. Its two panels, central diamond, angular overlap, text bars, perspective, and heavy outline match the selected concept. Focused comparison found no material geometry drift at header size.
-- Copy and content: no product copy changed. The localized wordmark continues to come from the existing locale strings.
-- Headers: the home page, methodology page, privacy page, and report view use the shared `BrandLink`. Methodology and privacy now expose it inside a full top bar rather than as an unstructured standalone link.
-- Metadata surfaces: light and dark 32 px favicon links, ICO fallback, Apple touch icon, PWA 192/512 icons, manifest entries, and Open Graph art all use the selected mark.
-- Interaction regression check: Link and Upload screenshot modes both remain selectable and reveal their corresponding inputs. Browser console reported no errors.
+- Fonts and typography: the implementation keeps the product's established Arial/Helvetica stack and heavy editorial labels. Claim text was reduced from an initially over-bold weight to a regular reading weight, matching the reference hierarchy while retaining clear verdict emphasis.
+- Spacing and layout rhythm: the complete reading flow uses one 920 px column centered inside the 1375 px desktop viewport, with equal 228 px side gutters. At 390 px the same regions use equal 10 px gutters and no horizontal overflow. Details open directly beneath their claim.
+- Colors and visual tokens: the implementation reuses the existing paper, ink, muted, yellow, mint, coral, and verdict tokens. The real report's neutral verdict color replaces the mock's positive mint treatment because the persisted verdict is `insufficient_evidence`.
+- Image quality and asset fidelity: no new raster assets were required. The existing brand image and Colombia Icons components remain sharp and consistent; no CSS art, Unicode icons, or inline SVG approximations were introduced.
+- Copy and content: persisted report claims, verdicts, explanations, source names, and dates remain authoritative. The mock's illustrative Spanish claim copy was not substituted for real report data. New labels are localized in English, Spanish, French, and Portuguese.
+- Interaction: claim rows and evidence rows maintain independent expanded sets, so opening one does not close another. Evaluation details are no longer a nested disclosure; they remain visible wherever the associated result or claim is shown. The translation/original control keeps its own state.
+- Evidence language: only one fragment is rendered at a time. A materially different translation is the default and exposes a control to show the original; identical translations are suppressed entirely.
+- Source origin: screenshot reports render no empty `Página original` panel. URL reports retain the linked original-page panel.
+- Browser console: no errors or warnings were reported during the final desktop pass.
 
-## Open Questions
+## Accessibility and responsive checks
 
-- None blocking. The in-app browser was running with a light OS preference, so the dark page palette was validated through its production CSS tokens and the final dark asset composite rather than a browser-level `prefers-color-scheme: dark` screenshot.
+- Claim and evidence controls use native buttons with `aria-expanded` and `aria-controls`.
+- Touch controls are at least 44 px in the mobile layout.
+- Focus styling continues to use the existing high-contrast global focus token.
+- Reading order follows the visible order: claim, verdict, strength, explanation, then sources.
+- The 390 × 844 and 1375 × 899 layouts were inspected; neither reintroduces the former master-detail separation.
 
 ## Comparison history
 
-- Initial implementation pass: no P0/P1/P2 issues found in the full-page and focused logo comparisons.
-- No corrective visual iteration was required.
+1. Initial comparison found two P2 differences: `Afirmaciones revisadas (3)` wrapped at 390 px, and claim text was visibly heavier than the reference. The mobile heading scale was reduced and kept on one line; claim weight was reduced.
+2. Browser interaction testing found the active claim reopened immediately after being closed. The state recovery effect now preserves an intentional all-collapsed state.
+3. The final aligned comparison found no remaining P0, P1, or P2 issues. Differences in verdict color and report prose are intentional consequences of real persisted data.
+4. The refinement pass made evaluation details permanently visible, converted claim and evidence disclosure state from single selection to independent multi-selection, and centered every main report region. Browser measurements confirmed symmetric gutters in both viewports and no console warnings or errors.
 
 ## Implementation checklist
 
-- [x] Shared header mark
-- [x] Header on every public page
-- [x] Report header through shared component
-- [x] Light and dark theme assets
-- [x] Light and dark site tokens
-- [x] Responsive mobile verification
-- [x] Favicon, Apple icon, PWA manifest, and Open Graph coverage
-- [x] Console and primary input-mode checks
+- [x] One-column claim accordion on mobile and desktop
+- [x] Verdict and evidence strength always adjacent to each claim
+- [x] Evaluation details visible without an extra disclosure
+- [x] Multiple claims and evidence sources can remain expanded
+- [x] Main report regions centered at desktop and mobile widths
+- [x] Expanded result directly below its claim
+- [x] One evidence language visible at a time
+- [x] Duplicate translations suppressed
+- [x] Screenshot reports omit the original-page panel
+- [x] URL reports retain the original-page link
+- [x] Localized labels in four supported languages
+- [x] Mobile and desktop browser verification
+- [x] Primary interactions and console checked
 
 ## Follow-up polish
 
-- P3: if a manual theme switcher is added later, reuse the same dark asset and token set instead of introducing a third logo treatment.
+- P3: future reports could persist the translation target language explicitly so a later interface-language change can label the translated excerpt more precisely.
 
 final result: passed

@@ -327,15 +327,15 @@ export function ReportLiveView({
         </section>
       ) : null}
 
-      <section className="source-card">
-        <span>{copy.source}</span>
-        {report.sourceUrl ? (
+      {report.sourceKind === "url" && report.sourceUrl ? (
+        <section className="source-card">
+          <span>{copy.source}</span>
           <a href={report.sourceUrl} target="_blank" rel="noreferrer noopener">
             {new URL(report.sourceUrl).hostname}
             <EnlaceExterno size={17} aria-hidden="true" />
           </a>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       <p className="report-limit">{copy.automatedLimit}</p>
 

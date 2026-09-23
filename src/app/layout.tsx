@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { siteName, siteUrl } from "../lib/site";
 import { getRequestLocale } from "../server/request-locale";
@@ -63,7 +64,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={await getRequestLocale()}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
